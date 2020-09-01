@@ -310,6 +310,10 @@ target_compile_definitions(gsl-lite INTERFACE ${GslDefinitions})
 add_library(optional-lite INTERFACE)
 target_include_directories(optional-lite INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/optional-lite-3.2.0/include")
 
+# range-v3
+add_library(range-v3 INTERFACE)
+target_include_directories(range-v3 INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/range-v3-0.5.0/include")
+
 #### Extensions ####
 SET(TEST_DIR ${CMAKE_SOURCE_DIR}/libminifi/test)
 include(Extensions)
