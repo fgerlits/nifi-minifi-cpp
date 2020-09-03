@@ -18,28 +18,30 @@
  * limitations under the License.
  */
 
+#include "TailFile.h"
+
 #include <algorithm>
 #include <cinttypes>
 #include <cstdint>
 #include <iostream>
 #include <limits>
 #include <map>
-#include <unordered_map>
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
+#include "core/ProcessContext.h"
+#include "core/ProcessSession.h"
 #include "io/CRCStream.h"
+#include "range/v3/all.hpp"
 #include "utils/file/FileUtils.h"
 #include "utils/file/PathUtils.h"
 #include "utils/TimeUtil.h"
 #include "utils/StringUtils.h"
 #include "utils/RegexUtils.h"
-#include "TailFile.h"
-#include "core/ProcessContext.h"
-#include "core/ProcessSession.h"
 
 namespace org {
 namespace apache {
@@ -605,10 +607,11 @@ std::vector<TailState> TailFile::findRotatedFiles(const TailState &state) const 
 
   utils::file::FileUtils::list_dir(state.path_, collect_matching_files, logger_, false);
 
-  std::sort(matched_files_with_mtime.begin(), matched_files_with_mtime.end(), [](const TailStateWithMtime &left, const TailStateWithMtime &right) {
+  const auto first_by_mtime_then_by_name = [](const TailStateWithMtime &left, const TailStateWithMtime &right) {
     return std::tie(left.mtime_, left.tail_state_.file_name_) <
            std::tie(right.mtime_, right.tail_state_.file_name_);
-  });
+  };
+  matched_files_with_mtime |= ranges::action::sort(first_by_mtime_then_by_name);
 
   if (!matched_files_with_mtime.empty() && state.position_ > 0) {
     TailState &first_rotated_file = matched_files_with_mtime[0].tail_state_;
@@ -622,11 +625,9 @@ std::vector<TailState> TailFile::findRotatedFiles(const TailState &state) const 
     }
   }
 
-  std::vector<TailState> matched_files;
-  matched_files.reserve(matched_files_with_mtime.size());
-  std::transform(matched_files_with_mtime.begin(), matched_files_with_mtime.end(), std::back_inserter(matched_files),
-                 [](TailStateWithMtime &tail_state_with_mtime) { return std::move(tail_state_with_mtime.tail_state_); });
-  return matched_files;
+  return matched_files_with_mtime
+      | ranges::view::transform([](TailStateWithMtime &tail_state_with_mtime) { return std::move(tail_state_with_mtime.tail_state_); })
+      | ranges::to_vector;
 }
 
 void TailFile::onTrigger(const std::shared_ptr<core::ProcessContext> &, const std::shared_ptr<core::ProcessSession> &session) {
