@@ -1,0 +1,106 @@
+MiNiFi Config Version: 3
+Flow Controller:
+  name: MinifiKafkaGateway
+  comment: Simple flow for the HTTP Kafka Gateway use case
+Core Properties:
+  flow controller graceful shutdown period: 10 sec
+  flow service write delay interval: 500 ms
+  administrative yield duration: 30 sec
+  bored yield duration: 10 millis
+  max concurrent threads: 1
+  variable registry properties: ''
+FlowFile Repository:
+  partitions: 256
+  checkpoint interval: 2 mins
+  always sync: false
+  Swap:
+    threshold: 20000
+    in period: 5 sec
+    in threads: 1
+    out period: 5 sec
+    out threads: 4
+Content Repository:
+  content claim max appendable size: 10 MB
+  content claim max flow files: 100
+  always sync: false
+Provenance Repository:
+  provenance rollover time: 1 min
+  implementation: org.apache.nifi.provenance.MiNiFiPersistentProvenanceRepository
+Component Status Repository:
+  buffer size: 1440
+  snapshot frequency: 1 min
+Security Properties:
+  keystore: ''
+  keystore type: ''
+  keystore password: ''
+  key password: ''
+  truststore: ''
+  truststore type: ''
+  truststore password: ''
+  ssl protocol: ''
+  Sensitive Props:
+    key:
+    algorithm: PBEWITHMD5AND256BITAES-CBC-OPENSSL
+    provider: BC
+Processors:
+- id: dc1614f3-d295-40f9-84a2-c29a88308488
+  name: ListenHTTP
+  class: org.apache.nifi.minifi.processors.ListenHTTP
+  max concurrent tasks: 1
+  scheduling strategy: TIMER_DRIVEN
+  scheduling period: 100 ms
+  penalization period: 30000 ms
+  yield period: 1000 ms
+  run duration nanos: 0
+  auto-terminated relationships list: []
+  Properties:
+    Authorized DN Pattern: .*
+    Base Path: contentListener
+    Listening Port: LISTEN_HTTP_PROCESSOR_LISTENING_PORT
+    SSL Minimum Version: TLS1.2
+    SSL Verify Peer: 'no'
+- id: a3e54824-4ebe-4ff5-a243-45fce8014189
+  name: PublishKafka
+  class: org.apache.nifi.minifi.processors.PublishKafka
+  max concurrent tasks: 1
+  scheduling strategy: TIMER_DRIVEN
+  scheduling period: 100 ms
+  penalization period: 30000 ms
+  yield period: 1000 ms
+  run duration nanos: 0
+  auto-terminated relationships list:
+  - failure
+  - success
+  Properties:
+    Batch Size: '1000'
+    Client Name: Minifi-Kafka-Gateway
+    Compress Codec: none
+    Delivery Guarantee: '1'
+    Fail empty flow files: 'true'
+    Known Brokers: PUBLISH_KAFKA_PROCESSOR_BROKER_ADDRESS
+    Max Flow Segment Size: 0 B
+    Message Timeout: 30 sec
+    Queue Buffering Max Time: 5 ms
+    Queue Max Buffer Size: 10 MB
+    Queue Max Message: '10000'
+    Request Timeout: 10 sec
+    Target Batch Payload Size: 512 KB
+    Topic Name: ${"Kafka Topic"}
+Controller Services: []
+Process Groups: []
+Input Ports: []
+Output Ports: []
+Funnels: []
+Connections:
+- id: 3a7f987f-c9c7-4081-a40a-ac589c324feb
+  name: ListenHTTP/success/PublishKafka
+  source id: dc1614f3-d295-40f9-84a2-c29a88308488
+  source relationship names:
+  - success
+  destination id: a3e54824-4ebe-4ff5-a243-45fce8014189
+  max work queue size: 10000
+  max work queue data size: 10 MB
+  flowfile expiration: 0 seconds
+  queue prioritizer class: ''
+Remote Process Groups: []
+NiFi Properties Overrides: {}
