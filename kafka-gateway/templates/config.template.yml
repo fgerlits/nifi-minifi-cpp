@@ -63,7 +63,7 @@ Processors:
   name: PublishKafka
   class: org.apache.nifi.minifi.processors.PublishKafka
   max concurrent tasks: 1
-  scheduling strategy: TIMER_DRIVEN
+  scheduling strategy: EVENT_DRIVEN
   scheduling period: 100 ms
   penalization period: 30000 ms
   yield period: 1000 ms
