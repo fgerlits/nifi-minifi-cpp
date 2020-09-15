@@ -84,7 +84,7 @@ Processors:
     Queue Max Buffer Size: 10 MB
     Queue Max Message: '10000'
     Request Timeout: 10 sec
-    Target Batch Payload Size: 512 KB
+    Target Batch Payload Size: 0 B
     Topic Name: ${"Kafka Topic"}
 Controller Services: []
 Process Groups: []
