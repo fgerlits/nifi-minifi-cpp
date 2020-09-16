@@ -55,7 +55,7 @@ Processors:
   auto-terminated relationships list: []
   Properties:
     Authorized DN Pattern: .*
-    Base Path: contentListener
+    Base Path: 'topic/{topic}'
     Listening Port: LISTEN_HTTP_PROCESSOR_LISTENING_PORT
     SSL Minimum Version: TLS1.2
     SSL Verify Peer: 'no'
@@ -69,7 +69,6 @@ Processors:
   yield period: 1000 ms
   run duration nanos: 0
   auto-terminated relationships list:
-  - failure
   - success
   Properties:
     Batch Size: '1000'
@@ -85,7 +84,7 @@ Processors:
     Queue Max Message: '10000'
     Request Timeout: 10 sec
     Target Batch Payload Size: 0 B
-    Topic Name: ${"Kafka Topic"}
+    Topic Name: '${topic}'
 Controller Services: []
 Process Groups: []
 Input Ports: []
@@ -100,6 +99,16 @@ Connections:
   destination id: a3e54824-4ebe-4ff5-a243-45fce8014189
   max work queue size: 10000
   max work queue data size: 10 MB
+  flowfile expiration: 0 seconds
+  queue prioritizer class: ''
+- id: e4b29bc5-5bae-42fe-a5af-0f6e7c0a92f7
+  name: PublishKafka/failure/PublishKafka
+  source id: a3e54824-4ebe-4ff5-a243-45fce8014189
+  source relationship names:
+  - failure
+  destination id: a3e54824-4ebe-4ff5-a243-45fce8014189
+  max work queue size: 100
+  max work queue data size: 1 MB
   flowfile expiration: 0 seconds
   queue prioritizer class: ''
 Remote Process Groups: []
