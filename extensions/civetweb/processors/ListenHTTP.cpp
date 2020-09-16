@@ -20,6 +20,11 @@
  */
 #include "ListenHTTP.h"
 
+#include <vector>
+
+#include "utils/OptionalUtils.h"
+#include "utils/GeneralUtils.h"
+
 namespace org {
 namespace apache {
 namespace nifi {
@@ -64,6 +69,234 @@ core::Property ListenHTTP::HeadersAsAttributesRegex("HTTP Headers to receive as 
 
 core::Relationship ListenHTTP::Success("success", "All files are routed to success");
 
+namespace {
+// tokenize URL
+using TokenType = ListenHTTP::TokenType;
+
+std::string str_from_span(const gsl::span<const char> s) {
+  return std::string{s.begin(), s.size()};
+}
+
+namespace pattern {
+using Token = ListenHTTP::UrlPatternToken;
+struct TokenizeResult {
+  utils::optional<Token> token;
+  const char* end;
+};
+
+TokenizeResult get_next_token(const gsl::span<const char> str) {
+  if (str.empty()) return {utils::nullopt, str.end()};
+  const auto str_until = [str](const char* const end) { return str.subspan(0, std::distance(str.begin(), end)); };
+  switch (str[0]) {
+    case '/': return {Token{TokenType::Slash, "/"}, str.subspan(1).begin()};
+    case '{': {
+      const auto closing_brace = std::find(str.begin(), str.end(), '}');
+      const auto text_span = str_until(closing_brace + 1);
+      if (closing_brace == str.end()) {
+        throw std::out_of_range{utils::StringUtils::join_pack("Invalid token: ", str_from_span(text_span))};
+      }
+      return {Token{TokenType::Argument, str_from_span(text_span)}, text_span.end()};
+    }
+    default: {
+      const auto is_slash_or_brace = [](char c) { return c == '/' || c == '{'; };
+      const auto text_end = std::find_if(str.begin(), str.end(), is_slash_or_brace);
+      const auto text_span = str_until(text_end);
+      return {Token{TokenType::String, str_from_span(text_span)}, text_end};
+    }
+  }
+}
+}  // namespace pattern
+
+namespace url {
+struct UrlComponentDispatcher;
+
+struct UrlComponent {
+  virtual void accept(UrlComponentDispatcher&) = 0;
+};
+
+struct StringComponent;
+struct Argument;
+struct Slash;
+
+struct UrlComponentDispatcher {
+  virtual void operator()(StringComponent&) = 0;
+  virtual void operator()(Argument&) = 0;
+  virtual void operator()(Slash&) = 0;
+};
+
+struct StringComponent : UrlComponent {
+  explicit StringComponent(std::string text) :text{std::move(text)} {}
+
+  void accept(UrlComponentDispatcher& dispatcher) override { dispatcher(*this); }
+
+  std::string text;
+};
+
+struct Argument : UrlComponent {
+  Argument(std::string key, std::string value) :key{std::move(key)}, value{std::move(value)} {}
+
+  void accept(UrlComponentDispatcher& dispatcher) override { dispatcher(*this); }
+
+  std::string key;
+  std::string value;
+};
+
+struct Slash : UrlComponent {
+  void accept(UrlComponentDispatcher& dispatcher) override { dispatcher(*this); }
+};
+
+const char* match_slash(const char* const str) {
+  if (str[0] == '/') return str + 1;
+  return nullptr;
+}
+
+const char* match_string(const char* const str, const pattern::Token& token) {
+  const auto mismatch = std::mismatch(token.text.begin(), token.text.end(), str);
+  if (mismatch.first != token.text.end()) return nullptr;
+  return mismatch.second;
+}
+
+std::pair<Argument, const char*> match_argument(const char* const str, const pattern::Token& token, const pattern::Token* next_token) {
+  const auto key = token.text.substr(1, token.text.size() - 2);
+  if (!next_token) {
+    const auto len = std::strlen(str);
+    return std::make_pair(Argument{key, std::string{str}}, str + len);
+  }
+
+  const auto match_next_token = [next_token](const char* const str) {
+    if (next_token->token_type == TokenType::Slash) return match_slash(str);
+    else if(next_token->token_type == TokenType::String) return match_string(str, *next_token);
+    else throw std::out_of_range{"Cannot have two consecutive argument patterns"};
+  };
+
+  // search for the next token, which designates the end of the argument
+  const char* it = str;
+  while(it && *it && !match_next_token(it)) {
+    ++it;
+  }
+
+  auto value = str_from_span(gsl::make_span(str, it));
+  return std::make_pair(Argument{key, std::move(value)}, it);
+}
+
+utils::optional<std::vector<std::unique_ptr<UrlComponent>>> parse_url(const std::string& url, const std::vector<pattern::Token>& pattern) {
+  utils::optional<std::vector<std::unique_ptr<UrlComponent>>> result{ std::vector<std::unique_ptr<UrlComponent>>{} };
+  const char* iterator = url.c_str();
+  auto pattern_it = pattern.begin();
+  const char* const last = url.c_str() + url.size();
+  while (iterator != last && pattern_it != pattern.end()) {
+    switch (pattern_it->token_type) {
+      case TokenType::String: {
+        auto end = match_string(iterator, *pattern_it);
+        if (!end) return utils::nullopt;
+        result->push_back(utils::make_unique<StringComponent>(str_from_span(gsl::make_span(iterator, end))));
+        iterator = end;
+      }
+      break;
+      case TokenType::Slash: {
+        auto end = match_slash(iterator);
+        if (!end) return utils::nullopt;
+        result->push_back(utils::make_unique<Slash>());
+        iterator = end;
+      }
+      break;
+      case TokenType::Argument: {
+        const auto next_token = std::next(pattern_it);
+        auto res = match_argument(iterator, *pattern_it, next_token == pattern.end() ? nullptr : &*next_token);
+        result->push_back(utils::make_unique<Argument>(std::move(res.first)));
+        iterator = res.second;
+      }
+      break;
+    }
+    ++pattern_it;
+  }
+  return result;
+}
+
+template<typename F>
+struct ArgumentCollectorVisitor : url::UrlComponentDispatcher {
+  explicit ArgumentCollectorVisitor(F consume) :consume{std::move(consume)} {}
+
+  void operator()(url::StringComponent&) override {}
+  void operator()(url::Argument& arg) override {
+    consume(arg);
+  }
+  void operator()(url::Slash&) override {}
+
+  F consume;
+};
+
+template<typename F>
+ArgumentCollectorVisitor<F> make_arg_collector(F consume) {
+  return ArgumentCollectorVisitor<F>{consume};
+}
+}  // namespace url
+
+std::vector<pattern::Token> tokenize_url_pattern(const std::string& url_pattern) {
+  std::vector<pattern::Token> result;
+  const char* iterator = url_pattern.c_str();
+  const char* const last = url_pattern.c_str() + url_pattern.size();
+  while (iterator != last) {
+    auto tr = pattern::get_next_token(gsl::make_span(iterator, last));
+    if (tr.token) {
+      result.push_back(std::move(*tr.token));
+      if (result.size() > 1 && result[result.size() - 2].token_type == TokenType::Argument && result.back().token_type == TokenType::Argument) {
+        throw std::domain_error{"Cannot have two arguments next to each other in an URL pattern"};
+      }
+    }
+    iterator = tr.end;
+  }
+  return result;
+}
+
+std::vector<std::pair<std::string, std::string>> collect_arguments(std::vector<std::unique_ptr<url::UrlComponent>>&& components) {
+  std::vector<std::pair<std::string, std::string>> args;
+  auto collector = url::make_arg_collector([&args](url::Argument& arg) mutable { args.emplace_back(arg.key, arg.value); });
+  for (auto& component: components) {
+    component->accept(collector);
+  }
+  return args;
+}
+
+utils::optional<std::vector<std::pair<std::string, std::string>>> match_url(const std::string& url, const std::vector<pattern::Token>& pattern) {
+  return url::parse_url(url, pattern) | utils::map(collect_arguments);
+}
+
+std::string static_head(const std::string& url_pattern) {
+  const auto brace = url_pattern.find('{');
+  if (brace == std::string::npos) return url_pattern;
+  const auto last_slash_before_brace = url_pattern.find_last_of('/', brace);
+  return url_pattern.substr(0, last_slash_before_brace);
+}
+
+std::string token_type_to_str(TokenType t) {
+  switch(t) {
+    case TokenType::String: return "String";
+    case TokenType::Slash: return "Slash";
+    case TokenType::Argument: return "Argument";
+  }
+  throw std::runtime_error{"invalid token type"};
+}
+
+void send_http_405(mg_connection* const conn) {
+  mg_printf(conn, "HTTP/1.1 405 Method Not Allowed\r\n"
+                  "Content-Type: text/html\r\n"
+                  "Content-Length: 0\r\n\r\n");
+}
+
+void send_http_500(mg_connection* const conn) {
+  mg_printf(conn, "HTTP/1.1 500 Internal Server Error\r\n"
+                  "Content-Type: text/html\r\n"
+                  "Content-Length: 0\r\n\r\n");
+}
+
+void send_http_503(mg_connection* const conn) {
+  mg_printf(conn, "HTTP/1.1 503 Service Unavailable\r\n"
+                  "Content-Type: text/html\r\n"
+                  "Content-Length: 0\r\n\r\n");
+}
+}  // namespace
+
 void ListenHTTP::initialize() {
   logger_->log_trace("Initializing ListenHTTP");
 
@@ -93,7 +326,7 @@ void ListenHTTP::onSchedule(core::ProcessContext *context, core::ProcessSessionF
   }
 
   basePath.insert(0, "/");
-
+  url_pattern_ = tokenize_url_pattern(basePath);
 
   if (!context->getProperty(Port.getName(), listeningPort)) {
     logger_->log_error("%s attribute is missing or invalid", Port.getName());
@@ -147,7 +380,8 @@ void ListenHTTP::onSchedule(core::ProcessContext *context, core::ProcessSessionF
 
   auto numThreads = getMaxConcurrentTasks();
 
-  logger_->log_info("ListenHTTP starting HTTP server on port %s and path %s with %d threads", randomPort ? "random" : listeningPort, basePath, numThreads);
+  const auto listen_path = static_head(basePath);
+  logger_->log_info("ListenHTTP starting HTTP server on port %s and path %s with %d threads", randomPort ? "random" : listeningPort, listen_path, numThreads);
 
   // Initialize web server
   std::vector<std::string> options;
@@ -191,8 +425,8 @@ void ListenHTTP::onSchedule(core::ProcessContext *context, core::ProcessSessionF
   }
 
   server_.reset(new CivetServer(options, &callbacks_, &logger_));
-  handler_.reset(new Handler(basePath, context, sessionFactory, std::move(authDNPattern), std::move(headersAsAttributesPattern)));
-  server_->addHandler(basePath, handler_.get());
+  handler_.reset(new Handler(listen_path, context, sessionFactory, std::move(authDNPattern), std::move(headersAsAttributesPattern), url_pattern_, this));
+  server_->addHandler(listen_path, handler_.get());
 
   if (randomPort) {
     const auto& vec = server_->getListeningPorts();
@@ -241,20 +475,23 @@ void ListenHTTP::onTrigger(core::ProcessContext *context, core::ProcessSession *
   session->remove(flow_file);
 }
 
-ListenHTTP::Handler::Handler(std::string base_uri, core::ProcessContext *context, core::ProcessSessionFactory *session_factory, std::string &&auth_dn_regex, std::string &&header_as_attrs_regex)
+ListenHTTP::Handler::Handler(std::string base_uri,
+    core::ProcessContext *context,
+    core::ProcessSessionFactory *session_factory,
+    const std::string &auth_dn_regex,
+    const std::string &header_as_attrs_regex,
+    const std::vector<UrlPatternToken>& pattern,
+    ListenHTTP* listen_http)
     : base_uri_(std::move(base_uri)),
-      auth_dn_regex_(std::move(auth_dn_regex)),
-      headers_as_attrs_regex_(std::move(header_as_attrs_regex)),
-      logger_(logging::LoggerFactory<ListenHTTP::Handler>::getLogger()) {
+      auth_dn_regex_(auth_dn_regex),
+      headers_as_attrs_regex_(header_as_attrs_regex),
+      listen_http_(listen_http),
+      logger_(logging::LoggerFactory<ListenHTTP::Handler>::getLogger()),
+      pattern_(pattern) {
   process_context_ = context;
   session_factory_ = session_factory;
 }
 
-void ListenHTTP::Handler::send_error_response(struct mg_connection *conn) {
-  mg_printf(conn, "HTTP/1.1 500 Internal Server Error\r\n"
-            "Content-Type: text/html\r\n"
-            "Content-Length: 0\r\n\r\n");
-}
 
 void ListenHTTP::Handler::set_header_attributes(const mg_request_info *req_info, const std::shared_ptr<FlowFileRecord> &flow_file) const {
   // Add filename from "filename" header value (and pattern headers)
@@ -283,11 +520,43 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
       logger_->log_error("ListenHTTP handling POST resulted in a null request");
       return false;
   }
+  {
+    std::lock_guard<std::mutex> l{listen_http_->mutex_};
+    if (listen_http_->flowFilesOutGoingFull()) {
+      send_http_503(conn);
+      listen_http_->yield();
+      return false;
+    }
+  }
   logger_->log_debug("ListenHTTP handling POST request of length %lld", req_info->content_length);
 
   if (!auth_request(conn, req_info)) {
     return true;
   }
+
+  auto components = url::parse_url(req_info->request_uri, pattern_);
+  logger_->log_trace("url pattern: %s : %s", req_info->request_uri, [&components]{
+    if(!components) return std::string{"NULL"};
+
+    struct DebugVisitor : url::UrlComponentDispatcher {
+      void operator()(url::StringComponent& string_component) override { f(fmt::format("\"{}\"", string_component.text)); }
+      void operator()(url::Argument& argument) override { f(fmt::format("{}={}", argument.key, argument.value)); }
+      void operator()(url::Slash&) override { f("/"); }
+
+      std::function<void(const std::string&)> f;
+    };
+
+    std::ostringstream oss;
+    DebugVisitor debug_visitor;
+    debug_visitor.f = [&oss](const std::string& s) { oss << s << ' '; };
+
+    for(auto& c : *components) {
+      c->accept(debug_visitor);
+    }
+    return oss.str();
+  }());
+  const auto url_arguments = std::move(components) | utils::map(collect_arguments);
+  logger_->log_trace("url arguments %s, size=%zu", url_arguments ? "present": "missing", url_arguments ? url_arguments->size() : -1);
 
   // Always send 100 Continue, as allowed per standard to minimize client delay (https://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html)
   mg_printf(conn, "HTTP/1.1 100 Continue\r\n\r\n");
@@ -297,24 +566,29 @@ bool ListenHTTP::Handler::handlePost(CivetServer *server, struct mg_connection *
   auto flow_file = std::static_pointer_cast<FlowFileRecord>(session->create());
 
   if (!flow_file) {
-    send_error_response(conn);
+    send_http_500(conn);
     return true;
   }
 
   try {
     session->write(flow_file, &callback);
     set_header_attributes(req_info, flow_file);
-
+    if (url_arguments) {
+      for(const auto& arg: *url_arguments) {
+        logger_->log_trace("url arg %s=%s", arg.first, arg.second);
+        flow_file->setAttribute(arg.first, arg.second);
+      }
+    }
     session->transfer(flow_file, Success);
     session->commit();
   } catch (std::exception &exception) {
     logger_->log_error("ListenHTTP Caught Exception %s", exception.what());
-    send_error_response(conn);
+    send_http_500(conn);
     session->rollback();
     throw;
   } catch (...) {
     logger_->log_error("ListenHTTP Caught Exception Processor::onTrigger");
-    send_error_response(conn);
+    send_http_500(conn);
     session->rollback();
     throw;
   }
@@ -356,7 +630,7 @@ bool ListenHTTP::Handler::handleGet(CivetServer *server, struct mg_connection *c
   auto flow_file = std::static_pointer_cast<FlowFileRecord>(session->create());
 
   if (!flow_file) {
-    send_error_response(conn);
+    send_http_500(conn);
     return true;
   }
 
@@ -367,12 +641,12 @@ bool ListenHTTP::Handler::handleGet(CivetServer *server, struct mg_connection *c
     session->commit();
   } catch (std::exception &exception) {
     logger_->log_error("ListenHTTP Caught Exception %s", exception.what());
-    send_error_response(conn);
+    send_http_500(conn);
     session->rollback();
     throw;
   } catch (...) {
     logger_->log_error("ListenHTTP Caught Exception Processor::onTrigger");
-    send_error_response(conn);
+    send_http_500(conn);
     session->rollback();
     throw;
   }
