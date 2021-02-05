@@ -39,7 +39,17 @@ namespace nifi {
 namespace minifi {
 namespace processors {
 
-// ListenHTTP Class
+
+/**
+ * ListenHTTP processor: Starts an HTTP Server and listens on a given base path to transform incoming requests into FlowFiles. The default URI of the Service will be
+ * http://{hostname}:{port}/contentListener. Only HEAD, POST, and GET requests are supported. PUT, and DELETE will result in an error and the HTTP response status code 405.
+ * The response body text for all requests, by default, is empty (length of 0). A static response body can be set for a given URI by sending input files to ListenHTTP with
+ * the http.type attribute set to response_body. The response body FlowFile filename attribute is appended to the Base Path property (separated by a /) when mapped to incoming requests.
+ * The mime.type attribute of the response body FlowFile is used for the Content-type header in responses. Response body content can be cleared by sending an empty (size 0)
+ * FlowFile for a given URI mapping.
+ *
+ * TODO: make this description available to AgentDocs
+ */
 class ListenHTTP : public core::Processor {
  public:
   using FlowFileBufferPair=std::pair<std::shared_ptr<FlowFileRecord>, std::unique_ptr<io::BufferStream>>;
@@ -206,13 +216,6 @@ class ListenHTTP : public core::Processor {
   std::string listeningPort;
   uint64_t batch_size_;
 };
-
-//REGISTER_RESOURCE(ListenHTTP, "Starts an HTTP Server and listens on a given base path to transform incoming requests into FlowFiles. The default URI of the Service will be "
-//    "http://{hostname}:{port}/contentListener. Only HEAD, POST, and GET requests are supported. PUT, and DELETE will result in an error and the HTTP response status code 405."
-//    " The response body text for all requests, by default, is empty (length of 0). A static response body can be set for a given URI by sending input files to ListenHTTP with "
-//    "the http.type attribute set to response_body. The response body FlowFile filename attribute is appended to the Base Path property (separated by a /) when mapped to incoming requests. "
-//    "The mime.type attribute of the response body FlowFile is used for the Content-type header in responses. Response body content can be cleared by sending an empty (size 0) "
-//    "FlowFile for a given URI mapping.");
 
 class ListenHTTPFactory : public core::CoreComponentFactory {
  public:
