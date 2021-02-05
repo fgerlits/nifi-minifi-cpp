@@ -26,12 +26,11 @@ include_directories(${CMAKE_SOURCE_DIR}/libminifi/include
 
 file(GLOB SOURCES  "processors/*.cpp")
 
-add_library(minifi-civet-extensions STATIC ${SOURCES})
+add_library(minifi-civet-extensions SHARED ${SOURCES})
 set_property(TARGET minifi-civet-extensions PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(minifi-civet-extensions ${LIBMINIFI} Threads::Threads)
 target_link_libraries(minifi-civet-extensions CIVETWEB::c-library CIVETWEB::civetweb-cpp)
 
 SET (civet-EXTENSIONS minifi-civet-extensions PARENT_SCOPE)
 
-register_extension(minifi-civet-extensions)
-
+target_compile_definitions(minifi-civet-extensions PRIVATE "MODULE_NAME=minifi-civet-extensions")

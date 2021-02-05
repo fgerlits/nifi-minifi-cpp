@@ -209,8 +209,13 @@ class CoreComponent {
   std::string name_;
 };
 
-namespace logging {
-}
+class CoreComponentFactory {
+ public:
+  virtual ~CoreComponentFactory() = default;
+  virtual std::shared_ptr<CoreComponent> create(std::string name) = 0;
+  virtual std::shared_ptr<CoreComponent> create(std::string name, utils::Identifier uuid) = 0;
+};
+
 }  // namespace core
 }  // namespace minifi
 }  // namespace nifi

@@ -25,6 +25,7 @@
 #include "TestBase.h"
 
 #include "utils/file/FileUtils.h"
+#include "Poco/ClassLoader.h"
 #include "processors/GetFile.h"
 #include "processors/UpdateAttribute.h"
 #include "processors/LogAttribute.h"
@@ -32,6 +33,17 @@
 #include "client/HTTPClient.h"
 #include "controllers/SSLContextService.h"
 #include "properties/Configure.h"
+
+namespace {
+
+struct PocoInitializer {
+  PocoInitializer(std::string class_name) {
+    core::ClassLoader::getDefaultClassLoader().registerClass(class_name);
+  }
+};
+const PocoInitializer INITIALIZER{"ListenHTTP"};
+
+}
 
 class ListenHTTPTestsFixture {
  public:

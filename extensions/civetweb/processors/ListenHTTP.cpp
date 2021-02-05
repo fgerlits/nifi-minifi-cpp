@@ -23,8 +23,8 @@
 #include "Poco/ClassLibrary.h"
 #include "utils/gsl.h"
 
-POCO_BEGIN_MANIFEST(org::apache::nifi::minifi::CoreComponentCreator)
-  POCO_EXPORT_CLASS(org::apache::nifi::minifi::processors::ListenHTTPCreator)
+POCO_BEGIN_MANIFEST(org::apache::nifi::minifi::core::CoreComponentFactory)
+  POCO_EXPORT_CLASS(org::apache::nifi::minifi::processors::ListenHTTPFactory)
 POCO_END_MANIFEST
 
 namespace org {

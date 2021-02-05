@@ -37,6 +37,7 @@
 #endif
 #include "core/Core.h"
 #include "io/BufferStream.h"
+#include "Poco/ClassLoader.h"
 
 namespace org {
 namespace apache {
@@ -298,6 +299,21 @@ class ClassLoader {
    */
   uint16_t registerResource(const std::string &resource, const std::string &resourceName);
 
+  void registerClass(const std::string &class_name) {
+    std::lock_guard<std::mutex> lock(internal_mutex_);
+
+    if (class_name == "ListenHTTP") {
+      // TODO: check if the library has already been loaded
+      auto class_loader = utils::make_unique<Poco::ClassLoader<core::CoreComponentFactory>>();
+      std::string lib_name = "/home/fgerlits/src/minifi/cmake-build-debug/extensions/civetweb/libminifi-civet-extensions.so";
+      class_loader->loadLibrary(lib_name);
+      poco_classloaders_.emplace(class_name, std::move(class_loader));
+      return;
+    } else {
+      throw std::runtime_error("Class " + class_name + " is not supported in Poco, yet");
+    }
+  }
+
   /**
    * Register a class with the give ProcessorFactory
    */
@@ -544,6 +560,8 @@ class ClassLoader {
   std::vector<void *> dl_handles_;
 
   std::vector<std::unique_ptr<ObjectFactoryInitializer>> initializers_;
+
+  std::map<std::string, std::unique_ptr<Poco::ClassLoader<core::CoreComponentFactory>>> poco_classloaders_;
 };
 
 template<class T>
@@ -558,6 +576,19 @@ std::shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, bool 
 template<class T>
 std::shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, const std::string &name) {
   std::lock_guard<std::mutex> lock(internal_mutex_);
+
+  if (class_name == "ListenHTTP") {
+    const auto iter = poco_classloaders_.find(class_name);
+    if (iter != poco_classloaders_.end()) {
+      const std::string factory_class_name = "org::apache::nifi::minifi::processors::" + class_name + "Factory";
+      const std::unique_ptr<core::CoreComponentFactory> factory{iter->second->create(factory_class_name)};
+      std::shared_ptr<core::CoreComponent> component = factory->create(name);
+      return std::dynamic_pointer_cast<T>(component);
+    } else {
+      return nullptr;
+    }
+  }
+
   auto factory_entry = loaded_factories_.find(class_name);
   if (factory_entry != loaded_factories_.end()) {
     auto obj = factory_entry->second->create(name);
@@ -570,6 +601,19 @@ std::shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, const
 template<class T>
 std::shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, const utils::Identifier &uuid) {
   std::lock_guard<std::mutex> lock(internal_mutex_);
+
+  if (class_name == "ListenHTTP") {
+    const auto iter = poco_classloaders_.find(class_name);
+    if (iter != poco_classloaders_.end()) {
+      const std::string factory_class_name = "org::apache::nifi::minifi::processors::" + class_name + "Factory";
+      const std::unique_ptr<core::CoreComponentFactory> factory{iter->second->create(factory_class_name)};
+      std::shared_ptr<core::CoreComponent> component = factory->create(class_name);
+      return std::dynamic_pointer_cast<T>(component);
+    } else {
+      return nullptr;
+    }
+  }
+
   auto factory_entry = loaded_factories_.find(class_name);
   if (factory_entry != loaded_factories_.end()) {
     auto obj = factory_entry->second->create(class_name, uuid);
@@ -582,6 +626,11 @@ std::shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, const
 template<class T>
 T *ClassLoader::instantiateRaw(const std::string &class_name, const std::string &name) {
   std::lock_guard<std::mutex> lock(internal_mutex_);
+
+  if (class_name == "ListenHTTP") {
+    throw std::runtime_error{"instantiateRaw is not supported for Poco components"};
+  }
+
   auto factory_entry = loaded_factories_.find(class_name);
   if (factory_entry != loaded_factories_.end()) {
     auto obj = factory_entry->second->createRaw(name);
@@ -594,6 +643,11 @@ T *ClassLoader::instantiateRaw(const std::string &class_name, const std::string 
 template<class T>
 T *ClassLoader::instantiateRaw(const std::string &class_name, const utils::Identifier& uuid) {
   std::lock_guard<std::mutex> lock(internal_mutex_);
+
+  if (class_name == "ListenHTTP") {
+    throw std::runtime_error{"instantiateRaw is not supported for Poco components"};
+  }
+
   auto factory_entry = loaded_factories_.find(class_name);
   if (factory_entry != loaded_factories_.end()) {
     auto obj = factory_entry->second->createRaw(class_name, uuid);

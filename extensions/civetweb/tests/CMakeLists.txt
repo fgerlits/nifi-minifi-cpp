@@ -29,7 +29,7 @@ if(NOT DISABLE_CURL)
         target_include_directories(${testfilename} PRIVATE BEFORE "${CMAKE_SOURCE_DIR}/extensions/http-curl")
         target_include_directories(${testfilename} PRIVATE BEFORE "${CMAKE_SOURCE_DIR}/thirdparty/civetweb-1.10/include")
 
-        target_wholearchive_library(${testfilename} minifi-civet-extensions)
+        target_link_libraries(${testfilename} minifi-civet-extensions)
         target_wholearchive_library(${testfilename} minifi-http-curl)
         target_wholearchive_library(${testfilename} minifi-standard-processors)
 
