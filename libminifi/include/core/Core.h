@@ -212,7 +212,6 @@ class CoreComponent {
 class CoreComponentFactory {
  public:
   virtual ~CoreComponentFactory() = default;
-  virtual std::shared_ptr<CoreComponent> create(std::string name) = 0;
   virtual std::shared_ptr<CoreComponent> create(std::string name, utils::Identifier uuid) = 0;
 };
 

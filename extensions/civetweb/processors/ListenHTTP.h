@@ -216,9 +216,6 @@ class ListenHTTP : public core::Processor {
 
 class ListenHTTPFactory : public core::CoreComponentFactory {
  public:
-  std::shared_ptr<core::CoreComponent> create(std::string name) override {
-    return std::make_shared<processors::ListenHTTP>(std::move(name));
-  }
   std::shared_ptr<core::CoreComponent> create(std::string name, utils::Identifier uuid) override {
     return std::make_shared<processors::ListenHTTP>(std::move(name), std::move(uuid));
   }

@@ -582,7 +582,7 @@ std::shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, const
     if (iter != poco_classloaders_.end()) {
       const std::string factory_class_name = "org::apache::nifi::minifi::processors::" + class_name + "Factory";
       const std::unique_ptr<core::CoreComponentFactory> factory{iter->second->create(factory_class_name)};
-      std::shared_ptr<core::CoreComponent> component = factory->create(name);
+      std::shared_ptr<core::CoreComponent> component = factory->create(name, utils::Identifier{});
       return std::dynamic_pointer_cast<T>(component);
     } else {
       return nullptr;
@@ -607,7 +607,7 @@ std::shared_ptr<T> ClassLoader::instantiate(const std::string &class_name, const
     if (iter != poco_classloaders_.end()) {
       const std::string factory_class_name = "org::apache::nifi::minifi::processors::" + class_name + "Factory";
       const std::unique_ptr<core::CoreComponentFactory> factory{iter->second->create(factory_class_name)};
-      std::shared_ptr<core::CoreComponent> component = factory->create(class_name);
+      std::shared_ptr<core::CoreComponent> component = factory->create(class_name, uuid);
       return std::dynamic_pointer_cast<T>(component);
     } else {
       return nullptr;
