@@ -41,7 +41,6 @@ FOREACH(testfile ${COAP_INTEGRATION_TESTS})
 	target_include_directories(${testfilename} BEFORE PRIVATE ./include)
 	createTests("${testfilename}")
 	target_wholearchive_library(${testfilename} minifi-coap)
-	target_wholearchive_library(${testfilename} minifi-civet-extensions)
 	target_wholearchive_library(${testfilename} minifi-http-curl)
 	target_wholearchive_library(${testfilename} minifi-standard-processors)
 
