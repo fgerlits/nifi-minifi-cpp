@@ -300,13 +300,15 @@ class ClassLoader {
   uint16_t registerResource(const std::string &resource, const std::string &resourceName);
 
   void registerClass(const std::string &class_name) {
-    if (class_name == "ListenHTTP") {
+    static bool initialized = false;
+    if (!initialized && class_name == "ListenHTTP") {
       // TODO: check if the library has already been loaded
       auto class_loader = utils::make_unique<Poco::ClassLoader<core::CoreComponentFactory>>();
       std::string lib_name = "/home/fgerlits/src/minifi/cmake-build-debug/extensions/civetweb/libminifi-civet-extensions.so";
       class_loader->loadLibrary(lib_name);
       std::lock_guard<std::mutex> lock(internal_mutex_);
       poco_classloaders_.emplace(class_name, std::move(class_loader));
+      initialized = true;
       return;
     } else {
       throw std::runtime_error("Class " + class_name + " is not supported in Poco, yet");
