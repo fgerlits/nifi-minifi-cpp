@@ -31,6 +31,17 @@
 #include "HTTPIntegrationBase.h"
 #include "utils/IntegrationTestUtils.h"
 
+namespace {
+
+struct PocoInitializer {
+  PocoInitializer(std::string class_name) {
+    core::ClassLoader::getDefaultClassLoader().registerClass(class_name);
+  }
+};
+const PocoInitializer INITIALIZER{"ListenHTTP"};
+
+}
+
 class HttpTestHarness : public HTTPIntegrationBase {
 public:
   HttpTestHarness() : HTTPIntegrationBase(4000) {
