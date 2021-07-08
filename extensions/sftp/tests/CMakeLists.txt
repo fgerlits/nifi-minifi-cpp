@@ -42,7 +42,7 @@ if (NOT SKIP_TESTS AND Java_FOUND AND Maven_FOUND AND NOT DISABLE_EXPRESSION_LAN
 		target_include_directories(${testfilename} BEFORE PRIVATE ./tools)
 
 		createTests("${testfilename}")
-		target_link_libraries(${testfilename} ${CATCH_MAIN_LIB} minifi sftp-test-tools)
+		target_link_libraries(${testfilename} ${CATCH_MAIN_LIB} core-minifi sftp-test-tools)
 		target_wholearchive_library(${testfilename} minifi-sftp)
 		target_wholearchive_library(${testfilename} minifi-expression-language-extensions)
 		target_wholearchive_library(${testfilename} minifi-standard-processors)

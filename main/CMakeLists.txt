@@ -47,7 +47,6 @@ endif(NOT USE_SHARED_LIBS)
 target_link_libraries(minifiexe Threads::Threads)
 
 target_wholearchive_library(minifiexe core-minifi)
-target_wholearchive_library(minifiexe minifi)
 
 target_link_libraries(minifiexe yaml-cpp)
 if(NOT WIN32 AND ENABLE_JNI AND NOT DISABLE_JEMALLOC)

@@ -31,7 +31,7 @@ include(CppVersion)
 set_cpp_version()
 
 add_executable(minificontroller MiNiFiController.cpp ../main/MainHelper.cpp)
-target_wholearchive_library(minificontroller minifi)
+target_wholearchive_library(minificontroller core-minifi)
 target_link_libraries(minificontroller cxxopts Threads::Threads)
 
 get_property(extensions GLOBAL PROPERTY EXTENSION-OPTIONS)

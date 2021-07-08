@@ -17,17 +17,17 @@
  * limitations under the License.
  */
 
-#include "processors/ProcessorUtils.h"
+#include "utils/ProcessorUtils.h"
 
 namespace org {
 namespace apache {
 namespace nifi {
 namespace minifi {
-namespace processors {
+namespace utils {
 
 ProcessorUtils::ProcessorUtils() = default;
 
-} /* namespace processors */
+} /* namespace utils */
 } /* namespace minifi */
 } /* namespace nifi */
 } /* namespace apache */

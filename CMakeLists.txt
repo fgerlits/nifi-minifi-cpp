@@ -580,7 +580,7 @@ add_dependencies(nanofi minifiexe)
 option(ENABLE_ENCRYPT_CONFIG "Enables build of encrypt-config binary." ON)
 if (ENABLE_ENCRYPT_CONFIG)
 	add_subdirectory(encrypt-config)
-	add_dependencies(encrypt-config minifi)
+	add_dependencies(encrypt-config core-minifi)
 endif()
 
 if (NOT DISABLE_CURL AND NOT DISABLE_CONTROLLER)

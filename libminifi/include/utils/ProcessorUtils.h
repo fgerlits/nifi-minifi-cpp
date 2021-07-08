@@ -27,7 +27,7 @@ namespace org {
 namespace apache {
 namespace nifi {
 namespace minifi {
-namespace processors {
+namespace utils {
 
 class ProcessorUtils {
  public:
@@ -78,7 +78,7 @@ class ProcessorUtils {
   ProcessorUtils();
 };
 
-}  // namespace processors
+}  // namespace utils
 }  // namespace minifi
 }  // namespace nifi
 }  // namespace apache

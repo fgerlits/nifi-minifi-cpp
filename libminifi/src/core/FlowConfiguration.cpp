@@ -22,7 +22,7 @@
 #include <string>
 #include "core/ClassLoader.h"
 #include "utils/StringUtils.h"
-#include "processors/ProcessorUtils.h"
+#include "utils/ProcessorUtils.h"
 
 namespace org {
 namespace apache {
@@ -43,7 +43,7 @@ FlowConfiguration::~FlowConfiguration() {
 }
 
 std::shared_ptr<core::Processor> FlowConfiguration::createProcessor(const std::string &name, const utils::Identifier &uuid) {
-  auto processor = minifi::processors::ProcessorUtils::createProcessor(name, name, uuid, stream_factory_);
+  auto processor = minifi::utils::ProcessorUtils::createProcessor(name, name, uuid, stream_factory_);
   if (nullptr == processor) {
     logger_->log_error("No Processor defined for %s", name);
     return nullptr;
@@ -52,7 +52,7 @@ std::shared_ptr<core::Processor> FlowConfiguration::createProcessor(const std::s
 }
 
 std::shared_ptr<core::Processor> FlowConfiguration::createProcessor(const std::string &name, const std::string &fullname, const utils::Identifier &uuid) {
-  auto processor = minifi::processors::ProcessorUtils::createProcessor(name, fullname, uuid, stream_factory_);
+  auto processor = minifi::utils::ProcessorUtils::createProcessor(name, fullname, uuid, stream_factory_);
   if (nullptr == processor) {
     logger_->log_error("No Processor defined for %s", fullname);
     return nullptr;

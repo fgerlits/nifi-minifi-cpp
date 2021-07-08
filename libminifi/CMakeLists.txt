@@ -72,13 +72,13 @@ if(WIN32)
 	file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/core/logging")
 endif()
 
-file(GLOB PROCESSOR_SOURCES  "src/processors/*.cpp" )
-
 
 add_library(core-minifi STATIC ${SOURCES})
 if(WIN32)
         add_dependencies(core-minifi message-strings)
         target_include_directories(core-minifi PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/include")
+		set_target_properties(core-minifi PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+		set_target_properties(core-minifi PROPERTIES LINK_FLAGS "${LINK_FLAGS} /WHOLEARCHIVE:core-minifi-shared")
 endif()
 
 if(NOT EXCLUDE_BOOST)
@@ -99,25 +99,15 @@ if (NOT OPENSSL_OFF)
 endif()
 target_link_libraries(core-minifi ${CMAKE_DL_LIBS} ${LIBMINIFI_LIBRARIES})
 
-
-add_library(minifi STATIC ${PROCESSOR_SOURCES})
-target_link_libraries(minifi core-minifi)
-if (WIN32)
-	set_target_properties(minifi PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-	set_target_properties(minifi PROPERTIES LINK_FLAGS "${LINK_FLAGS} /WHOLEARCHIVE:core-minifi")
-endif()
-
-
 SET (LIBMINIFI core-minifi PARENT_SCOPE)
+
 
 if (ENABLE_PYTHON AND NOT STATIC_BUILD)
 	add_library(core-minifi-shared SHARED ${SOURCES})
 	target_link_libraries(core-minifi-shared ${CMAKE_DL_LIBS} ${LIBMINIFI_LIBRARIES})
 
-	add_library(minifi-shared SHARED ${PROCESSOR_SOURCES})
-	target_link_libraries(minifi-shared core-minifi-shared)
 	if (WIN32)
-		set_target_properties(minifi-shared PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-		set_target_properties(minifi-shared PROPERTIES LINK_FLAGS "${LINK_FLAGS} /WHOLEARCHIVE:core-minifi-shared")
+		set_target_properties(core-minifi-shared PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+		set_target_properties(core-minifi-shared PROPERTIES LINK_FLAGS "${LINK_FLAGS} /WHOLEARCHIVE:core-minifi-shared")
 	endif()
 endif(ENABLE_PYTHON AND NOT STATIC_BUILD)

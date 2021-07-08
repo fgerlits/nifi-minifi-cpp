@@ -19,7 +19,7 @@
 file(GLOB ENCRYPT_CONFIG_FILES  "*.cpp")
 add_executable(encrypt-config "${ENCRYPT_CONFIG_FILES}")
 target_include_directories(encrypt-config PRIVATE ../libminifi/include)
-target_wholearchive_library(encrypt-config minifi)
+target_wholearchive_library(encrypt-config core-minifi)
 target_link_libraries(encrypt-config libsodium)
 set_target_properties(encrypt-config PROPERTIES OUTPUT_NAME encrypt-config)
 install(TARGETS encrypt-config RUNTIME DESTINATION bin COMPONENT bin)

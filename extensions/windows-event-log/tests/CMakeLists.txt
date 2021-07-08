@@ -37,7 +37,7 @@ FOREACH(testfile ${WEL_INTEGRATION_TESTS})
 	createTests("${testfilename}")
 	target_wholearchive_library(${testfilename} minifi-wel)
 	target_wholearchive_library(${testfilename} minifi-standard-processors)
-	target_link_libraries (${testfilename} minifi ${CATCH_MAIN_LIB})
+	target_link_libraries (${testfilename} core-minifi ${CATCH_MAIN_LIB})
 
 	MATH(EXPR WEL_TEST_COUNT "${WEL_TEST_COUNT}+1")
 	add_test(NAME "${testfilename}" COMMAND "${testfilename}" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

@@ -44,7 +44,6 @@ add_library(nanofi STATIC ${NANOFI_SOURCES})
 
 target_link_libraries(nanofi spdlog ut)
 target_wholearchive_library(nanofi core-minifi)
-target_wholearchive_library(nanofi minifi)
 target_wholearchive_library(nanofi minifi-standard-processors)
 
 
@@ -54,7 +53,6 @@ add_library(nanofi-shared SHARED ${NANOFI_SOURCES})
 
 target_link_libraries(nanofi-shared spdlog ut)
 target_wholearchive_library(nanofi-shared core-minifi-shared)
-target_wholearchive_library(nanofi-shared minifi-shared)
 target_wholearchive_library(nanofi-shared minifi-standard-processors)
 
 add_dependencies(nanofi-shared minifi-standard-processors)
