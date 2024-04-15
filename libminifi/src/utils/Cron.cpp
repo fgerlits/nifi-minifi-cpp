@@ -19,7 +19,6 @@
 #include <charconv>
 #include "utils/TimeUtil.h"
 #include "utils/StringUtils.h"
-#include "date/date.h"
 
 using namespace std::literals::chrono_literals;
 
@@ -28,19 +27,17 @@ using std::chrono::minutes;
 using std::chrono::hours;
 using std::chrono::days;
 
-using date::local_seconds;
-using date::day;
-using date::weekday;
-using date::month;
-using date::year;
-using date::year_month_day;
-using date::last;
-using date::local_days;
-using date::from_stream;
-using date::make_time;
-using date::Friday;
-using date::Saturday;
-using date::Sunday;
+using std::chrono::local_seconds;
+using std::chrono::day;
+using std::chrono::weekday;
+using std::chrono::month;
+using std::chrono::year;
+using std::chrono::year_month_day;
+using std::chrono::last;
+using std::chrono::local_days;
+using std::chrono::Friday;
+using std::chrono::Saturday;
+using std::chrono::Sunday;
 
 namespace org::apache::nifi::minifi::utils {
 namespace {
@@ -120,11 +117,11 @@ month parse<month>(const std::string& month_str) {
 
   month parsed_month{};
   if (month_str.size() > 2) {
-    from_stream(stream, "%b", parsed_month);
+    stream >> std::chrono::parse("%b", parsed_month);
     if (!stream.fail() && parsed_month.ok() && stream.peek() == EOF)
       return parsed_month;
   } else {
-    from_stream(stream, "%m", parsed_month);
+    stream >> std::chrono::parse("%m", parsed_month);
     if (!stream.fail() && parsed_month.ok() && stream.peek() == EOF)
       return parsed_month;
   }
@@ -138,7 +135,7 @@ weekday parse<weekday>(const std::string& weekday_str) {
 
   if (weekday_str.size() > 2) {
     weekday parsed_weekday{};
-    from_stream(stream, "%a", parsed_weekday);
+    stream >> std::chrono::parse("%a", parsed_weekday);
     if (!stream.fail() && parsed_weekday.ok() && stream.peek() == EOF)
       return parsed_weekday;
   } else {
@@ -181,22 +178,19 @@ day getFieldType(local_seconds time_point) {
 template <>
 hours getFieldType(local_seconds time_point) {
   auto dp = floor<days>(time_point);
-  auto time = make_time(time_point-dp);
-  return time.hours();
+  return floor<hours>(time_point - dp);
 }
 
 template <>
 minutes getFieldType(local_seconds time_point) {
-  auto dp = floor<days>(time_point);
-  auto time = make_time(time_point-dp);
-  return time.minutes();
+  auto dp = floor<hours>(time_point);
+  return floor<minutes>(time_point - dp);
 }
 
 template <>
 seconds getFieldType(local_seconds time_point) {
-  auto dp = floor<days>(time_point);
-  auto time = make_time(time_point-dp);
-  return time.seconds();
+  auto dp = floor<minutes>(time_point);
+  return floor<seconds>(time_point - dp);
 }
 
 template <>

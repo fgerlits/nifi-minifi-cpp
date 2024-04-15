@@ -49,9 +49,6 @@ class TailFileTestHarness : public IntegrationBase {
     LogTestController::getInstance().setInfo<minifi::processors::LogAttribute>();
     LogTestController::getInstance().setTrace<minifi::processors::TailFile>();
     LogTestController::getInstance().setTrace<minifi::FlowController>();
-#ifdef WIN32
-    utils::dateSetInstall(TZ_DATA_DIR);
-#endif
   }
 
   void cleanup() override {

@@ -61,11 +61,6 @@ class SchedulingAgentTestFixture {
   SchedulingAgentTestFixture() {
     count_proc_->incrementActiveTasks();
     count_proc_->setScheduledState(core::RUNNING);
-
-#ifdef WIN32
-    utils::dateSetInstall(TZ_DATA_DIR);
-    date::set_install(TZ_DATA_DIR);
-#endif
   }
 
  protected:
@@ -135,9 +130,10 @@ TEST_CASE_METHOD(SchedulingAgentTestFixture, "Cron Driven every year") {
   if (first_task_reschedule_info.getNextExecutionTime() > std::chrono::steady_clock::now() + 1min) {  // To avoid possibly failing around dec 31 23:59:59
     auto wait_time_till_next_execution_time = std::chrono::round<std::chrono::seconds>(first_task_reschedule_info.getNextExecutionTime() - std::chrono::steady_clock::now());
 
-    auto current_time = date::make_zoned<std::chrono::seconds>(date::current_zone(), std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()));
-    auto current_year_month_day = date::year_month_day(date::floor<date::days>(current_time.get_local_time()));
-    auto new_years_day = date::make_zoned<std::chrono::seconds>(date::current_zone(), date::local_days{date::year{current_year_month_day.year()+date::years(1)}/date::January/1});
+    using namespace std::chrono;
+    auto current_time = zoned_time<std::chrono::seconds>(current_zone(), std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()));
+    auto current_year_month_day = year_month_day(floor<days>(current_time.get_local_time()));
+    auto new_years_day = zoned_time<std::chrono::seconds>(current_zone(), local_days{year{current_year_month_day.year()+years(1)}/January/1});
 
     auto time_until_new_years_day = new_years_day.get_local_time() - current_time.get_local_time();
 

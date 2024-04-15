@@ -16,7 +16,6 @@
  */
 
 #include "../Catch.h"
-#include "date/date.h"
 #include "openssl/core_names.h"
 #include "utils/file/FileUtils.h"
 #include "utils/span.h"
@@ -26,7 +25,6 @@
 namespace utils = org::apache::nifi::minifi::utils;
 
 TEST_CASE("getCertificateExpiration() works correctly") {
-  using namespace date::literals;  // NOLINT(google-build-using-namespace)
   using namespace std::literals::chrono_literals;
 
   const auto executable_dir = utils::file::get_executable_dir();
@@ -35,7 +33,7 @@ TEST_CASE("getCertificateExpiration() works correctly") {
   size_t num_times_called = 0;
   utils::tls::processPEMCertificate(cert_location, {}, {[&](utils::tls::X509_unique_ptr cert) {
     ++num_times_called;
-    CHECK(utils::tls::getCertificateExpiration(cert) == date::sys_days(date::year_month_day(2053_y / 4 / 30)) + 9h + 3min);
+    CHECK(utils::tls::getCertificateExpiration(cert) == std::chrono::sys_days(std::chrono::year_month_day(2053y / 4 / 30)) + 9h + 3min);
     return std::error_code{};
   }, {}, {}});
   CHECK(num_times_called == 1);

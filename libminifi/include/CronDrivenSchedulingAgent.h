@@ -60,7 +60,7 @@ class CronDrivenSchedulingAgent : public ThreadedSchedulingAgent {
  private:
   std::mutex mutex_;
   std::map<utils::Identifier, utils::Cron> schedules_;
-  std::map<utils::Identifier, date::local_time<std::chrono::seconds>> last_exec_;
+  std::map<utils::Identifier, std::chrono::local_time<std::chrono::seconds>> last_exec_;
 };
 
 }  // namespace org::apache::nifi::minifi

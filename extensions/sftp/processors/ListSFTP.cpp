@@ -293,7 +293,7 @@ bool ListSFTP::createAndTransferFlowFileFromChild(
     logger_->log_error("Modification date {} of \"{}/{}\" larger than int64_t max", child.attrs.mtime, child.parent_path.c_str(), child.filename.c_str());
     return true;
   }
-  auto mtime_str = utils::timeutils::getDateTimeStr(date::sys_seconds{std::chrono::seconds(child.attrs.mtime)});
+  auto mtime_str = utils::timeutils::getDateTimeStr(std::chrono::sys_seconds{std::chrono::seconds(child.attrs.mtime)});
 
   /* Create FlowFile */
   auto flow_file = session.create();

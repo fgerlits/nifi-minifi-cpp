@@ -174,8 +174,4 @@ Expression make_dynamic_function(const std::string &function_name, const std::ve
  */
 Expression make_function_composition(const Expression &arg, const std::vector<std::pair<std::string, std::vector<Expression>>> &chain);
 
-#ifdef WIN32
-void dateSetInstall(const std::string& install);
-#endif
-
 }  // namespace org::apache::nifi::minifi::expression

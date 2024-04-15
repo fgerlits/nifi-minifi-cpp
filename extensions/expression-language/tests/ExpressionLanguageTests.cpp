@@ -16,8 +16,6 @@
  * limitations under the License.
  */
 
-#include <ctime>
-
 #include <memory>
 #include <string>
 #ifdef ENABLE_CURL
@@ -45,7 +43,6 @@
 #include "Catch.h"
 #include "catch2/catch_approx.hpp"
 #include "unit/ProvenanceTestHelper.h"
-#include "date/tz.h"
 #include "Utils.h"
 
 namespace expression = org::apache::nifi::minifi::expression;
@@ -1266,9 +1263,6 @@ TEST_CASE("Encode Decode URL", "[expressionEncodeDecodeURLExcept]") {
 #endif
 
 TEST_CASE("Parse Date", "[expressionParseDate]") {
-#ifdef WIN32
-  expression::dateSetInstall(TZ_DATA_DIR);
-#endif
   auto flow_file_a = std::make_shared<core::FlowFile>();
   flow_file_a->addAttribute("message", "2014/04/30");
   CHECK("1398841200000" == expression::compile("${message:toDate('%Y/%m/%d', 'America/Los_Angeles')}")(expression::Parameters{ flow_file_a.get() }).asString());
@@ -1296,9 +1290,6 @@ TEST_CASE("Parse Date", "[expressionParseDate]") {
 }
 
 TEST_CASE("Reformat Date", "[expressionReformatDate]") {
-#ifdef WIN32
-  expression::dateSetInstall(TZ_DATA_DIR);
-#endif
   auto flow_file_a = std::make_shared<core::FlowFile>();
   flow_file_a->addAttribute("message", "2014/03/14");
   flow_file_a->addAttribute("blue", "20130917162643");
@@ -1314,25 +1305,21 @@ TEST_CASE("Reformat Date", "[expressionReformatDate]") {
 }
 
 TEST_CASE("Now Date", "[expressionNowDate]") {
-#ifdef WIN32
-  expression::dateSetInstall(TZ_DATA_DIR);
-#endif
   auto expr = expression::compile("${now():format('%Y')}");
-  auto current_year = date::year_month_day{std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now())}.year().operator int();
+  auto current_year = std::chrono::year_month_day{std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now())}.year().operator int();
 
   CHECK(current_year == expr(expression::Parameters{ }).asSignedLong());
 }
 
 TEST_CASE("Parse RFC3339 with Expression Language toDate") {
-  using date::sys_days;
+  using std::chrono::sys_days;
   using org::apache::nifi::minifi::utils::timeutils::parseRfc3339;
-  using namespace date::literals;  // NOLINT(google-build-using-namespace)
   using namespace std::literals::chrono_literals;
   using std::chrono::milliseconds;
 
-  milliseconds expected_second = std::chrono::floor<milliseconds>((sys_days(2023_y / 03 / 01) + 19h + 04min + 55s).time_since_epoch());
-  milliseconds expected_tenth_second = std::chrono::floor<milliseconds>((sys_days(2023_y / 03 / 01) + 19h + 04min + 55s + 100ms).time_since_epoch());
-  milliseconds expected_milli_second = std::chrono::floor<milliseconds>((sys_days(2023_y / 03 / 01) + 19h + 04min + 55s + 190ms).time_since_epoch());
+  milliseconds expected_second = std::chrono::floor<milliseconds>((sys_days(2023y / 03 / 01) + 19h + 04min + 55s).time_since_epoch());
+  milliseconds expected_tenth_second = std::chrono::floor<milliseconds>((sys_days(2023y / 03 / 01) + 19h + 04min + 55s + 100ms).time_since_epoch());
+  milliseconds expected_milli_second = std::chrono::floor<milliseconds>((sys_days(2023y / 03 / 01) + 19h + 04min + 55s + 190ms).time_since_epoch());
 
   CHECK(expression::compile("${literal('2023-03-01T19:04:55Z'):toDate()}")(expression::Parameters()).asSignedLong() == expected_second.count());
   CHECK(expression::compile("${literal('2023-03-01T19:04:55.1Z'):toDate()}")(expression::Parameters()).asSignedLong() == expected_tenth_second.count());
@@ -1381,9 +1368,6 @@ TEST_CASE("Parse RFC3339 with Expression Language toDate") {
 }
 
 TEST_CASE("Format Date", "[expressionFormatDate]") {
-#ifdef WIN32
-  expression::dateSetInstall(TZ_DATA_DIR);
-#endif
   auto flow_file_a = std::make_shared<core::FlowFile>();
   flow_file_a->addAttribute("trillion_milliseconds", "1000000000000");
   CHECK(expression::compile("${trillion_milliseconds:format('%Y/%m/%d %H:%M:%SZ', 'UTC')}")(expression::Parameters{ flow_file_a.get() }).asString() == "2001/09/09 01:46:40.000Z");

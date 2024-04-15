@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <format>
 #include <memory>
 #include <string>
 
@@ -38,7 +39,7 @@ std::string getEventTimestampStr(uint64_t event_timestamp) {
   const std::chrono::duration<int64_t, std::ratio<1, 10'000'000>> event_timestamp_as_duration{event_timestamp};
   const auto converted_timestamp = std::chrono::system_clock::time_point{event_timestamp_as_duration + nt_to_unix_epoch};
 
-  return date::format("%m/%d/%Y %r %p", std::chrono::floor<std::chrono::milliseconds>(converted_timestamp));
+  return std::format("{:%m/%d/%Y %r %p}", std::chrono::floor<std::chrono::milliseconds>(converted_timestamp));
 }
 }  // namespace
 

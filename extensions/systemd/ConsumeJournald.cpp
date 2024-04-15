@@ -20,7 +20,6 @@
 
 #include <algorithm>
 
-#include "date/date.h"
 #include "fmt/format.h"
 #include "utils/GeneralUtils.h"
 #include "utils/OptionalUtils.h"
@@ -127,7 +126,8 @@ void ConsumeJournald::onTrigger(core::ProcessContext&, core::ProcessSession& ses
         flow_file->setAttribute(std::move(field.name), std::move(field.value));
       }
     }
-    if (include_timestamp_) flow_file->setAttribute("timestamp", date::format(timestamp_format_, chr::floor<chr::microseconds>(msg.timestamp)));
+    const auto format_string = utils::string::join_pack("{:", timestamp_format_, "}");
+    if (include_timestamp_) flow_file->setAttribute("timestamp", std::vformat(format_string, std::make_format_args(chr::floor<chr::microseconds>(msg.timestamp))));
     session.transfer(flow_file, Success);
   }
   state_manager_->set({{"cursor", std::move(cursor_and_messages.first)}});
@@ -206,8 +206,9 @@ std::string ConsumeJournald::formatSyslogMessage(const journal_message& msg) con
       | utils::orElse([&] { return utils::optional_from_ptr(systemd_pid); })
       | utils::transform([](const std::string* const pid) { return fmt::format("[{}]", *pid); });
 
+  const auto format_string = utils::string::join_pack("{:", timestamp_format_, "}");
   return fmt::format("{} {} {}{}: {}",
-      date::format(timestamp_format_, chr::floor<chr::microseconds>(msg.timestamp)),
+      std::vformat(format_string, std::make_format_args(chr::floor<chr::microseconds>(msg.timestamp))),
       (utils::optional_from_ptr(systemd_hostname) | utils::transform(utils::dereference)).value_or("unknown_host"),
       (utils::optional_from_ptr(syslog_identifier) | utils::transform(utils::dereference)).value_or("unknown_process"),
       pid_string.value_or(std::string{}),

@@ -37,8 +37,8 @@ void setClock(std::shared_ptr<SteadyClock> clock) {
 
 std::optional<std::chrono::system_clock::time_point> parseRfc3339(const std::string& str) {
   std::istringstream stream(str);
-  date::year_month_day date_part{};
-  date::from_stream(stream, "%F", date_part);
+  std::chrono::year_month_day date_part{};
+  stream >> std::chrono::parse("%F", date_part);
 
   if (stream.fail())
     return std::nullopt;
@@ -51,20 +51,19 @@ std::optional<std::chrono::system_clock::time_point> parseRfc3339(const std::str
     return std::nullopt;
 
   std::chrono::system_clock::duration time_part;
-  std::chrono::minutes offset = 0min;
   if (str.ends_with('Z') || str.ends_with('z')) {
-    date::from_stream(stream, "%T", time_part);
+    stream >> std::chrono::parse("%T", time_part);
     if (stream.fail())
       return std::nullopt;
     stream.get();
   } else {
-    date::from_stream(stream, "%T%Ez", time_part, {}, &offset);
+    stream >> std::chrono::parse("%T%Ez", time_part);
   }
 
   if (stream.fail() || (stream.peek() && !stream.eof()))
     return std::nullopt;
 
-  return date::sys_days(date_part) + time_part - offset;
+  return std::chrono::sys_days(date_part) + time_part;
 }
 
 }  // namespace org::apache::nifi::minifi::utils::timeutils

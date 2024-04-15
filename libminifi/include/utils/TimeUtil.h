@@ -22,6 +22,7 @@
 #include <array>
 #include <chrono>
 #include <cstdio>
+#include <format>
 #include <iomanip>
 #include <limits>
 #include <sstream>
@@ -40,9 +41,7 @@
 #include <concepts>
 #endif
 
-#include "date/date.h"
-
-#define TIME_FORMAT "%Y-%m-%d %H:%M:%S"
+inline constexpr std::string_view TIME_FORMAT = "{:%Y-%m-%d %H:%M:%S}";
 
 #if defined(_LIBCPP_VERSION)
 namespace org::apache::nifi::minifi::detail {
@@ -112,15 +111,13 @@ std::shared_ptr<SteadyClock> getClock();
 void setClock(std::shared_ptr<SteadyClock> clock);
 
 inline std::string getTimeStr(std::chrono::system_clock::time_point tp) {
-  std::ostringstream stream;
-  date::to_stream(stream, TIME_FORMAT, std::chrono::floor<std::chrono::milliseconds>(tp));
-  return stream.str();
+  return std::format(TIME_FORMAT, std::chrono::floor<std::chrono::milliseconds>(tp));
 }
 
 inline std::optional<std::chrono::sys_seconds> parseDateTimeStr(const std::string& str) {
   std::istringstream stream(str);
   std::chrono::sys_seconds tp;
-  date::from_stream(stream, "%Y-%m-%dT%H:%M:%SZ", tp);
+  stream >> std::chrono::parse("%Y-%m-%dT%H:%M:%SZ", tp);
   if (stream.fail() || (stream.peek() && !stream.eof()))
     return std::nullopt;
   return tp;
@@ -129,31 +126,31 @@ inline std::optional<std::chrono::sys_seconds> parseDateTimeStr(const std::strin
 std::optional<std::chrono::system_clock::time_point> parseRfc3339(const std::string& str);
 
 inline std::string getDateTimeStr(std::chrono::sys_seconds tp) {
-  return date::format("%Y-%m-%dT%H:%M:%SZ", tp);
+  return std::format("{:%Y-%m-%dT%H:%M:%SZ}", tp);
 }
 
 inline std::string getRFC2616Format(std::chrono::sys_seconds tp) {
-  return date::format("%a, %d %b %Y %H:%M:%S %Z", tp);
+  return std::format("{:%a, %d %b %Y %H:%M:%S %Z}", tp);
 }
 
-inline date::sys_seconds to_sys_time(const std::tm& t) {
-  using date::year;
-  using date::month;
-  using date::day;
+inline std::chrono::sys_seconds to_sys_time(const std::tm& t) {
+  using std::chrono::year;
+  using std::chrono::month;
+  using std::chrono::day;
   using std::chrono::hours;
   using std::chrono::minutes;
   using std::chrono::seconds;
-  return date::sys_days{year{t.tm_year + 1900}/(t.tm_mon+1)/t.tm_mday} + hours{t.tm_hour} + minutes{t.tm_min} + seconds{t.tm_sec};
+  return std::chrono::sys_days{year{t.tm_year + 1900}/(t.tm_mon+1)/t.tm_mday} + hours{t.tm_hour} + minutes{t.tm_min} + seconds{t.tm_sec};
 }
 
-inline date::local_seconds to_local_time(const std::tm& t) {
-  using date::year;
-  using date::month;
-  using date::day;
+inline std::chrono::local_seconds to_local_time(const std::tm& t) {
+  using std::chrono::year;
+  using std::chrono::month;
+  using std::chrono::day;
   using std::chrono::hours;
   using std::chrono::minutes;
   using std::chrono::seconds;
-  return date::local_days{year{t.tm_year + 1900}/(t.tm_mon+1)/t.tm_mday} + hours{t.tm_hour} + minutes{t.tm_min} + seconds{t.tm_sec};
+  return std::chrono::local_days{year{t.tm_year + 1900}/(t.tm_mon+1)/t.tm_mday} + hours{t.tm_hour} + minutes{t.tm_min} + seconds{t.tm_sec};
 }
 
 namespace details {
@@ -253,31 +250,31 @@ std::optional<TargetDuration> StringToDuration(const std::string& input) {
     std::chrono::years>(unit, value);
 }
 
-inline date::local_seconds roundToNextYear(date::local_seconds tp) {
-  date::year_month_day date(std::chrono::floor<std::chrono::days>(tp));
+inline std::chrono::local_seconds roundToNextYear(std::chrono::local_seconds tp) {
+  std::chrono::year_month_day date(std::chrono::floor<std::chrono::days>(tp));
   auto start_of_year = date.year()/1/1;
-  return date::local_days(start_of_year + std::chrono::years(1));
+  return std::chrono::local_days(start_of_year + std::chrono::years(1));
 }
 
-inline date::local_seconds roundToNextMonth(date::local_seconds tp) {
-  date::year_month_day date(std::chrono::floor<std::chrono::days>(tp));
+inline std::chrono::local_seconds roundToNextMonth(std::chrono::local_seconds tp) {
+  std::chrono::year_month_day date(std::chrono::floor<std::chrono::days>(tp));
   auto start_of_month = date.year()/date.month()/1;
-  return date::local_days(start_of_month + std::chrono::months(1));
+  return std::chrono::local_days(start_of_month + std::chrono::months(1));
 }
 
-inline date::local_seconds roundToNextDay(date::local_seconds tp) {
+inline std::chrono::local_seconds roundToNextDay(std::chrono::local_seconds tp) {
   return std::chrono::floor<std::chrono::days>(tp) + std::chrono::days(1);
 }
 
-inline date::local_seconds roundToNextHour(date::local_seconds tp) {
+inline std::chrono::local_seconds roundToNextHour(std::chrono::local_seconds tp) {
   return std::chrono::floor<std::chrono::hours>(tp) + std::chrono::hours(1);
 }
 
-inline date::local_seconds roundToNextMinute(date::local_seconds tp) {
+inline std::chrono::local_seconds roundToNextMinute(std::chrono::local_seconds tp) {
   return std::chrono::floor<std::chrono::minutes>(tp) + std::chrono::minutes(1);
 }
 
-inline date::local_seconds roundToNextSecond(date::local_seconds tp) {
+inline std::chrono::local_seconds roundToNextSecond(std::chrono::local_seconds tp) {
   return std::chrono::floor<std::chrono::seconds>(tp) + std::chrono::seconds(1);
 }
 

@@ -40,7 +40,6 @@
 #include "TestBase.h"
 #include "Catch.h"
 #include "Exception.h"
-#include "date/date.h"
 #include "utils/file/FileUtils.h"
 #include "core/Core.h"
 #include "core/logging/Logger.h"
@@ -497,7 +496,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP set mtime", "[PutSFTP]") {
   testController.runSession(plan, true);
 
   testFile("nifi_test/tstFile1.ext", "content 1");
-  constexpr auto modification_time = date::sys_days(date::January / 24 / 2065) + 5h + 20min;
+  constexpr auto modification_time = std::chrono::sys_days(std::chrono::January / 24 / 2065) + 5h + 20min;
   testModificationTime("nifi_test/tstFile1.ext", utils::file::from_sys(modification_time));
 }
 

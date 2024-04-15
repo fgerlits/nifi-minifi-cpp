@@ -37,7 +37,7 @@ utils::TaskRescheduleInfo CronDrivenSchedulingAgent::run(core::Processor* proces
 
   if (this->running_ && processor->isRunning()) {
     auto uuid = processor->getUUID();
-    auto current_time = date::make_zoned<seconds>(date::current_zone(), time_point_cast<seconds>(system_clock::now()));
+    auto current_time = std::chrono::zoned_time<seconds>(std::chrono::current_zone(), time_point_cast<seconds>(system_clock::now()));
     std::lock_guard<std::mutex> lock(mutex_);
 
     schedules_.emplace(uuid, utils::Cron(processor->getCronPeriod()));

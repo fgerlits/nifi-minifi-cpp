@@ -22,7 +22,6 @@
 #include <optional>
 #include <memory>
 #include <utility>
-#include "date/tz.h"
 #include "Exception.h"
 
 namespace org::apache::nifi::minifi::utils {
@@ -35,14 +34,14 @@ class CronField {
  public:
   virtual ~CronField() = default;
 
-  [[nodiscard]] virtual bool matches(date::local_seconds time_point) const = 0;
+  [[nodiscard]] virtual bool matches(std::chrono::local_seconds time_point) const = 0;
 };
 
 class Cron {
  public:
   explicit Cron(const std::string& expression);
 
-  [[nodiscard]] std::optional<date::local_seconds> calculateNextTrigger(date::local_seconds start) const;
+  [[nodiscard]] std::optional<std::chrono::local_seconds> calculateNextTrigger(std::chrono::local_seconds start) const;
 
   std::unique_ptr<CronField> second_;
   std::unique_ptr<CronField> minute_;

@@ -307,9 +307,6 @@ if (STRICT_GSL_CHECKS STREQUAL "DEBUG_ONLY")
 endif()
 target_compile_definitions(gsl-lite INTERFACE ${GslDefinitions})
 
-# date
-include(Date)
-
 # expected-lite
 include(ExpectedLite)
 

@@ -63,14 +63,6 @@ void setAclOnFileOrDirectory(std::string file_name, DWORD perms, ACCESS_MODE per
 
 namespace org::apache::nifi::minifi::utils {
 
-#ifdef WIN32
-// If minifi is not installed through the MSI installer, then TZDATA might be missing
-// date::set_install can point to the TZDATA location, but it has to be called from each library/executable that wants to use timezones
-void dateSetInstall(const std::string& install) {
-  date::set_install(install);
-}
-#endif
-
 void makeFileOrDirectoryNotWritable(const std::filesystem::path& file_name) {
 #ifdef WIN32
   setAclOnFileOrDirectory(file_name.string(), FILE_GENERIC_WRITE, DENY_ACCESS);

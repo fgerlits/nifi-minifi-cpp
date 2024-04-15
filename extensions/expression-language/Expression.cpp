@@ -17,6 +17,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <format>
 #include <utility>
 #include <iostream>
 #include <iomanip>
@@ -46,7 +47,6 @@
 #include <curl/curl.h>
 #endif
 
-
 #ifdef WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -66,7 +66,6 @@
 
 #include "core/logging/LoggerFactory.h"
 
-#include "date/tz.h"
 #include "utils/net/DNS.h"
 #include "utils/expected.h"
 
@@ -632,14 +631,12 @@ Value expr_escapeCsv(const std::vector<Value> &args) {
 Value expr_format(const std::vector<Value> &args) {
   using std::chrono::milliseconds;
 
-  date::sys_time<milliseconds> utc_time_point{milliseconds(args[0].asUnsignedLong())};
-  auto format_string = args[1].asString();
-  auto zone = args.size() > 2 ? date::locate_zone(args[2].asString()) : date::current_zone();
+  std::chrono::sys_time<milliseconds> utc_time_point{milliseconds(args[0].asUnsignedLong())};
+  auto zone = args.size() > 2 ? std::chrono::locate_zone(args[2].asString()) : std::chrono::current_zone();
 
-  auto zoned_time_point = date::make_zoned(zone, utc_time_point);
-  std::ostringstream result_stream;
-  result_stream << date::format(args[1].asString(), zoned_time_point);
-  return Value(result_stream.str());
+  auto zoned_time_point = std::chrono::zoned_time{zone, utc_time_point};
+  auto format_string = utils::string::join_pack("{:", args[1].asString(), "}");
+  return Value(std::vformat(format_string, std::make_format_args(zoned_time_point)));
 }
 
 Value expr_toDate(const std::vector<Value> &args) {
@@ -653,17 +650,17 @@ Value expr_toDate(const std::vector<Value> &args) {
       throw std::runtime_error(fmt::format("Failed to parse \"{}\" as an RFC3339 formatted datetime", input_string));
   }
   auto format_string = args[1].asString();
-  auto zone = args.size() > 2 ? date::locate_zone(args[2].asString()) : date::current_zone();
+  auto zone = args.size() > 2 ? std::chrono::locate_zone(args[2].asString()) : std::chrono::current_zone();
 
   std::istringstream input_stream{ input_string };
-  date::sys_time<milliseconds> time_point;
-  date::from_stream(input_stream, format_string.c_str(), time_point);
+  std::chrono::sys_time<milliseconds> time_point;
+  input_stream >> std::chrono::parse(format_string.c_str(), time_point);
   if (input_stream.fail() || (input_stream.peek() && !input_stream.eof()))
     throw std::runtime_error(fmt::format(R"(Failed to parse "{}", with "{}" format)", input_string, format_string));
 
-  auto utc_zone = date::locate_zone("UTC");
-  auto utc_time_point = date::make_zoned(utc_zone, time_point);
-  auto zoned_time_point = date::make_zoned(zone, utc_time_point.get_local_time());
+  auto utc_zone = std::chrono::locate_zone("UTC");
+  auto utc_time_point = std::chrono::zoned_time{utc_zone, time_point};
+  auto zoned_time_point = std::chrono::zoned_time{zone, utc_time_point.get_local_time()};
   return Value(int64_t{std::chrono::duration_cast<milliseconds>(zoned_time_point.get_sys_time().time_since_epoch()).count()});
 }
 
@@ -1640,11 +1637,5 @@ Expression Expression::make_aggregate(const std::function<Value(const Parameters
     return val_fn(params, sub_expr_generator(params));
   });
 }
-
-#ifdef WIN32
-void dateSetInstall(const std::string& install) {
-  date::set_install(install);
-}
-#endif
 
 }  // namespace org::apache::nifi::minifi::expression
