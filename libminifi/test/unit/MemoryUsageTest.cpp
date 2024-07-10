@@ -20,6 +20,7 @@
 // as we measure the absolute memory usage that would fail this test
 #define EXTENSION_LIST ""  // NOLINT(cppcoreguidelines-macro-usage)
 
+#include <algorithm>
 #include <iostream>
 #include <numeric>
 #include <random>
@@ -33,12 +34,10 @@ TEST_CASE("Test Physical memory usage", "[testphysicalmemoryusage]") {
   constexpr bool cout_enabled = true;
 
   // make sure the compiler is not able to optimize out the vector
-  std::mt19937 gen(std::random_device{}());
+  std::mt19937_64 gen(std::random_device{}());
   std::uniform_int_distribution dist(0, 255);
   std::vector<uint8_t> large_random_vector(30'000'000);
-  for (size_t i = 0; i < 10; ++i) {
-    large_random_vector[dist(gen) * 100'000 + dist(gen) * 1000 + dist(gen)] = dist(gen);
-  }
+  std::generate(begin(large_random_vector), end(large_random_vector), [&]() { return dist(gen); });
 
   const auto ram_usage_by_process = utils::OsUtils::getCurrentProcessPhysicalMemoryUsage();
   const auto ram_usage_by_system = utils::OsUtils::getSystemPhysicalMemoryUsage();
