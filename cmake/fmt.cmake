@@ -18,8 +18,8 @@
 #
 include(FetchContent)
 FetchContent_Declare(Fmt
-        URL  https://github.com/fmtlib/fmt/archive/refs/tags/11.0.2.tar.gz
-        URL_HASH SHA256=6cb1e6d37bdcb756dbbe59be438790db409cdb4868c66e888d5df9f13f7c027f
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG fb97cb2318dd14b5c791699232e1e73782be7e57
         OVERRIDE_FIND_PACKAGE
         )
 FetchContent_MakeAvailable(Fmt)
