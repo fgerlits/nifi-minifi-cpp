@@ -19,12 +19,8 @@
 #include <string>
 #include <chrono>
 #include <atomic>
-#include <unordered_map>
-#include <mutex>
-#include <vector>
 
 #include "minifi-cpp/core/state/nodes/MetricsBase.h"
-#include "minifi-cpp/core/state/PublishedMetricProvider.h"
 
 namespace org::apache::nifi::minifi::core {
 
@@ -40,12 +36,12 @@ class ProcessorMetrics : public virtual state::response::ResponseNode {
   virtual void addLastSessionCommitRuntime(std::chrono::milliseconds runtime) = 0;
 
   virtual std::atomic<size_t>& iterations() = 0;
-  virtual std::atomic<size_t>& transferred_flow_files() = 0;
-  virtual std::atomic<uint64_t>& transferred_bytes() = 0;
+  virtual std::atomic<size_t>& transferredFlowFiles() = 0;
+  virtual std::atomic<uint64_t>& transferredBytes() = 0;
 
   virtual const std::atomic<size_t>& iterations() const = 0;
-  virtual const std::atomic<size_t>& transferred_flow_files() const = 0;
-  virtual const std::atomic<uint64_t>& transferred_bytes() const = 0;
+  virtual const std::atomic<size_t>& transferredFlowFiles() const = 0;
+  virtual const std::atomic<uint64_t>& transferredBytes() const = 0;
 };
 
 }  // namespace org::apache::nifi::minifi::core

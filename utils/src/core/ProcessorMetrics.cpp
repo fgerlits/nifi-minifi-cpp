@@ -49,8 +49,8 @@ std::vector<state::response::SerializedResponseNode> ProcessorMetricsImpl::seria
       {.name = "LastOnTriggerRunTime", .value = static_cast<uint64_t>(getLastOnTriggerRuntime().count())},
       {.name = "AverageSessionCommitRunTime", .value = static_cast<uint64_t>(getAverageSessionCommitRuntime().count())},
       {.name = "LastSessionCommitRunTime", .value = static_cast<uint64_t>(getLastSessionCommitRuntime().count())},
-      {.name = "TransferredFlowFiles", .value = static_cast<uint32_t>(transferred_flow_files().load())},
-      {.name = "TransferredBytes", .value = transferred_bytes().load()}
+      {.name = "TransferredFlowFiles", .value = static_cast<uint32_t>(transferredFlowFiles().load())},
+      {.name = "TransferredBytes", .value = transferredBytes().load()}
     }
   };
 
@@ -78,8 +78,8 @@ std::vector<state::PublishedMetric> ProcessorMetricsImpl::calculateMetrics() {
     {"last_onTrigger_runtime_milliseconds", static_cast<double>(getLastOnTriggerRuntime().count()), getCommonLabels()},
     {"average_session_commit_runtime_milliseconds", static_cast<double>(getAverageSessionCommitRuntime().count()), getCommonLabels()},
     {"last_session_commit_runtime_milliseconds", static_cast<double>(getLastSessionCommitRuntime().count()), getCommonLabels()},
-    {"transferred_flow_files", static_cast<double>(transferred_flow_files().load()), getCommonLabels()},
-    {"transferred_bytes", static_cast<double>(transferred_bytes().load()), getCommonLabels()}
+    {"transferred_flow_files", static_cast<double>(transferredFlowFiles().load()), getCommonLabels()},
+    {"transferred_bytes", static_cast<double>(transferredBytes().load()), getCommonLabels()}
   };
 
   {

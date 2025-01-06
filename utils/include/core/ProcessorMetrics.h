@@ -54,12 +54,12 @@ class ProcessorMetricsImpl : public state::response::ResponseNodeImpl, public vi
   void addLastSessionCommitRuntime(std::chrono::milliseconds runtime) override;
 
   std::atomic<size_t>& iterations() override {return iterations_;}
-  std::atomic<size_t>& transferred_flow_files() override {return transferred_flow_files_;}
-  std::atomic<uint64_t>& transferred_bytes() override {return transferred_bytes_;}
+  std::atomic<size_t>& transferredFlowFiles() override {return transferred_flow_files_;}
+  std::atomic<uint64_t>& transferredBytes() override {return transferred_bytes_;}
 
   const std::atomic<size_t>& iterations() const override {return iterations_;}
-  const std::atomic<size_t>& transferred_flow_files() const override {return transferred_flow_files_;}
-  const std::atomic<uint64_t>& transferred_bytes() const override {return transferred_bytes_;}
+  const std::atomic<size_t>& transferredFlowFiles() const override {return transferred_flow_files_;}
+  const std::atomic<uint64_t>& transferredBytes() const override {return transferred_bytes_;}
 
  protected:
   template<typename ValueType>
