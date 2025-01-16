@@ -45,7 +45,7 @@ Feature: Core flow functionalities
     And a Funnel with the name "TerminalFunnel" is set up
     And the "success" relationship of the GenerateFlowFile processor is connected to the TerminalFunnel
     When the MiNiFi instance starts up
-    Then the Minifi logs contain the following message: "ProcessSession committed for GenerateFlowFile" in less than 5 seconds
+    Then the Minifi logs do not contain the following message: "Connect empty for non auto terminated relationship" after 5 seconds
 
   @CORE
   Scenario: The default configuration uses RocksDB for both the flow file and content repositories
