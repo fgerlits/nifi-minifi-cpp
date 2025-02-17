@@ -36,7 +36,7 @@ add_library(LibLZMA::LibLZMA ALIAS liblzma)
 
 set(LIBLZMA_INCLUDE_DIRS "${liblzma_SOURCE_DIR}/src/liblzma/api" CACHE STRING "" FORCE)
 if (WIN32)
-    set(LIBLZMA_LIBRARIES "${liblzma_BINARY_DIR}/${CMAKE_BUILD_TYPE}/liblzma.lib" CACHE STRING "" FORCE)
+    set(LIBLZMA_LIBRARIES "${liblzma_BINARY_DIR}/liblzma.lib" CACHE STRING "" FORCE)
 else()
     set(LIBLZMA_LIBRARIES "${liblzma_BINARY_DIR}/liblzma.a" CACHE STRING "" FORCE)
 endif()
