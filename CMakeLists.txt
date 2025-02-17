@@ -106,6 +106,13 @@ if (WIN32)
         # these flags are default on msbuild, but not on ninja
         add_compile_options(/MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline)
     endif()
+
+    find_program(SCCACHE sccache REQUIRED)
+    message("-- Found sccache: ${SCCACHE}")
+    set(CMAKE_C_COMPILER_LAUNCHER ${SCCACHE})
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${SCCACHE})
+    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded)
+    cmake_policy(SET CMP0141 NEW)
 endif()
 
 if (NOT PORTABLE)
