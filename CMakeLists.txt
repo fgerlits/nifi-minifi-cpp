@@ -21,6 +21,7 @@ cmake_minimum_required(VERSION 3.24)
 cmake_policy(SET CMP0096 NEW) # policy to preserve the leading zeros in PROJECT_VERSION_{MAJOR,MINOR,PATCH,TWEAK}
 cmake_policy(SET CMP0065 OLD) # default export policy, required for self-dlopen
 cmake_policy(SET CMP0135 NEW) # policy to set the timestamps of extracted contents to the time of extraction
+cmake_policy(SET CMP0141 NEW) # for MSVC, to enable CMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded
 
 project(nifi-minifi-cpp VERSION 0.99.1)
 set(PROJECT_NAME "nifi-minifi-cpp")
@@ -106,6 +107,7 @@ if (WIN32)
         # these flags are default on msbuild, but not on ninja
         add_compile_options(/MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline)
     endif()
+    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "Embedded")
 endif()
 
 if (NOT PORTABLE)
