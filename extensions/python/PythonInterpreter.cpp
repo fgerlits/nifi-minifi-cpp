@@ -50,8 +50,10 @@ void initThreads() {
   #pragma warning(push)
 #pragma warning(disable: 4996)
 #endif
+#ifndef WIN32
   if (!PyEval_ThreadsInitialized())
     PyEval_InitThreads();
+#endif
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #elif defined(__GNUC__)
