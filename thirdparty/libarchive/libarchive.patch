@@ -1,6 +1,6 @@
 diff -rupN orig/CMakeLists.txt patched/CMakeLists.txt
 --- orig/CMakeLists.txt	2020-02-11 22:33:47.000000000 +0100
-+++ patched/CMakeLists.txt	2020-03-26 00:12:47.000000000 +0100
++++ patched/CMakeLists.txt	2025-02-24 14:59:13.155525017 +0100
 @@ -6,7 +6,7 @@ endif()
  #
  PROJECT(libarchive C)
@@ -10,9 +10,53 @@ diff -rupN orig/CMakeLists.txt patched/CMakeLists.txt
  if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${libarchive_BINARY_DIR}/bin)
  endif()
+@@ -445,6 +445,7 @@ IF(ZLIB_FOUND)
+ ENDIF(ZLIB_FOUND)
+ MARK_AS_ADVANCED(CLEAR ZLIB_INCLUDE_DIR)
+ MARK_AS_ADVANCED(CLEAR ZLIB_LIBRARY)
++
+ #
+ # Find BZip2
+ #
+@@ -478,34 +479,8 @@ MARK_AS_ADVANCED(CLEAR BZIP2_LIBRARIES)
+ # Find LZMA
+ #
+ IF(ENABLE_LZMA)
+-  FIND_PACKAGE(LibLZMA)
+-ELSE()
+-  SET(LIBLZMA_FOUND FALSE) # Override cached value
+-ENDIF()
+-
+-IF(LIBLZMA_FOUND)
+-  SET(HAVE_LIBLZMA 1)
+-  SET(HAVE_LZMA_H 1)
+-  CMAKE_PUSH_CHECK_STATE()
+-  SET(CMAKE_REQUIRED_INCLUDES ${LIBLZMA_INCLUDE_DIR})
+-  SET(CMAKE_REQUIRED_LIBRARIES ${LIBLZMA_LIBRARIES})
+-  INCLUDE_DIRECTORIES(${LIBLZMA_INCLUDE_DIRS})
+   LIST(APPEND ADDITIONAL_LIBS ${LIBLZMA_LIBRARIES})
+-  # Test if a macro is needed for the library.
+-  TRY_MACRO_FOR_LIBRARY(
+-    "${LIBLZMA_INCLUDE_DIRS}" "${LIBLZMA_LIBRARIES}"
+-    COMPILES
+-    "#include <lzma.h>\nint main() {return (int)lzma_version_number(); }"
+-    "WITHOUT_LZMA_API_STATIC;LZMA_API_STATIC")
+-  IF(NOT WITHOUT_LZMA_API_STATIC AND LZMA_API_STATIC)
+-    ADD_DEFINITIONS(-DLZMA_API_STATIC)
+-  ENDIF(NOT WITHOUT_LZMA_API_STATIC AND LZMA_API_STATIC)
+-  CMAKE_POP_CHECK_STATE()
+-ELSE(LIBLZMA_FOUND)
+-# LZMA not found and will not be used.
+-ENDIF(LIBLZMA_FOUND)
+-MARK_AS_ADVANCED(CLEAR LIBLZMA_INCLUDE_DIR)
+-MARK_AS_ADVANCED(CLEAR LIBLZMA_LIBRARY)
++ENDIF()
+ 
+ #
+ # Find LZO2
 diff -rupN orig/libarchive/CMakeLists.txt patched/libarchive/CMakeLists.txt
 --- orig/libarchive/CMakeLists.txt	2020-01-28 00:19:39.000000000 +0100
-+++ patched/libarchive/CMakeLists.txt	2020-03-26 00:54:15.000000000 +0100
++++ patched/libarchive/CMakeLists.txt	2025-02-24 14:34:37.134226647 +0100
 @@ -166,51 +166,6 @@ SET(libarchive_SOURCES
    xxhash.c
  )
@@ -65,7 +109,7 @@ diff -rupN orig/libarchive/CMakeLists.txt patched/libarchive/CMakeLists.txt
  IF(WIN32 AND NOT CYGWIN)
    LIST(APPEND libarchive_SOURCES archive_entry_copy_bhfi.c)
    LIST(APPEND libarchive_SOURCES archive_read_disk_windows.c)
-@@ -235,12 +190,6 @@ ELSEIF(ARCHIVE_ACL_SUNOS)
+@@ -235,14 +190,9 @@ ELSEIF(ARCHIVE_ACL_SUNOS)
    LIST(APPEND libarchive_SOURCES archive_disk_acl_sunos.c)
  ENDIF()
  
@@ -77,8 +121,11 @@ diff -rupN orig/libarchive/CMakeLists.txt patched/libarchive/CMakeLists.txt
 -
  # archive_static is a static library
  ADD_LIBRARY(archive_static STATIC ${libarchive_SOURCES} ${include_HEADERS})
++TARGET_INCLUDE_DIRECTORIES(archive_static PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
  TARGET_LINK_LIBRARIES(archive_static ${ADDITIONAL_LIBS})
-@@ -253,12 +202,9 @@ ENDIF(NOT WIN32 OR CYGWIN)
+ SET_TARGET_PROPERTIES(archive_static PROPERTIES COMPILE_DEFINITIONS
+   LIBARCHIVE_STATIC)
+@@ -253,12 +203,9 @@ ENDIF(NOT WIN32 OR CYGWIN)
  
  IF(ENABLE_INSTALL)
    # How to install the libraries
@@ -94,7 +141,7 @@ diff -rupN orig/libarchive/CMakeLists.txt patched/libarchive/CMakeLists.txt
 -add_subdirectory(test)
 diff -rupN orig/libarchive/archive_read_support_format_rar5.c patched/libarchive/archive_read_support_format_rar5.c
 --- orig/libarchive/archive_read_support_format_rar5.c	2020-02-11 00:30:01.000000000 +0100
-+++ patched/libarchive/archive_read_support_format_rar5.c	2020-03-26 17:10:03.000000000 +0100
++++ patched/libarchive/archive_read_support_format_rar5.c	2025-02-24 14:29:00.203562989 +0100
 @@ -3084,12 +3084,17 @@ static int do_uncompress_block(struct ar
  
  			continue;
@@ -114,3 +161,4 @@ diff -rupN orig/libarchive/archive_read_support_format_rar5.c patched/libarchive
  	}
  
  	return ARCHIVE_OK;
+

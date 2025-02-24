@@ -54,12 +54,12 @@ set(PATCH_FILE "${CMAKE_SOURCE_DIR}/thirdparty/libarchive/libarchive.patch")
 set(PC ${Bash_EXECUTABLE}  -c "set -x &&\
         (\\\"${Patch_EXECUTABLE}\\\" -p1 -R -s -f --dry-run -i \\\"${PATCH_FILE}\\\" || \\\"${Patch_EXECUTABLE}\\\" -p1 -N -i \\\"${PATCH_FILE}\\\")")
 
-FetchContent_Declare(libarchive
+FetchContent_Declare(archive_static
         URL "https://github.com/libarchive/libarchive/releases/download/v3.4.2/libarchive-3.4.2.tar.gz"
         URL_HASH "SHA256=b60d58d12632ecf1e8fad7316dc82c6b9738a35625746b47ecdcaf4aed176176"
         PATCH_COMMAND ${PC})
 
-FetchContent_MakeAvailable(libarchive)
+FetchContent_MakeAvailable(archive_static)
 
 #add_library(libarchive STATIC IMPORTED)
 #add_library(LibArchive::LibArchive ALIAS libarchive)
