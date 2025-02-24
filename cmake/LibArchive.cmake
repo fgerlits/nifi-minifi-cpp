@@ -61,5 +61,13 @@ FetchContent_Declare(libarchive
 
 FetchContent_MakeAvailable(libarchive)
 
-add_library(libarchive INTERFACE)
-add_library(LibArchive::LibArchive ALIAS libarchive)
+#add_library(libarchive STATIC IMPORTED)
+#add_library(LibArchive::LibArchive ALIAS libarchive)
+
+#if (ENABLE_LZMA)
+#    add_dependencies(libarchive liblzma)
+#endif()
+#
+#if (ENABLE_BZIP2)
+#    add_dependencies(libarchive BZip2::BZip2)
+#endif()
