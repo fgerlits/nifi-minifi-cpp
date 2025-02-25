@@ -23,7 +23,6 @@ endif()
 
 if (ENABLE_LZMA)
     include(LibLZMA)
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/liblzma/dummy")
 endif()
 
 include(LibArchive)

@@ -60,14 +60,3 @@ FetchContent_Declare(archive_static
         PATCH_COMMAND ${PC})
 
 FetchContent_MakeAvailable(archive_static)
-
-#add_library(libarchive STATIC IMPORTED)
-#add_library(LibArchive::LibArchive ALIAS libarchive)
-
-#if (ENABLE_LZMA)
-#    add_dependencies(libarchive liblzma)
-#endif()
-#
-#if (ENABLE_BZIP2)
-#    add_dependencies(libarchive BZip2::BZip2)
-#endif()

@@ -29,17 +29,3 @@ FetchContent_Declare(liblzma
         PATCH_COMMAND "${PC}")
 
 FetchContent_MakeAvailable(liblzma)
-#
-#add_library(LibLZMA::LibLZMA ALIAS liblzma)
-#
-## Set exported variables for FindPackage.cmake
-#
-#set(LIBLZMA_INCLUDE_DIR "${liblzma_SOURCE_DIR}/src/liblzma/api" CACHE STRING "" FORCE)
-#if (WIN32)
-#    set(LIBLZMA_LIBRARY "${liblzma_BINARY_DIR}/liblzma.lib" CACHE STRING "" FORCE)
-#else()
-#    set(LIBLZMA_LIBRARY "${liblzma_BINARY_DIR}/liblzma.a" CACHE STRING "" FORCE)
-#endif()
-#
-#set(PASSTHROUGH_VARIABLES ${PASSTHROUGH_VARIABLES} "-DEXPORTED_LIBLZMA_INCLUDE_DIR=${LIBLZMA_INCLUDE_DIR}" CACHE STRING "" FORCE)
-#set(PASSTHROUGH_VARIABLES ${PASSTHROUGH_VARIABLES} "-DEXPORTED_LIBLZMA_LIBRARY=${LIBLZMA_LIBRARY}" CACHE STRING "" FORCE)
