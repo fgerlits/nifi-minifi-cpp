@@ -63,4 +63,5 @@ FetchContent_MakeAvailable(archive_static)
 
 if (ENABLE_BZIP2)
   add_dependencies(archive_static BZip2::BZip2)
+  set_property(TARGET archive_static APPEND PROPERTY INTERFACE_LINK_LIBRARIES BZip2::BZip2)
 endif()
