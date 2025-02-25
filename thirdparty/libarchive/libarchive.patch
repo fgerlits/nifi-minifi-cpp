@@ -1,6 +1,6 @@
 diff -rupN orig/CMakeLists.txt patched/CMakeLists.txt
 --- orig/CMakeLists.txt	2020-02-11 22:33:47.000000000 +0100
-+++ patched/CMakeLists.txt	2025-02-24 14:59:13.155525017 +0100
++++ patched/CMakeLists.txt	2025-02-25 10:29:03.907997882 +0100
 @@ -6,7 +6,7 @@ endif()
  #
  PROJECT(libarchive C)
@@ -18,7 +18,7 @@ diff -rupN orig/CMakeLists.txt patched/CMakeLists.txt
  #
  # Find BZip2
  #
-@@ -478,34 +479,8 @@ MARK_AS_ADVANCED(CLEAR BZIP2_LIBRARIES)
+@@ -478,34 +479,11 @@ MARK_AS_ADVANCED(CLEAR BZIP2_LIBRARIES)
  # Find LZMA
  #
  IF(ENABLE_LZMA)
@@ -28,13 +28,13 @@ diff -rupN orig/CMakeLists.txt patched/CMakeLists.txt
 -ENDIF()
 -
 -IF(LIBLZMA_FOUND)
--  SET(HAVE_LIBLZMA 1)
--  SET(HAVE_LZMA_H 1)
+   SET(HAVE_LIBLZMA 1)
+   SET(HAVE_LZMA_H 1)
 -  CMAKE_PUSH_CHECK_STATE()
 -  SET(CMAKE_REQUIRED_INCLUDES ${LIBLZMA_INCLUDE_DIR})
 -  SET(CMAKE_REQUIRED_LIBRARIES ${LIBLZMA_LIBRARIES})
 -  INCLUDE_DIRECTORIES(${LIBLZMA_INCLUDE_DIRS})
-   LIST(APPEND ADDITIONAL_LIBS ${LIBLZMA_LIBRARIES})
+-  LIST(APPEND ADDITIONAL_LIBS ${LIBLZMA_LIBRARIES})
 -  # Test if a macro is needed for the library.
 -  TRY_MACRO_FOR_LIBRARY(
 -    "${LIBLZMA_INCLUDE_DIRS}" "${LIBLZMA_LIBRARIES}"
@@ -50,13 +50,15 @@ diff -rupN orig/CMakeLists.txt patched/CMakeLists.txt
 -ENDIF(LIBLZMA_FOUND)
 -MARK_AS_ADVANCED(CLEAR LIBLZMA_INCLUDE_DIR)
 -MARK_AS_ADVANCED(CLEAR LIBLZMA_LIBRARY)
++  LIST(APPEND ADDITIONAL_LIBS liblzma)
++  ADD_DEFINITIONS(-DLZMA_API_STATIC)
 +ENDIF()
  
  #
  # Find LZO2
 diff -rupN orig/libarchive/CMakeLists.txt patched/libarchive/CMakeLists.txt
 --- orig/libarchive/CMakeLists.txt	2020-01-28 00:19:39.000000000 +0100
-+++ patched/libarchive/CMakeLists.txt	2025-02-24 14:34:37.134226647 +0100
++++ patched/libarchive/CMakeLists.txt	2025-02-24 16:49:53.345455543 +0100
 @@ -166,51 +166,6 @@ SET(libarchive_SOURCES
    xxhash.c
  )
@@ -161,4 +163,3 @@ diff -rupN orig/libarchive/archive_read_support_format_rar5.c patched/libarchive
  	}
  
  	return ARCHIVE_OK;
-
