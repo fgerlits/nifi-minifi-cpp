@@ -60,3 +60,7 @@ FetchContent_Declare(archive_static
         PATCH_COMMAND ${PC})
 
 FetchContent_MakeAvailable(archive_static)
+
+if (ENABLE_BZIP2)
+  add_dependencies(archive_static BZip2::BZip2)
+endif()
