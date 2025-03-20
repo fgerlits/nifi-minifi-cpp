@@ -165,7 +165,7 @@ class FileReaderCallback {
   size_t buffer_size_{};
   std::shared_ptr<core::logging::Logger> logger_ = core::logging::LoggerFactory<TailFile>::getLogger();
 
-  std::vector<char> buffer_(buffer_size_);
+  std::vector<char> buffer_ = std::vector<char>(buffer_size_);
   char *begin_ = buffer_.data();
   char *end_ = buffer_.data();
 
