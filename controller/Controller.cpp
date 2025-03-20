@@ -256,7 +256,7 @@ nonstd::expected<void, std::string> getDebugBundle(const utils::net::SocketData&
   }
 
   std::ofstream out_file(target_dir / "debug.tar.gz");
-  constexpr uint64_t BUFFER_SIZE = utils::configuration::DEFAULT_BUFFER_SIZE;
+  static constexpr auto BUFFER_SIZE = utils::configuration::DEFAULT_BUFFER_SIZE;
   std::array<char, BUFFER_SIZE> out_buffer{};
   while (bundle_size > 0) {
     const auto next_read_size = (std::min)(bundle_size, BUFFER_SIZE);
