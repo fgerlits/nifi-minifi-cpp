@@ -20,7 +20,7 @@
 #include "minifi-cpp/properties/Configure.h"
 #include "utils/ParsingUtils.h"
 
-namespace org::apache::nifi::minifi::utils::ConfigurationUtils {
+namespace org::apache::nifi::minifi::utils::configuration {
 
 uint64_t getBufferSize(const Configure& configuration) {
   if (const auto buffer_size = configuration.get(Configure::nifi_default_internal_buffer_size); buffer_size && !buffer_size->empty()) {
@@ -30,4 +30,4 @@ uint64_t getBufferSize(const Configure& configuration) {
   }
 }
 
-}  // namespace org::apache::nifi::minifi::utils::ConfigurationUtils
+}  // namespace org::apache::nifi::minifi::utils::configuration

@@ -22,10 +22,10 @@ namespace org::apache::nifi::minifi {
 
 class Configure;
 
-namespace utils::ConfigurationUtils {
+namespace utils::configuration {
 
 inline constexpr uint64_t DEFAULT_BUFFER_SIZE = 4096;
 uint64_t getBufferSize(const Configure& configuration);
 
-}  // namespace utils::ConfigurationUtils
+}  // namespace utils::configuration
 }  // namespace org::apache::nifi::minifi
