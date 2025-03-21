@@ -23,12 +23,6 @@
 #include "core/logging/LoggerFactory.h"
 #include "utils/StringUtils.h"
 
-namespace {
-
-constexpr std::size_t BUFFER_SIZE = 4096;
-
-}  // namespace
-
 namespace org::apache::nifi::minifi::utils {
 
 FileReaderCallback::FileReaderCallback(std::filesystem::path file_path, size_t buffer_size)
