@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <iostream>
 
+#include "utils/ConfigurationUtils.h"
 #include "utils/Literals.h"
 #include "utils/Searcher.h"
 
@@ -32,8 +33,8 @@
 namespace org::apache::nifi::minifi::utils::file {
 
 uint64_t computeChecksum(const std::filesystem::path& file_name, uint64_t up_to_position) {
-  constexpr uint64_t BUFFER_SIZE = 4096U;
-  std::array<char, std::size_t{BUFFER_SIZE}> buffer{};
+  static constexpr auto BUFFER_SIZE = utils::configuration::DEFAULT_BUFFER_SIZE;
+  std::array<char, BUFFER_SIZE> buffer{};
 
   std::ifstream stream{file_name, std::ios::in | std::ios::binary};
 
