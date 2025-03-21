@@ -41,7 +41,7 @@ int64_t FileReaderCallback::operator()(const std::shared_ptr<io::OutputStream>& 
   }
   logger_->log_debug("Opening {}", file_path_);
   while (input_stream.good()) {
-    input_stream.read(buffer.data(), buffer.size());
+    input_stream.read(buffer.data(), gsl::narrow<std::streamsize>(buffer.size()));
     if (input_stream.bad()) {
       throw FileReaderCallbackIOError(string::join_pack("Error reading file: ", std::strerror(errno)), errno);
     }
