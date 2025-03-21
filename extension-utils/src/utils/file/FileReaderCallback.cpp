@@ -25,7 +25,7 @@
 
 namespace org::apache::nifi::minifi::utils {
 
-FileReaderCallback::FileReaderCallback(std::filesystem::path file_path, size_t buffer_size)
+FileReaderCallback::FileReaderCallback(std::filesystem::path file_path, const size_t buffer_size)
   : file_path_{std::move(file_path)},
     buffer_size_{buffer_size},
     logger_(core::logging::LoggerFactory<FileReaderCallback>::getLogger()) {
