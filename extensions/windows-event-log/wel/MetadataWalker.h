@@ -90,8 +90,14 @@ class MetadataWalker : public pugi::xml_tree_walker {
    * Updates text within the XML representation
    */
   template<typename Fn>
-  requires std::is_convertible_v<std::invoke_result_t<Fn, std::string>, std::string>
-  void updateText(pugi::xml_node &node, const std::string &field_name, Fn &&fn);
+    requires std::is_convertible_v<std::invoke_result_t<Fn, std::string>, std::string>
+  void updateText1(pugi::xml_node &node, const std::string &field_name, Fn &&fn);
+  template<typename Fn>
+    requires std::is_convertible_v<std::invoke_result_t<Fn, std::string>, std::string>
+  void updateText2(pugi::xml_node &node, const std::string &field_name, Fn &&fn);
+  template<typename Fn>
+    requires std::is_convertible_v<std::invoke_result_t<Fn, std::string>, std::string>
+  void updateText3(pugi::xml_node &node, const std::string &field_name, Fn &&fn);
   template<typename Fn>
   requires std::is_convertible_v<std::invoke_result_t<Fn, std::string>, std::string>
   void updateAttributeValue(pugi::xml_attribute &node, const std::string &field_name, Fn &&fn);

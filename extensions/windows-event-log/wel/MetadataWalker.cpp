@@ -57,11 +57,11 @@ bool MetadataWalker::for_each(pugi::xml_node &node) {
   if (node_name == "Data") {
     for (pugi::xml_attribute attr : node.attributes())  {
       if (regex_ && utils::regexMatch(attr.name(), *regex_)) {
-        updateText(node, attr.name(), idUpdate);
+        updateText1(node, attr.name(), idUpdate);
       }
 
       if (regex_ && utils::regexMatch(attr.value(), *regex_)) {
-        updateText(node, attr.value(), idUpdate);
+        updateText2(node, attr.value(), idUpdate);
       }
     }
 
@@ -101,7 +101,7 @@ bool MetadataWalker::for_each(pugi::xml_node &node) {
         }
         return input;
       };
-      updateText(node, node.name(), std::move(updateFunc));
+      updateText3(node, node.name(), std::move(updateFunc));
     } else {
       // no conversion is required here, so let the node fall through
     }
@@ -165,8 +165,8 @@ std::map<std::string, std::string> MetadataWalker::getIdentifiers() const {
 
 template<typename Fn>
 requires std::is_convertible_v<std::invoke_result_t<Fn, std::string>, std::string>
-void MetadataWalker::updateText(pugi::xml_node &node, const std::string &field_name, Fn &&fn) {
-  logger_->log_info("### start updateText");
+void MetadataWalker::updateText1(pugi::xml_node &node, const std::string &field_name, Fn &&fn) {
+  logger_->log_info("### start updateText 1");
   std::string previous_value = node.text().get();
   auto new_field_value = std::invoke(std::forward<Fn>(fn), previous_value);
   logger_->log_info("### got {} -> {}", previous_value, new_field_value);
@@ -178,7 +178,43 @@ void MetadataWalker::updateText(pugi::xml_node &node, const std::string &field_n
       fields_values_[field_name] = new_field_value;
     }
   }
-  logger_->log_info("### end updateText");
+  logger_->log_info("### end updateText 1");
+}
+
+template<typename Fn>
+  requires std::is_convertible_v<std::invoke_result_t<Fn, std::string>, std::string>
+void MetadataWalker::updateText2(pugi::xml_node &node, const std::string &field_name, Fn &&fn) {
+  logger_->log_info("### start updateText 2");
+  std::string previous_value = node.text().get();
+  auto new_field_value = std::invoke(std::forward<Fn>(fn), previous_value);
+  logger_->log_info("### got {} -> {}", previous_value, new_field_value);
+  if (new_field_value != previous_value) {
+    metadata_[field_name] = new_field_value;
+    if (update_xml_) {
+      node.text().set(new_field_value.c_str());
+    } else {
+      fields_values_[field_name] = new_field_value;
+    }
+  }
+  logger_->log_info("### end updateText 2");
+}
+
+template<typename Fn>
+  requires std::is_convertible_v<std::invoke_result_t<Fn, std::string>, std::string>
+void MetadataWalker::updateText3(pugi::xml_node &node, const std::string &field_name, Fn &&fn) {
+  logger_->log_info("### start updateText 3");
+  std::string previous_value = node.text().get();
+  auto new_field_value = std::invoke(std::forward<Fn>(fn), previous_value);
+  logger_->log_info("### got {} -> {}", previous_value, new_field_value);
+  if (new_field_value != previous_value) {
+    metadata_[field_name] = new_field_value;
+    if (update_xml_) {
+      node.text().set(new_field_value.c_str());
+    } else {
+      fields_values_[field_name] = new_field_value;
+    }
+  }
+  logger_->log_info("### end updateText 3");
 }
 
 template<typename Fn>
