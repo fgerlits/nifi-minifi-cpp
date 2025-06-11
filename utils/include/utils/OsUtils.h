@@ -21,12 +21,14 @@
 #include <optional>
 #include <system_error>
 
+#include "core/logging/Logger.h"
+
 struct sockaddr;
 
 namespace org::apache::nifi::minifi::utils::OsUtils {
 
 /// Resolves a user ID to a username
-extern std::string userIdToUsername(const std::string &uid);
+extern std::string userIdToUsername(const std::string &uid, std::shared_ptr<core::logging::Logger> logger = nullptr);
 
 /// Returns physical memory usage by the current process in bytes
 int64_t getCurrentProcessPhysicalMemoryUsage();

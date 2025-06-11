@@ -19,10 +19,13 @@
 namespace org::apache::nifi::minifi::wel {
 
 std::string LookupCacher::operator()(const std::string& key) {
+  logger_->log_info("### trying to look up '{}' in the cache", key);
+
   {
     std::lock_guard<std::mutex> lock{mutex_};
     const auto it = cache_.find(key);
     if (it != cache_.end() && it->second.expiry > std::chrono::system_clock::now()) {
+      logger_->log_info("### -> cache hit, value: '{}'", it->second.value);
       return it->second.value;
     }
   }
@@ -31,6 +34,7 @@ std::string LookupCacher::operator()(const std::string& key) {
 
   std::lock_guard<std::mutex> lock{mutex_};
   cache_.insert_or_assign(key, CacheItem{value, std::chrono::system_clock::now() + lifetime_});
+  logger_->log_info("### -> cache miss, looked up value: '{}'", value);
   return value;
 }
 

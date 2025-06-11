@@ -33,13 +33,17 @@ namespace org::apache::nifi::minifi::wel {
 
 bool MetadataWalker::for_each(pugi::xml_node &node) {
   // don't shortcut resolution here so that we can log attributes.
-  const auto idUpdate = [&](const std::string &input) {
+  const auto idUpdate = [this](const std::string &input) {
+    logger_->log_info("### in idUpdate");
     if (resolve_) {
+      logger_->log_info("### before user_id_to_username_fn_");
       auto resolved = user_id_to_username_fn_(input);
+      logger_->log_info("### after user_id_to_username_fn_");
       replaced_identifiers_[input] = resolved;
       return resolved;
     }
 
+    logger_->log_info("### skipping user_id_to_username_fn_ because 'resolve' is false");
     replaced_identifiers_[input] = input;
     return input;
   };
@@ -162,8 +166,10 @@ std::map<std::string, std::string> MetadataWalker::getIdentifiers() const {
 template<typename Fn>
 requires std::is_convertible_v<std::invoke_result_t<Fn, std::string>, std::string>
 void MetadataWalker::updateText(pugi::xml_node &node, const std::string &field_name, Fn &&fn) {
+  logger_->log_info("### start updateText");
   std::string previous_value = node.text().get();
   auto new_field_value = std::invoke(std::forward<Fn>(fn), previous_value);
+  logger_->log_info("### got {} -> {}", previous_value, new_field_value);
   if (new_field_value != previous_value) {
     metadata_[field_name] = new_field_value;
     if (update_xml_) {
@@ -172,13 +178,16 @@ void MetadataWalker::updateText(pugi::xml_node &node, const std::string &field_n
       fields_values_[field_name] = new_field_value;
     }
   }
+  logger_->log_info("### end updateText");
 }
 
 template<typename Fn>
 requires std::is_convertible_v<std::invoke_result_t<Fn, std::string>, std::string>
 void MetadataWalker::updateAttributeValue(pugi::xml_attribute &attr, const std::string &field_name, Fn &&fn) {
+  logger_->log_info("### start updateAttributeValue");
   std::string previous_value = attr.value();
   auto new_field_value = std::invoke(std::forward<Fn>(fn), previous_value);
+  logger_->log_info("### got {} -> {}", previous_value, new_field_value);
   if (new_field_value != previous_value) {
     metadata_[field_name] = new_field_value;
     if (update_xml_) {
@@ -187,6 +196,7 @@ void MetadataWalker::updateAttributeValue(pugi::xml_attribute &attr, const std::
       fields_values_[field_name] = new_field_value;
     }
   }
+  logger_->log_info("### end updateAttributeValue");
 }
 
 }  // namespace org::apache::nifi::minifi::wel

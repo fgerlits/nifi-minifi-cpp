@@ -219,7 +219,7 @@ bool ConsumeWindowsEventLog::commitAndSaveBookmark(const std::wstring &bookmark_
 std::tuple<size_t, std::wstring> ConsumeWindowsEventLog::processEventLogs(core::ProcessSession& session, const EVT_HANDLE& event_query_results) {
   size_t processed_event_count = 0;
   std::wstring bookmark_xml;
-  logger_->log_trace("Enumerating the events in the result set after the bookmarked event.");
+  logger_->log_info("### Enumerating the events in the result set after the bookmarked event.");
   while (processed_event_count < batch_commit_size_ || batch_commit_size_ == 0) {
     EVT_HANDLE next_event{};
     DWORD handles_set_count{};
@@ -236,7 +236,7 @@ std::tuple<size_t, std::wstring> ConsumeWindowsEventLog::processEventLogs(core::
     }
 
     const auto guard_next_event = gsl::finally([next_event]() { EvtClose(next_event); });
-    logger_->log_trace("Succesfully got the next event, performing event rendering");
+    logger_->log_info("Succesfully got the next event, performing event rendering");
     auto event_render = createEventRender(next_event);
     if (!event_render) {
       logger_->log_error("{}", event_render.error());
@@ -251,11 +251,13 @@ std::tuple<size_t, std::wstring> ConsumeWindowsEventLog::processEventLogs(core::
     processed_event_count++;
     putEventRenderFlowFileToSession(*event_render, session);
   }
-  logger_->log_trace("Finished enumerating events.");
+  logger_->log_info("Finished enumerating events.");
   return std::make_tuple(processed_event_count, bookmark_xml);
 }
 
 void ConsumeWindowsEventLog::onTrigger(core::ProcessContext& context, core::ProcessSession& session) {
+  logger_->log_info("### start onTrigger");
+
   std::unique_lock<std::mutex> lock(on_trigger_mutex_, std::try_to_lock);
   if (!lock.owns_lock()) {
     logger_->log_warn("processor was triggered before previous listing finished, configuration should be revised!");
@@ -263,7 +265,7 @@ void ConsumeWindowsEventLog::onTrigger(core::ProcessContext& context, core::Proc
   }
 
   if (!bookmark_) {
-    logger_->log_debug("bookmark_ is null");
+    logger_->log_info("bookmark_ is null");
     context.yield();
     return;
   }
@@ -273,7 +275,7 @@ void ConsumeWindowsEventLog::onTrigger(core::ProcessContext& context, core::Proc
   size_t processed_event_count = 0;
   const TimeDiff time_diff;
   const auto timeGuard = gsl::finally([&]() {
-    logger_->log_debug("processed {} Events in {}", processed_event_count, time_diff());
+    logger_->log_info("processed {} Events in {}", processed_event_count, time_diff());
   });
 
   wel::unique_evt_handle event_query_results{EvtQuery(nullptr, path_.wstr().c_str(), wstr_query_.c_str(), path_.getQueryFlags())};
@@ -306,8 +308,10 @@ void ConsumeWindowsEventLog::onTrigger(core::ProcessContext& context, core::Proc
 
   if (processed_event_count == 0 || !commitAndSaveBookmark(bookmark_xml, context, session)) {
     context.yield();
+    logger_->log_info("### end onTrigger (do nothing)");
     return;
   }
+  logger_->log_info("### end onTrigger");
 }
 
 wel::WindowsEventLogHandler& ConsumeWindowsEventLog::getEventLogHandler(const std::string & name) {
@@ -461,10 +465,12 @@ nonstd::expected<cwel::EventRender, std::string> ConsumeWindowsEventLog::createE
   // this is a well known path.
   std::string provider_name = doc.child("Event").child("System").child("Provider").attribute("Name").value();
   wel::WindowsEventLogMetadataImpl metadata{getEventLogHandler(provider_name).getMetadata(), hEvent};
-  wel::MetadataWalker walker{metadata, path_.str(), !resolve_as_attributes_, apply_identifier_function_, regex_ ? &*regex_ : nullptr, userIdToUsernameFunction()};
+  wel::MetadataWalker walker{metadata, path_.str(), !resolve_as_attributes_, apply_identifier_function_, regex_ ? &*regex_ : nullptr, userIdToUsernameFunction(), logger_};
 
   // resolve the event metadata
+  logger_->log_info("### before metadata walker");
   doc.traverse(walker);
+  logger_->log_info("### after metadata walker");
 
   logger_->log_trace("Finish doc traversing, performing writing...");
 
@@ -615,9 +621,9 @@ void ConsumeWindowsEventLog::addMatchedFieldsAsAttributes(const cwel::EventRende
 }
 
 std::function<std::string(const std::string&)> ConsumeWindowsEventLog::userIdToUsernameFunction() const {
-  static constexpr auto lookup = &utils::OsUtils::userIdToUsername;
+  static auto lookup = [logger = this->logger_](const std::string& id) { return utils::OsUtils::userIdToUsername(id, logger); };
   if (cache_sid_lookups_) {
-    static auto cached_lookup = wel::LookupCacher{lookup};
+    static auto cached_lookup = wel::LookupCacher{lookup, std::chrono::hours{24}, logger_};
     return std::ref(cached_lookup);
   } else {
     return lookup;

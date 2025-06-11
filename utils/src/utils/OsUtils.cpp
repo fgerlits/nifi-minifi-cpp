@@ -60,6 +60,9 @@
 #endif
 
 namespace org::apache::nifi::minifi::utils {
+namespace {
+struct Testing {};
+}  // namespace
 
 #ifdef _WIN32
 /*
@@ -85,13 +88,16 @@ std::string OsUtils::resolve_common_identifiers(const std::string &id) {
 }
 #endif
 
-std::string OsUtils::userIdToUsername(const std::string &uid) {
+std::string OsUtils::userIdToUsername(const std::string &uid, std::shared_ptr<core::logging::Logger> logger_) {
+  logger_->log_info("### trying to resolve '{}'", uid);
+
   std::string name;
   name = uid;
   if (!name.empty()) {
 #ifdef _WIN32
     auto resolved_name = resolve_common_identifiers(name);
     if (!resolved_name.empty()) {
+      logger_->log_info("### -> resolved to common identifier '{}'", resolved_name);
       return resolved_name;
     }
     // First call to LookupAccountSid to get the buffer sizes.
@@ -167,6 +173,7 @@ std::string OsUtils::userIdToUsername(const std::string &uid) {
     }
 #endif
   }
+  logger_->log_info("### -> resolved to '{}'", name);
   return name;
 }
 

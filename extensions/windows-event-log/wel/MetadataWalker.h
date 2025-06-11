@@ -40,6 +40,7 @@
 #include "concurrentqueue.h"
 #include "pugixml.hpp"
 #include "utils/RegexUtils.h"
+#include "core/logging/Logger.h"
 
 namespace org::apache::nifi::minifi::wel {
 
@@ -49,14 +50,15 @@ namespace org::apache::nifi::minifi::wel {
  */
 class MetadataWalker : public pugi::xml_tree_walker {
  public:
-  MetadataWalker(const WindowsEventLogMetadata& windows_event_log_metadata, std::string log_name, bool update_xml, bool resolve, utils::Regex const* regex,
-      std::function<std::string(std::string)> user_id_to_username_fn)
+  MetadataWalker(const WindowsEventLogMetadata& windows_event_log_metadata, std::string log_name, bool update_xml, bool resolve, utils::Regex const* regex, std::function<std::string(std::string)> user_id_to_username_fn,
+      std::shared_ptr<core::logging::Logger> logger = nullptr)
       : windows_event_log_metadata_(windows_event_log_metadata),
         log_name_(std::move(log_name)),
         regex_(regex),
         update_xml_(update_xml),
         resolve_(resolve),
-        user_id_to_username_fn_(std::move(user_id_to_username_fn)) {
+        user_id_to_username_fn_(std::move(user_id_to_username_fn)),
+        logger_(logger) {
   }
 
   /**
@@ -103,6 +105,7 @@ class MetadataWalker : public pugi::xml_tree_walker {
   std::map<std::string, std::string> metadata_;
   std::map<std::string, std::string> fields_values_;
   std::map<std::string, std::string> replaced_identifiers_;
+  std::shared_ptr<core::logging::Logger> logger_;
 };
 
 }  // namespace org::apache::nifi::minifi::wel

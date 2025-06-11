@@ -24,13 +24,16 @@
 #include <unordered_map>
 #include <utility>
 
+#include "core/logging/Logger.h"
+
 namespace org::apache::nifi::minifi::wel {
 
 class LookupCacher {
  public:
-  explicit LookupCacher(std::function<std::string(const std::string&)> lookup_function, std::chrono::milliseconds lifetime = std::chrono::hours{24})
+  explicit LookupCacher(std::function<std::string(const std::string&)> lookup_function, std::chrono::milliseconds lifetime = std::chrono::hours{24}, std::shared_ptr<core::logging::Logger> logger = nullptr)
     : lookup_function_(std::move(lookup_function)),
-      lifetime_(lifetime) {}
+      lifetime_(lifetime),
+      logger_(logger) {}
   std::string operator()(const std::string& key);
 
  private:
@@ -43,6 +46,7 @@ class LookupCacher {
   std::function<std::string(const std::string&)> lookup_function_;
   std::chrono::milliseconds lifetime_;
   std::unordered_map<std::string, CacheItem> cache_;
+  std::shared_ptr<core::logging::Logger> logger_;
 };
 
 }  // namespace org::apache::nifi::minifi::wel
