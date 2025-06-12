@@ -201,7 +201,7 @@ bool ConsumeWindowsEventLog::commitAndSaveBookmark(const std::wstring &bookmark_
     const TimeDiff time_diff;
     session.commit();
     context.getStateManager()->beginTransaction();
-    logger_->log_debug("processQueue commit took {}", time_diff());
+    logger_->log_info("processQueue commit took {}", time_diff());
   }
 
   if (!bookmark_->saveBookmarkXml(bookmark_xml)) {

@@ -169,7 +169,7 @@ void MetadataWalker::updateText1(pugi::xml_node &node, const std::string &field_
   logger_->log_info("### start updateText 1");
   std::string previous_value = node.text().get();
   auto new_field_value = std::invoke(std::forward<Fn>(fn), previous_value);
-  logger_->log_info("### got {} -> {}", previous_value, new_field_value);
+  logger_->log_info("### updateText 1 replaced {} -> {}", previous_value, new_field_value);
   if (new_field_value != previous_value) {
     metadata_[field_name] = new_field_value;
     if (update_xml_) {
@@ -187,7 +187,7 @@ void MetadataWalker::updateText2(pugi::xml_node &node, const std::string &field_
   logger_->log_info("### start updateText 2");
   std::string previous_value = node.text().get();
   auto new_field_value = std::invoke(std::forward<Fn>(fn), previous_value);
-  logger_->log_info("### got {} -> {}", previous_value, new_field_value);
+  logger_->log_info("### updateText 2 replaced {} -> {}", previous_value, new_field_value);
   if (new_field_value != previous_value) {
     metadata_[field_name] = new_field_value;
     if (update_xml_) {
@@ -203,9 +203,12 @@ template<typename Fn>
   requires std::is_convertible_v<std::invoke_result_t<Fn, std::string>, std::string>
 void MetadataWalker::updateText3(pugi::xml_node &node, const std::string &field_name, Fn &&fn) {
   logger_->log_info("### start updateText 3");
+  const TimeDiff time_diff;
+  const auto timeGuard = gsl::finally([&]() { logger_->log_info("### end updateText 3, it took {}", time_diff()); });
+
   std::string previous_value = node.text().get();
   auto new_field_value = std::invoke(std::forward<Fn>(fn), previous_value);
-  logger_->log_info("### got {} -> {}", previous_value, new_field_value);
+  logger_->log_info("### updateText 3 replaced {} -> {}", previous_value, new_field_value);
   if (new_field_value != previous_value) {
     metadata_[field_name] = new_field_value;
     if (update_xml_) {
@@ -214,7 +217,7 @@ void MetadataWalker::updateText3(pugi::xml_node &node, const std::string &field_
       fields_values_[field_name] = new_field_value;
     }
   }
-  logger_->log_info("### end updateText 3");
+  //logger_->log_info("### end updateText 3");
 }
 
 template<typename Fn>
@@ -223,7 +226,7 @@ void MetadataWalker::updateAttributeValue(pugi::xml_attribute &attr, const std::
   logger_->log_info("### start updateAttributeValue");
   std::string previous_value = attr.value();
   auto new_field_value = std::invoke(std::forward<Fn>(fn), previous_value);
-  logger_->log_info("### got {} -> {}", previous_value, new_field_value);
+  logger_->log_info("### updateAttribute replaced {} -> {}", previous_value, new_field_value);
   if (new_field_value != previous_value) {
     metadata_[field_name] = new_field_value;
     if (update_xml_) {

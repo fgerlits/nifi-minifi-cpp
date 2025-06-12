@@ -73,6 +73,11 @@ class MetadataWalker : public pugi::xml_tree_walker {
 
   [[nodiscard]] std::string getMetadata(METADATA metadata) const;
 
+  struct TimeDiff {
+    auto operator()() const { return std::chrono::steady_clock::now() - time_; }
+    const decltype(std::chrono::steady_clock::now()) time_ = std::chrono::steady_clock::now();
+  };
+
  private:
   static std::vector<std::string> getIdentifiers(const std::string &text);
 
