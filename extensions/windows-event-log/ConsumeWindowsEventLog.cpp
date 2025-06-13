@@ -273,7 +273,7 @@ void ConsumeWindowsEventLog::onTrigger(core::ProcessContext& context, core::Proc
   size_t processed_event_count = 0;
   const TimeDiff time_diff;
   const auto timeGuard = gsl::finally([&]() {
-    logger_->log_debug("processed {} Events in {}", processed_event_count, time_diff());
+    logger_->log_info("processed {} Events in {}", processed_event_count, time_diff());
   });
 
   wel::unique_evt_handle event_query_results{EvtQuery(nullptr, path_.wstr().c_str(), wstr_query_.c_str(), path_.getQueryFlags())};
@@ -461,7 +461,7 @@ nonstd::expected<cwel::EventRender, std::string> ConsumeWindowsEventLog::createE
   // this is a well known path.
   std::string provider_name = doc.child("Event").child("System").child("Provider").attribute("Name").value();
   wel::WindowsEventLogMetadataImpl metadata{getEventLogHandler(provider_name).getMetadata(), hEvent};
-  wel::MetadataWalker walker{metadata, path_.str(), !resolve_as_attributes_, apply_identifier_function_, regex_ ? &*regex_ : nullptr, userIdToUsernameFunction()};
+  wel::MetadataWalker walker{metadata, path_.str(), !resolve_as_attributes_, apply_identifier_function_, regex_ ? &*regex_ : nullptr, userIdToUsernameFunction(), logger_};
 
   // resolve the event metadata
   doc.traverse(walker);

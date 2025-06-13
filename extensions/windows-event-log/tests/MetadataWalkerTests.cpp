@@ -37,7 +37,7 @@ namespace {
 
 std::string updateXmlMetadata(const std::string &xml, EVT_HANDLE metadata_ptr, EVT_HANDLE event_ptr, bool update_xml, bool resolve, utils::Regex const* regex = nullptr) {
   WindowsEventLogMetadataImpl metadata{metadata_ptr, event_ptr};
-  MetadataWalker walker(metadata, "", update_xml, resolve, regex, &utils::OsUtils::userIdToUsername);
+  MetadataWalker walker(metadata, "", update_xml, resolve, regex, &utils::OsUtils::userIdToUsername, nullptr);
 
   pugi::xml_document doc;
   pugi::xml_parse_result result = doc.load_string(xml.c_str());
@@ -158,7 +158,7 @@ void extractMappingsTestHelper(const std::string &file_name,
   REQUIRE(result);
 
   auto regex = utils::Regex(".*Sid");
-  MetadataWalker walker(FakeWindowsEventLogMetadata{}, METADATA_WALKER_TESTS_LOG_NAME, update_xml, resolve, &regex, &utils::OsUtils::userIdToUsername);
+  MetadataWalker walker(FakeWindowsEventLogMetadata{}, METADATA_WALKER_TESTS_LOG_NAME, update_xml, resolve, &regex, &utils::OsUtils::userIdToUsername, nullptr);
   doc.traverse(walker);
 
   CHECK(walker.getIdentifiers() == expected_identifiers);

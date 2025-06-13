@@ -97,7 +97,11 @@ bool MetadataWalker::for_each(pugi::xml_node &node) {
         }
         return input;
       };
-      updateText(node, node.name(), std::move(updateFunc));
+      {
+        const TimeDiff time_diff;
+        const auto timeGuard = gsl::finally([&]() { logger_->log_info("updateText 3 took {}", time_diff()); });
+        updateText(node, node.name(), std::move(updateFunc));
+      }
     } else {
       // no conversion is required here, so let the node fall through
     }
