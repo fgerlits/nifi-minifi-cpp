@@ -119,7 +119,6 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
       .build();
   EXTENSIONAPI static constexpr auto IdentifierMatcher = core::PropertyDefinitionBuilder<>::createProperty("Identifier Match Regex")
       .isRequired(false)
-      .withValidator(core::StandardPropertyValidators::NON_BLANK_VALIDATOR)
       .withDefaultValue(".*Sid")
       .withDescription("Regular Expression to match Subject Identifier Fields. These will be placed into the attributes of the FlowFile")
       .build();

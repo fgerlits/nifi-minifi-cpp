@@ -190,7 +190,7 @@ void ConsumeWindowsEventLog::onSchedule(core::ProcessContext& context, core::Pro
 }
 
 std::function<bool(std::string_view)> cwel::parseSidMatcher(const std::optional<std::string>& sid_matcher) {
-  if (!sid_matcher) {
+  if (!sid_matcher || sid_matcher->empty()) {
     return [](std::string_view){ return false; };
   }
 
