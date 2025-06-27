@@ -74,6 +74,8 @@ enum class JsonFormat {
   Simple,
   Flattened,
 };
+
+std::function<bool(std::string_view)> parseSidMatcher(const std::optional<std::string>& sid_matcher);
 }  // namespace cwel
 
 class Bookmark;
@@ -117,6 +119,7 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
       .build();
   EXTENSIONAPI static constexpr auto IdentifierMatcher = core::PropertyDefinitionBuilder<>::createProperty("Identifier Match Regex")
       .isRequired(false)
+      .withValidator(core::StandardPropertyValidators::NON_BLANK_VALIDATOR)
       .withDefaultValue(".*Sid")
       .withDescription("Regular Expression to match Subject Identifier Fields. These will be placed into the attributes of the FlowFile")
       .build();
@@ -242,7 +245,7 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
   std::optional<std::string> header_delimiter_;
   wel::EventPath path_;
   std::wstring wstr_query_;
-  std::optional<utils::Regex> regex_;
+  std::function<bool(std::string_view)> sid_matcher_;
   bool resolve_as_attributes_{false};
   bool apply_identifier_function_{false};
   std::string provenanceUri_;
