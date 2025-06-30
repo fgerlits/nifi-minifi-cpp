@@ -61,28 +61,6 @@ enum METADATA {
 // this is a continuous enum, so we can rely on the array
 using METADATA_NAMES = std::vector<std::pair<METADATA, std::string>>;
 
-struct EventDataCacheKey {
-  EVT_FORMAT_MESSAGE_FLAGS field;
-  std::string key;
-};
-
-inline bool operator==(const EventDataCacheKey& left, const EventDataCacheKey& right) {
-  return left.field == right.field && left.key == right.key;
-}
-
-}  // namespace org::apache::nifi::minifi::wel
-
-template<>
-struct std::hash<org::apache::nifi::minifi::wel::EventDataCacheKey> {
-  size_t operator()(const org::apache::nifi::minifi::wel::EventDataCacheKey& event_data_cache_key) const noexcept {
-    return org::apache::nifi::minifi::utils::hash_combine(
-        std::hash<EVT_FORMAT_MESSAGE_FLAGS>{}(event_data_cache_key.field),
-        std::hash<std::string>{}(event_data_cache_key.key));
-  }
-};
-
-namespace org::apache::nifi::minifi::wel {
-
 class EventDataCache {
  public:
   explicit EventDataCache(std::chrono::milliseconds lifetime = std::chrono::hours{24})
@@ -91,6 +69,19 @@ class EventDataCache {
   void set(EVT_FORMAT_MESSAGE_FLAGS field, const std::string& key, std::string value);
 
  private:
+  struct CacheKey {
+    EVT_FORMAT_MESSAGE_FLAGS field;
+    std::string key;
+
+    bool operator==(const CacheKey& other) const noexcept {
+      return field == other.field && key == other.key;
+    }
+  };
+  struct CacheKeyHash {
+    size_t operator()(const CacheKey& cache_key) const noexcept {
+      return utils::hash_combine(std::hash<EVT_FORMAT_MESSAGE_FLAGS>{}(cache_key.field), std::hash<std::string>{}(cache_key.key));
+    }
+  };
   struct CacheItem {
     std::string value;
     std::chrono::system_clock::time_point expiry;
@@ -98,7 +89,7 @@ class EventDataCache {
 
   std::mutex mutex_;
   std::chrono::milliseconds lifetime_;
-  std::unordered_map<EventDataCacheKey, CacheItem> cache_;
+  std::unordered_map<CacheKey, CacheItem, CacheKeyHash> cache_;
 };
 
 class WindowsEventLogHandler {

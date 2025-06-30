@@ -44,14 +44,14 @@ std::string getEventTimestampStr(uint64_t event_timestamp) {
 
 std::optional<std::string> EventDataCache::get(EVT_FORMAT_MESSAGE_FLAGS field, const std::string& key) {
     std::lock_guard<std::mutex> lock{mutex_};
-    const auto it = cache_.find(EventDataCacheKey{field, key});
+    const auto it = cache_.find(CacheKey{field, key});
     if (it != cache_.end() && it->second.expiry > std::chrono::system_clock::now()) { return it->second.value; }
     return std::nullopt;
 }
 
 void EventDataCache::set(EVT_FORMAT_MESSAGE_FLAGS field, const std::string& key, std::string value) {
   std::lock_guard<std::mutex> lock{mutex_};
-  cache_.insert_or_assign(EventDataCacheKey{field, key}, CacheItem{std::move(value), std::chrono::system_clock::now() + lifetime_});
+  cache_.insert_or_assign(CacheKey{field, key}, CacheItem{std::move(value), std::chrono::system_clock::now() + lifetime_});
 }
 
 void WindowsEventLogMetadataImpl::renderMetadata() {
