@@ -50,11 +50,11 @@ namespace org::apache::nifi::minifi::wel {
 class MetadataWalker : public pugi::xml_tree_walker {
  public:
   MetadataWalker(const WindowsEventLogMetadata& windows_event_log_metadata, std::string log_name, bool update_xml, bool resolve,
-      const std::function<bool(std::string_view)>& sid_matcher,
+      std::function<bool(std::string_view)> sid_matcher,
       std::function<std::string(std::string)> user_id_to_username_fn)
       : windows_event_log_metadata_(windows_event_log_metadata),
         log_name_(std::move(log_name)),
-        sid_matcher_(sid_matcher),
+        sid_matcher_(std::move(sid_matcher)),
         update_xml_(update_xml),
         resolve_(resolve),
         user_id_to_username_fn_(std::move(user_id_to_username_fn)) {
