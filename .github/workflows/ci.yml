@@ -13,8 +13,8 @@ jobs:
     timeout-minutes: 240
     steps:
       - id: get-changed-files
-        uses: Ana06/get-changed-files@v2.3.0
-        continue-on-error: true
+        run: |
+          echo "::set-output name=new-or-modified::$(git diff --name-only --diff-filter=ACMRT ${{github.event.pull_request.base.sha}} ${{github.sha}} | grep .cpp$ | xargs)"
       - name: show-changed-files
         run: |
-          echo "changed files: ${{ steps.get-changed-files.outputs.all }}"
+          echo "changed files: ${{steps.get-changed-files.new-or-modified}}"
