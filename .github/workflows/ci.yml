@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-22.04-arm
     timeout-minutes: 240
     steps:
+      - id: checkout
+        uses: actions/checkout@v4
       - id: get-changed-files
         run: |
           echo "::set-output name=new-or-modified::$(git diff --name-only --diff-filter=ACMRT ${{github.event.pull_request.base.sha}} ${{github.sha}} | grep .cpp$ | xargs)"
