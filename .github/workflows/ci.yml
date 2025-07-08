@@ -19,7 +19,7 @@ jobs:
           if [[ -n "${{github.event.pull_request.base.sha}}" ]]; then
             base_commit=${{github.event.pull_request.base.sha}}
           else
-            base_commit=$(git log -n1 --format=format:%H ${{github.sha}}~)
+            base_commit=$(git log -n2 --format=format:%H ${{github.sha}} | tail -n1)
           fi
           git fetch origin ${base_commit}
           head_commit=${{github.sha}}
