@@ -14,18 +14,16 @@ jobs:
     steps:
       - id: checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - id: get-changed-files
         run: |
           if [[ -n "${{github.event.pull_request.base.sha}}" ]]; then
-            base_sha=${{github.event.pull_request.base.sha}}
-          elif [[ -n "${{github.event.push.base.sha}}" ]]; then
-            base_sha=${{github.event.push.base.sha}}
+            base_commit=${{github.event.pull_request.base.sha}}
           else
-            base_sha=${{github.sha}}~
+            base_commit=${{github.sha}}~
           fi
-          echo "files=$(git diff --name-only --diff-filter=ACMRT ${base_sha} ${{github.sha}} | xargs)" >> $GITHUB_OUTPUT
+          git fetch origin ${base_commit}
+          head_commit=${{github.sha}}
+          echo "files=$(git diff --name-only --diff-filter=ACMRT ${base_commit} ${head_commit} | xargs)" >> $GITHUB_OUTPUT
       - name: show-changed-files
         run: |
           echo "changed files: ${{steps.get-changed-files.outputs.files}}"
