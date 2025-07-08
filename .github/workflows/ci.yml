@@ -18,9 +18,9 @@ jobs:
           fetch-depth: 0
       - id: get-changed-files
         run: |
-          if [[ -n "${{github.event.pull_request.base.sha}}" ]]
+          if [[ -n "${{github.event.pull_request.base.sha}}" ]]; then
             base_sha=${{github.event.pull_request.base.sha}}
-          elif [[ -n ${{github.event.push.base.sha}} ]]
+          elif [[ -n "${{github.event.push.base.sha}}" ]]; then
             base_sha=${{github.event.push.base.sha}}
           else
             base_sha=${{github.sha}}~
