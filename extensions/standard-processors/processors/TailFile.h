@@ -170,6 +170,7 @@ class TailFile : public core::ProcessorImpl {
       .build();
   EXTENSIONAPI static constexpr auto LookupFrequency = core::PropertyDefinitionBuilder<>::createProperty("Lookup frequency")
       .withDescription("When using Multiple file mode, this property specifies the minimum duration "
+          "add something here "
           "the processor will wait between looking for new files to tail in the Base Directory.")
       .isRequired(false)
       .withValidator(core::StandardPropertyValidators::TIME_PERIOD_VALIDATOR)

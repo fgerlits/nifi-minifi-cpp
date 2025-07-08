@@ -261,10 +261,6 @@ void TailFile::onSchedule(core::ProcessContext& context, core::ProcessSessionFac
     }
   }
 
-  std::string file_name_str = context.getProperty(FileName).value_or("");
-
-  std::string mode = context.getProperty(TailMode).value_or("");
-
   if (mode == "Multiple file") {
     tail_mode_ = Mode::MULTIPLE;
     pattern_regex_ = utils::Regex(file_name_str);
