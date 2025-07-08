@@ -18,7 +18,14 @@ jobs:
           fetch-depth: 0
       - id: get-changed-files
         run: |
-          echo "files=$(git diff --name-only --diff-filter=ACMRT ${{github.event.pull_request.base.sha}} ${{github.sha}} | xargs)" >> $GITHUB_OUTPUT
+          if [[ -n "${{github.event.pull_request.base.sha}}" ]]
+            base_sha=${{github.event.pull_request.base.sha}}
+          elif [[ -n ${{github.event.push.base.sha}} ]]
+            base_sha=${{github.event.push.base.sha}}
+          else
+            base_sha=${{github.sha}}~
+          fi
+          echo "files=$(git diff --name-only --diff-filter=ACMRT ${base_sha} ${{github.sha}} | xargs)" >> $GITHUB_OUTPUT
       - name: show-changed-files
         run: |
           echo "changed files: ${{steps.get-changed-files.outputs.files}}"
