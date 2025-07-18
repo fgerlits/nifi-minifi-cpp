@@ -117,49 +117,6 @@ class WindowsEventLogMetadata {
   [[nodiscard]] virtual std::string getEventTimestamp() const = 0;
   virtual short getEventTypeIndex() const = 0;  // NOLINT short comes from WINDOWS API
 
-  static std::string getMetadataString(METADATA val) {
-    static std::map<METADATA, std::string> map = {
-        {LOG_NAME, "LOG_NAME"},
-        {SOURCE, "SOURCE"},
-        {TIME_CREATED, "TIME_CREATED"},
-        {EVENTID, "EVENTID"},
-        {OPCODE, "OPCODE"},
-        {EVENT_RECORDID, "EVENT_RECORDID"},
-        {EVENT_TYPE, "EVENT_TYPE"},
-        {TASK_CATEGORY, "TASK_CATEGORY"},
-        {LEVEL, "LEVEL"},
-        {KEYWORDS, "KEYWORDS"},
-        {USER, "USER"},
-        {COMPUTER, "COMPUTER"}
-    };
-
-    return map[val];
-  }
-
-  static METADATA getMetadataFromString(const std::string& val) {
-    static std::map<std::string, METADATA> map = {
-        {"LOG_NAME", LOG_NAME},
-        {"SOURCE", SOURCE},
-        {"TIME_CREATED", TIME_CREATED},
-        {"EVENTID", EVENTID},
-        {"OPCODE", OPCODE},
-        {"EVENT_RECORDID", EVENT_RECORDID},
-        {"TASK_CATEGORY", TASK_CATEGORY},
-        {"EVENT_TYPE", EVENT_TYPE},
-        {"LEVEL", LEVEL},
-        {"KEYWORDS", KEYWORDS},
-        {"USER", USER},
-        {"COMPUTER", COMPUTER}
-    };
-
-    auto enumVal = map.find(val);
-    if (enumVal != std::end(map)) {
-      return enumVal->second;
-    } else {
-      return METADATA::UNKNOWN;
-    }
-  }
-
   static std::string getComputerName() {
     static std::string computer_name;
     if (computer_name.empty()) {
