@@ -96,10 +96,8 @@ void ConsumeWindowsEventLog::initialize() {
 }
 
 bool ConsumeWindowsEventLog::insertHeaderName(wel::METADATA_NAMES &header, const std::string &key, const std::string & value) {
-  wel::METADATA name = wel::WindowsEventLogMetadata::getMetadataFromString(key);
-
-  if (name != wel::METADATA::UNKNOWN) {
-    header.emplace_back(std::make_pair(name, value));
+  if (auto metadata = magic_enum::enum_cast<wel::METADATA>(key); metadata) {
+    header.emplace_back(*metadata, value);
     return true;
   }
   return false;
