@@ -43,7 +43,7 @@
 
 namespace org::apache::nifi::minifi::wel {
 
-enum METADATA {
+enum class METADATA {
   LOG_NAME,
   SOURCE,
   TIME_CREATED,
@@ -56,7 +56,6 @@ enum METADATA {
   KEYWORDS,
   USER,
   COMPUTER,
-  UNKNOWN
 };
 using METADATA_NAMES = std::vector<std::pair<METADATA, std::string>>;
 
