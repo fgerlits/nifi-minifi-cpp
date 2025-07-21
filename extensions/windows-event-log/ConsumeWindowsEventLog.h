@@ -222,7 +222,6 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
   nonstd::expected<cwel::ProcessedEvent, std::string> processEvent(EVT_HANDLE eventHandle);
   void substituteXMLPercentageItems(pugi::xml_document& doc);
   std::function<std::string(const std::string&)> userIdToUsernameFunction() const;
-
   nonstd::expected<std::string, std::string> renderEventAsXml(EVT_HANDLE event_handle);
 
   struct TimeDiff {
@@ -236,8 +235,6 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
 
   std::tuple<size_t, std::wstring> processEventLogs(core::ProcessSession& session,
                                                     const EVT_HANDLE& event_query_results);
-
-  void addMatchedFieldsAsAttributes(const cwel::ProcessedEvent &processed_event, core::ProcessSession &session, const std::shared_ptr<core::FlowFile> &flowFile) const;
 
   core::StateManager* state_manager_{nullptr};
   wel::METADATA_NAMES header_names_;

@@ -582,6 +582,16 @@ void ConsumeWindowsEventLog::refreshTimeZoneData() {
   logger_->log_trace("Timezone name: {}, offset: {}", timezone_name_, timezone_offset_);
 }
 
+namespace {
+void addMatchedFieldsAsAttributes(const cwel::ProcessedEvent& processed_event, core::ProcessSession& session, const std::shared_ptr<core::FlowFile>& flowFile) {
+  for (const auto& [key, value] : processed_event.matched_fields) {
+    if (!value.empty()) {
+      session.putAttribute(*flowFile, key, value);
+    }
+  }
+}
+}  // namespace
+
 void ConsumeWindowsEventLog::createAndCommitFlowFile(const cwel::ProcessedEvent& processed_event, core::ProcessSession& session) const {
   auto commitFlowFile = [&] (const std::string& content, const std::string& mimeType) {
     auto flow_file = session.create();
@@ -607,14 +617,6 @@ void ConsumeWindowsEventLog::createAndCommitFlowFile(const cwel::ProcessedEvent&
   if (output_format_ == cwel::OutputFormat::JSON) {
     logger_->log_trace("Writing rendered {} JSON to a flow file", magic_enum::enum_name(json_format_));
     commitFlowFile(processed_event.json, "application/json");
-  }
-}
-
-void ConsumeWindowsEventLog::addMatchedFieldsAsAttributes(const cwel::ProcessedEvent& processed_event, core::ProcessSession& session, const std::shared_ptr<core::FlowFile>& flowFile) const {
-  for (const auto &fieldMapping : processed_event.matched_fields) {
-    if (!fieldMapping.second.empty()) {
-      session.putAttribute(*flowFile, fieldMapping.first, fieldMapping.second);
-    }
   }
 }
 
