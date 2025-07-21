@@ -55,7 +55,7 @@
 namespace org::apache::nifi::minifi::processors {
 
 namespace cwel {
-struct EventRender {
+struct ProcessedEvent {
   std::map<std::string, std::string> matched_fields;
   std::string xml;
   std::string plaintext;
@@ -216,10 +216,10 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
 
  private:
   void refreshTimeZoneData();
-  void putEventRenderFlowFileToSession(const cwel::EventRender& eventRender, core::ProcessSession& session) const;
+  void createAndCommitFlowFile(const cwel::ProcessedEvent& processed_event, core::ProcessSession& session) const;
   wel::WindowsEventLogHandler& getEventLogHandler(const std::string& name);
   static bool insertHeaderName(wel::METADATA_NAMES& header, const std::string& key, const std::string& value);
-  nonstd::expected<cwel::EventRender, std::string> createEventRender(EVT_HANDLE eventHandle);
+  nonstd::expected<cwel::ProcessedEvent, std::string> processEvent(EVT_HANDLE eventHandle);
   void substituteXMLPercentageItems(pugi::xml_document& doc);
   std::function<std::string(const std::string&)> userIdToUsernameFunction() const;
 
@@ -237,7 +237,7 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
   std::tuple<size_t, std::wstring> processEventLogs(core::ProcessSession& session,
                                                     const EVT_HANDLE& event_query_results);
 
-  void addMatchedFieldsAsAttributes(const cwel::EventRender &eventRender, core::ProcessSession &session, const std::shared_ptr<core::FlowFile> &flowFile) const;
+  void addMatchedFieldsAsAttributes(const cwel::ProcessedEvent &processed_event, core::ProcessSession &session, const std::shared_ptr<core::FlowFile> &flowFile) const;
 
   core::StateManager* state_manager_{nullptr};
   wel::METADATA_NAMES header_names_;

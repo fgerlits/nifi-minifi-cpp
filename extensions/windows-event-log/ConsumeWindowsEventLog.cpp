@@ -241,9 +241,9 @@ std::tuple<size_t, std::wstring> ConsumeWindowsEventLog::processEventLogs(core::
 
     const auto guard_next_event = gsl::finally([next_event]() { EvtClose(next_event); });
     logger_->log_trace("Succesfully got the next event, performing event rendering");
-    auto event_render = createEventRender(next_event);
-    if (!event_render) {
-      logger_->log_error("{}", event_render.error());
+    auto processed_event = processEvent(next_event);
+    if (!processed_event) {
+      logger_->log_error("{}", processed_event.error());
       continue;
     }
     auto new_bookmark_xml = bookmark_->getNewBookmarkXml(next_event);
@@ -253,7 +253,7 @@ std::tuple<size_t, std::wstring> ConsumeWindowsEventLog::processEventLogs(core::
     }
     bookmark_xml = std::move(*new_bookmark_xml);
     processed_event_count++;
-    putEventRenderFlowFileToSession(*event_render, session);
+    createAndCommitFlowFile(*processed_event, session);
   }
   logger_->log_trace("Finished enumerating events.");
   return std::make_tuple(processed_event_count, bookmark_xml);
@@ -451,7 +451,7 @@ nonstd::expected<std::string, std::string> ConsumeWindowsEventLog::renderEventAs
   return utils::to_string(std::wstring{buf.get()});
 }
 
-nonstd::expected<cwel::EventRender, std::string> ConsumeWindowsEventLog::createEventRender(EVT_HANDLE hEvent) {
+nonstd::expected<cwel::ProcessedEvent, std::string> ConsumeWindowsEventLog::processEvent(EVT_HANDLE hEvent) {
   auto event_as_xml = renderEventAsXml(hEvent);
   if (!event_as_xml)
     return nonstd::make_unexpected(event_as_xml.error());
@@ -460,7 +460,7 @@ nonstd::expected<cwel::EventRender, std::string> ConsumeWindowsEventLog::createE
   if (!doc.load_string(event_as_xml->c_str()))
     return nonstd::make_unexpected("Invalid XML produced");
 
-  cwel::EventRender result;
+  cwel::ProcessedEvent result;
 
   // this is a well known path.
   std::string provider_name = doc.child("Event").child("System").child("Provider").attribute("Name").value();
@@ -582,10 +582,10 @@ void ConsumeWindowsEventLog::refreshTimeZoneData() {
   logger_->log_trace("Timezone name: {}, offset: {}", timezone_name_, timezone_offset_);
 }
 
-void ConsumeWindowsEventLog::putEventRenderFlowFileToSession(const cwel::EventRender& eventRender, core::ProcessSession& session) const {
+void ConsumeWindowsEventLog::createAndCommitFlowFile(const cwel::ProcessedEvent& processed_event, core::ProcessSession& session) const {
   auto commitFlowFile = [&] (const std::string& content, const std::string& mimeType) {
     auto flow_file = session.create();
-    addMatchedFieldsAsAttributes(eventRender, session, flow_file);
+    addMatchedFieldsAsAttributes(processed_event, session, flow_file);
     session.writeBuffer(flow_file, content);
     session.putAttribute(*flow_file, core::SpecialFlowAttribute::MIME_TYPE, mimeType);
     session.putAttribute(*flow_file, "timezone.name", timezone_name_);
@@ -596,22 +596,22 @@ void ConsumeWindowsEventLog::putEventRenderFlowFileToSession(const cwel::EventRe
 
   if (output_format_ == cwel::OutputFormat::XML || output_format_ == cwel::OutputFormat::Both) {
     logger_->log_trace("Writing rendered XML to a flow file");
-    commitFlowFile(eventRender.xml, "application/xml");
+    commitFlowFile(processed_event.xml, "application/xml");
   }
 
   if (output_format_ == cwel::OutputFormat::Plaintext || output_format_ == cwel::OutputFormat::Both) {
     logger_->log_trace("Writing rendered plain text to a flow file");
-    commitFlowFile(eventRender.plaintext, "text/plain");
+    commitFlowFile(processed_event.plaintext, "text/plain");
   }
 
   if (output_format_ == cwel::OutputFormat::JSON) {
     logger_->log_trace("Writing rendered {} JSON to a flow file", magic_enum::enum_name(json_format_));
-    commitFlowFile(eventRender.json, "application/json");
+    commitFlowFile(processed_event.json, "application/json");
   }
 }
 
-void ConsumeWindowsEventLog::addMatchedFieldsAsAttributes(const cwel::EventRender& eventRender, core::ProcessSession& session, const std::shared_ptr<core::FlowFile>& flowFile) const {
-  for (const auto &fieldMapping : eventRender.matched_fields) {
+void ConsumeWindowsEventLog::addMatchedFieldsAsAttributes(const cwel::ProcessedEvent& processed_event, core::ProcessSession& session, const std::shared_ptr<core::FlowFile>& flowFile) const {
+  for (const auto &fieldMapping : processed_event.matched_fields) {
     if (!fieldMapping.second.empty()) {
       session.putAttribute(*flowFile, fieldMapping.first, fieldMapping.second);
     }
