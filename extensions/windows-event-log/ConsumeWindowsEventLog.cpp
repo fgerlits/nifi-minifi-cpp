@@ -19,6 +19,7 @@
  */
 
 #include "ConsumeWindowsEventLog.h"
+
 #include <cstdio>
 #include <vector>
 #include <tuple>
@@ -32,7 +33,6 @@
 #include "wel/MetadataWalker.h"
 #include "wel/XMLString.h"
 #include "wel/JSONUtils.h"
-#include "wel/UniqueEvtHandle.h"
 
 #include "io/BufferStream.h"
 #include "core/ProcessContext.h"
@@ -55,8 +55,6 @@
 using namespace std::literals::chrono_literals;
 
 namespace org::apache::nifi::minifi::processors {
-
-const int EVT_NEXT_TIMEOUT_MS = 500;
 
 ConsumeWindowsEventLog::ConsumeWindowsEventLog(core::ProcessorMetadata metadata)
     : core::ProcessorImpl{std::move(metadata)} {
@@ -221,13 +219,14 @@ bool ConsumeWindowsEventLog::commitAndSaveBookmark(const std::wstring &bookmark_
 }
 
 std::tuple<size_t, std::wstring> ConsumeWindowsEventLog::processEventLogs(core::ProcessSession& session, const EVT_HANDLE& event_query_results) {
+  static constexpr DWORD timeout_milliseconds = 500;
   size_t processed_event_count = 0;
   std::wstring bookmark_xml;
   logger_->log_trace("Enumerating the events in the result set after the bookmarked event.");
   while (processed_event_count < batch_commit_size_ || batch_commit_size_ == 0) {
     EVT_HANDLE next_event{};
     DWORD handles_set_count{};
-    if (!EvtNext(event_query_results, 1, &next_event, EVT_NEXT_TIMEOUT_MS, 0, &handles_set_count)) {
+    if (!EvtNext(event_query_results, 1, &next_event, timeout_milliseconds, 0, &handles_set_count)) {
       if (ERROR_NO_MORE_ITEMS != GetLastError()) {
         auto last_error = utils::OsUtils::windowsErrorToErrorCode(GetLastError());
         logger_->log_error("Failed to get next event: {}: {}", last_error, last_error.message());
