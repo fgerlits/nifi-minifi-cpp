@@ -76,7 +76,7 @@ void ConsumeWindowsEventLog::notifyStop() {
     if (FreeLibrary(hMsobjsDll_)) {
       hMsobjsDll_ = nullptr;
     } else {
-      LOG_LAST_ERROR(LoadLibrary);
+      LOG_LAST_ERROR(FreeLibrary);
     }
   }
   logger_->log_trace("finish notifyStop");
