@@ -33,8 +33,6 @@
 
 namespace org::apache::nifi::minifi::processors {
 
-#define LOG_LAST_ERROR(func) logger_->log_error("!"#func" error {:#x}", GetLastError())
-
 class Bookmark {
  public:
   Bookmark(const wel::EventPath& path,

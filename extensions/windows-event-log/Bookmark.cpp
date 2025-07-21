@@ -67,7 +67,7 @@ Bookmark::Bookmark(const wel::EventPath& path,
       return;
     }
 
-    LOG_LAST_ERROR(EvtCreateBookmark);
+    logger_->log_error("EvtCreateBookmark failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
 
     bookmarkXml_.clear();
     state_map.erase(BOOKMARK_KEY);
@@ -76,18 +76,18 @@ Bookmark::Bookmark(const wel::EventPath& path,
 
   hBookmark_ = unique_evt_handle{EvtCreateBookmark(nullptr)};
   if (!hBookmark_) {
-    LOG_LAST_ERROR(EvtCreateBookmark);
+    logger_->log_error("EvtCreateBookmark failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
     return;
   }
 
   const auto hEventResults = unique_evt_handle{ EvtQuery(nullptr, path.wstr().c_str(), query.c_str(), path.getQueryFlags()) };
   if (!hEventResults) {
-    LOG_LAST_ERROR(EvtQuery);
+    logger_->log_error("EvtQuery failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
     return;
   }
 
   if (!EvtSeek(hEventResults.get(), 0, nullptr, 0, processOldEvents? EvtSeekRelativeToFirst : EvtSeekRelativeToLast)) {
-    LOG_LAST_ERROR(EvtSeek);
+    logger_->log_error("EvtSeek failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
     return;
   }
 
@@ -95,7 +95,7 @@ Bookmark::Bookmark(const wel::EventPath& path,
     DWORD dwReturned{};
     EVT_HANDLE hEvent{ nullptr };
     if (!EvtNext(hEventResults.get(), 1, &hEvent, INFINITE, 0, &dwReturned)) {
-      LOG_LAST_ERROR(EvtNext);
+      logger_->log_error("EvtNext failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
     }
     return unique_evt_handle{ hEvent };
   }();
@@ -112,7 +112,7 @@ Bookmark::operator bool() const noexcept {
 EVT_HANDLE Bookmark::getBookmarkHandleFromXML() {
   hBookmark_ = unique_evt_handle{ EvtCreateBookmark(bookmarkXml_.c_str()) };
   if (!hBookmark_) {
-    LOG_LAST_ERROR(EvtCreateBookmark);
+    logger_->log_error("EvtCreateBookmark failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
   }
 
   return hBookmark_.get();
@@ -139,7 +139,7 @@ bool Bookmark::saveBookmark(EVT_HANDLE event_handle) {
 
 nonstd::expected<std::wstring, std::string> Bookmark::getNewBookmarkXml(EVT_HANDLE hEvent) {
   if (!EvtUpdateBookmark(hBookmark_.get(), hEvent)) {
-    return nonstd::make_unexpected(fmt::format("EvtUpdateBookmark failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()).message()));
+    return nonstd::make_unexpected(fmt::format("EvtUpdateBookmark failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError())));
   }
   // Render the bookmark as an XML string that can be persisted.
   logger_->log_trace("Rendering new bookmark");
@@ -152,13 +152,13 @@ nonstd::expected<std::wstring, std::string> Bookmark::getNewBookmarkXml(EVT_HAND
 
   auto last_error = GetLastError();
   if (last_error != ERROR_INSUFFICIENT_BUFFER)
-    return nonstd::make_unexpected(fmt::format("EvtRender failed due to {}", utils::OsUtils::windowsErrorToErrorCode(last_error).message()));
+    return nonstd::make_unexpected(fmt::format("EvtRender failed due to {}", utils::OsUtils::windowsErrorToErrorCode(last_error)));
 
   bufferSize = bufferUsed;
   std::vector<wchar_t> buf(bufferSize / 2 + 1);
 
   if (!EvtRender(nullptr, hBookmark_.get(), EvtRenderBookmark, bufferSize, buf.data(), &bufferUsed, &propertyCount)) {
-    return nonstd::make_unexpected(fmt::format("EvtRender failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()).message()));
+    return nonstd::make_unexpected(fmt::format("EvtRender failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError())));
   }
 
   return std::wstring(buf.data());

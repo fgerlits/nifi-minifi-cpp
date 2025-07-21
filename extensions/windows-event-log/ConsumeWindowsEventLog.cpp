@@ -76,7 +76,7 @@ void ConsumeWindowsEventLog::notifyStop() {
     if (FreeLibrary(hMsobjsDll_)) {
       hMsobjsDll_ = nullptr;
     } else {
-      LOG_LAST_ERROR(FreeLibrary);
+      logger_->log_error("FreeLibrary failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
     }
   }
   logger_->log_trace("finish notifyStop");
@@ -142,10 +142,10 @@ void ConsumeWindowsEventLog::onSchedule(core::ProcessContext& context, core::Pro
     if (GetSystemDirectory(systemDir, sizeof(systemDir))) {
       hMsobjsDll_ = LoadLibrary((systemDir + std::string("\\msobjs.dll")).c_str());
       if (!hMsobjsDll_) {
-        LOG_LAST_ERROR(LoadLibrary);
+        logger_->log_error("LoadLibrary failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
       }
     } else {
-      LOG_LAST_ERROR(GetSystemDirectory);
+      logger_->log_error("GetSystemDirectory failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
     }
   }
 
@@ -281,7 +281,7 @@ void ConsumeWindowsEventLog::onTrigger(core::ProcessContext& context, core::Proc
 
   wel::unique_evt_handle event_query_results{EvtQuery(nullptr, path_.wstr().c_str(), wstr_query_.c_str(), path_.getQueryFlags())};
   if (!event_query_results) {
-    LOG_LAST_ERROR(EvtQuery);
+    logger_->log_error("EvtQuery failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
     context.yield();
     return;
   }
@@ -297,7 +297,7 @@ void ConsumeWindowsEventLog::onTrigger(core::ProcessContext& context, core::Proc
   }
 
   if (!EvtSeek(event_query_results.get(), 1, bookmark_handle, 0, EvtSeekRelativeToBookmark)) {
-    LOG_LAST_ERROR(EvtSeek);
+    logger_->log_error("EvtSeek failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
     context.yield();
     return;
   }
