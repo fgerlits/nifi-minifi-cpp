@@ -223,6 +223,8 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
   void substituteXMLPercentageItems(pugi::xml_document& doc);
   std::function<std::string(const std::string&)> userIdToUsernameFunction() const;
   nonstd::expected<std::string, std::string> renderEventAsXml(EVT_HANDLE event_handle);
+  bool commitAndSaveBookmark(const std::wstring& bookmarkXml, core::ProcessContext& context, core::ProcessSession& session);
+  std::tuple<size_t, std::wstring> processEventLogs(core::ProcessSession& session, const EVT_HANDLE& event_query_results);
 
   struct TimeDiff {
     auto operator()() const {
@@ -230,11 +232,6 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
     }
     const decltype(std::chrono::steady_clock::now()) time_ = std::chrono::steady_clock::now();
   };
-
-  bool commitAndSaveBookmark(const std::wstring& bookmarkXml, core::ProcessContext& context, core::ProcessSession& session);
-
-  std::tuple<size_t, std::wstring> processEventLogs(core::ProcessSession& session,
-                                                    const EVT_HANDLE& event_query_results);
 
   core::StateManager* state_manager_{nullptr};
   wel::METADATA_NAMES header_names_;
