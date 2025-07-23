@@ -91,12 +91,36 @@ void ConsumeWindowsEventLog::initialize() {
   setSupportedRelationships(Relationships);
 }
 
-bool ConsumeWindowsEventLog::insertHeaderName(wel::METADATA_NAMES &header, const std::string &key, const std::string & value) {
-  if (auto metadata = magic_enum::enum_cast<wel::METADATA>(key); metadata) {
-    header.emplace_back(*metadata, value);
-    return true;
+wel::HeaderNames ConsumeWindowsEventLog::createHeaderNames(const std::optional<std::string>& event_header_property) const {
+  if (!event_header_property) { return {}; }
+
+  wel::HeaderNames header_names;
+
+  const auto insertHeaderName = [&header_names](const std::string& key, const std::string& value) {
+    if (auto metadata = magic_enum::enum_cast<wel::METADATA>(key); metadata) {
+      header_names.emplace_back(*metadata, value);
+      return true;
+    }
+    return false;
+  };
+
+  auto keyValueSplit = utils::string::split(*event_header_property, ",");
+  for (const auto &kv : keyValueSplit) {
+    auto splitKeyAndValue = utils::string::split(kv, "=");
+    if (splitKeyAndValue.size() == 2) {
+      auto key = utils::string::trim(splitKeyAndValue.at(0));
+      auto value = utils::string::trim(splitKeyAndValue.at(1));
+      if (!insertHeaderName(key, value)) {
+        logger_->log_error("{} is an invalid key for the header map", key);
+      }
+    } else if (splitKeyAndValue.size() == 1) {
+      auto key = utils::string::trim(splitKeyAndValue.at(0));
+      if (!insertHeaderName(key, "")) {
+        logger_->log_error("{} is an invalid key for the header map", key);
+      }
+    }
   }
-  return false;
+  return header_names;
 }
 
 void ConsumeWindowsEventLog::onSchedule(core::ProcessContext& context, core::ProcessSessionFactory&) {
@@ -110,27 +134,7 @@ void ConsumeWindowsEventLog::onSchedule(core::ProcessContext& context, core::Pro
 
   header_delimiter_ = utils::parseOptionalProperty(context, EventHeaderDelimiter);
   batch_commit_size_ = utils::parseU64Property(context, BatchCommitSize);
-
-  header_names_.clear();
-  if (auto header = context.getProperty(EventHeader)) {
-    auto keyValueSplit = utils::string::split(*header, ",");
-    for (const auto &kv : keyValueSplit) {
-      auto splitKeyAndValue = utils::string::split(kv, "=");
-      if (splitKeyAndValue.size() == 2) {
-        auto key = utils::string::trim(splitKeyAndValue.at(0));
-        auto value = utils::string::trim(splitKeyAndValue.at(1));
-        if (!insertHeaderName(header_names_, key, value)) {
-          logger_->log_error("{} is an invalid key for the header map", key);
-        }
-      } else if (splitKeyAndValue.size() == 1) {
-        auto key = utils::string::trim(splitKeyAndValue.at(0));
-        if (!insertHeaderName(header_names_, key, "")) {
-          logger_->log_error("{} is an invalid key for the header map", key);
-        }
-      }
-    }
-  }
-
+  header_names_ = createHeaderNames(utils::parseOptionalProperty(context, EventHeader));
   sid_matcher_ = cwel::parseSidMatcher(utils::parseOptionalProperty(context, IdentifierMatcher));
   output_format_ = utils::parseEnumProperty<cwel::OutputFormat>(context, OutputFormatProperty);
   json_format_ = utils::parseEnumProperty<cwel::JsonFormat>(context, JsonFormatProperty);

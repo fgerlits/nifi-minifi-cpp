@@ -196,7 +196,7 @@ nonstd::expected<std::string, std::error_code> WindowsEventLogHandler::getEventM
 }
 
 namespace {
-size_t findLongestHeaderNameSize(const METADATA_NAMES& header_names, const size_t minimum_size) {
+size_t findLongestHeaderNameSize(const HeaderNames& header_names, const size_t minimum_size) {
   size_t max = minimum_size;
   for (const auto& option : header_names) {
     max = (std::max(max, option.second.size()));
@@ -205,7 +205,7 @@ size_t findLongestHeaderNameSize(const METADATA_NAMES& header_names, const size_
 }
 }  // namespace
 
-WindowsEventLogHeader::WindowsEventLogHeader(const METADATA_NAMES& header_names, const std::optional<std::string>& custom_delimiter, const size_t minimum_size)
+WindowsEventLogHeader::WindowsEventLogHeader(const HeaderNames& header_names, const std::optional<std::string>& custom_delimiter, const size_t minimum_size)
     : header_names_(header_names),
       custom_delimiter_(custom_delimiter),
       longest_header_name_(findLongestHeaderNameSize(header_names, minimum_size)) {

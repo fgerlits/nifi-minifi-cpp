@@ -57,7 +57,6 @@ enum class METADATA {
   USER,
   COMPUTER,
 };
-using METADATA_NAMES = std::vector<std::pair<METADATA, std::string>>;
 
 class EventDataCache {
  public:
@@ -153,9 +152,11 @@ class WindowsEventLogMetadataImpl : public WindowsEventLogMetadata {
   const WindowsEventLogHandler& metadata_ptr_;
 };
 
+using HeaderNames = std::vector<std::pair<METADATA, std::string>>;
+
 class WindowsEventLogHeader {
  public:
-  explicit WindowsEventLogHeader(const METADATA_NAMES& header_names, const std::optional<std::string>& custom_delimiter, size_t minimum_size);
+  explicit WindowsEventLogHeader(const HeaderNames& header_names, const std::optional<std::string>& custom_delimiter, size_t minimum_size);
 
   template<typename MetadataCollection>
   std::string getEventHeader(const MetadataCollection& metadata_collection) const;
@@ -164,7 +165,7 @@ class WindowsEventLogHeader {
  private:
   [[nodiscard]] std::string createDefaultDelimiter(size_t length) const;
 
-  const METADATA_NAMES& header_names_;
+  const HeaderNames& header_names_;
   const std::optional<std::string>& custom_delimiter_;
   const size_t longest_header_name_;
 };

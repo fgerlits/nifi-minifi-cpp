@@ -218,7 +218,7 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
   void refreshTimeZoneData();
   void createAndCommitFlowFile(const cwel::ProcessedEvent& processed_event, core::ProcessSession& session) const;
   wel::WindowsEventLogHandler& getEventLogHandler(const std::string& name);
-  static bool insertHeaderName(wel::METADATA_NAMES& header, const std::string& key, const std::string& value);
+  wel::HeaderNames createHeaderNames(const std::optional<std::string>& event_header_property) const;
   nonstd::expected<cwel::ProcessedEvent, std::string> processEvent(EVT_HANDLE eventHandle);
   void substituteXMLPercentageItems(pugi::xml_document& doc);
   std::function<std::string(const std::string&)> userIdToUsernameFunction() const;
@@ -234,7 +234,7 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
   };
 
   core::StateManager* state_manager_{nullptr};
-  wel::METADATA_NAMES header_names_;
+  wel::HeaderNames header_names_;
   std::optional<std::string> header_delimiter_;
   wel::EventPath path_;
   std::wstring wstr_query_;
