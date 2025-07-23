@@ -43,7 +43,7 @@
 
 namespace org::apache::nifi::minifi::wel {
 
-enum class METADATA {
+enum class Metadata {
   LOG_NAME,
   SOURCE,
   TIME_CREATED,
@@ -152,7 +152,7 @@ class WindowsEventLogMetadataImpl : public WindowsEventLogMetadata {
   const WindowsEventLogHandler& metadata_ptr_;
 };
 
-using HeaderNames = std::vector<std::pair<METADATA, std::string>>;
+using HeaderNames = std::vector<std::pair<Metadata, std::string>>;
 
 class WindowsEventLogHeader {
  public:

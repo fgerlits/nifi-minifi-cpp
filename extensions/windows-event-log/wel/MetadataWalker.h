@@ -70,7 +70,7 @@ class MetadataWalker : public pugi::xml_tree_walker {
 
   [[nodiscard]] std::map<std::string, std::string> getIdentifiers() const;
 
-  [[nodiscard]] std::string getMetadata(METADATA metadata) const;
+  [[nodiscard]] std::string getMetadata(Metadata metadata) const;
 
  private:
   static std::vector<std::string> getIdentifiers(const std::string &text);

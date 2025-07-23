@@ -97,7 +97,7 @@ wel::HeaderNames ConsumeWindowsEventLog::createHeaderNames(const std::optional<s
   wel::HeaderNames header_names;
 
   const auto insertHeaderName = [&header_names](const std::string& key, const std::string& value) {
-    if (auto metadata = magic_enum::enum_cast<wel::METADATA>(key); metadata) {
+    if (auto metadata = magic_enum::enum_cast<wel::Metadata>(key); metadata) {
       header_names.emplace_back(*metadata, value);
       return true;
     }
@@ -488,7 +488,7 @@ nonstd::expected<cwel::ProcessedEvent, std::string> ConsumeWindowsEventLog::proc
     std::string_view payload_name = event_message ? "Message" : "Error";
 
     wel::WindowsEventLogHeader log_header(header_names_, header_delimiter_, payload_name.size());
-    result.plaintext = log_header.getEventHeader([&walker](wel::METADATA metadata) { return walker.getMetadata(metadata); });
+    result.plaintext = log_header.getEventHeader([&walker](wel::Metadata metadata) { return walker.getMetadata(metadata); });
     result.plaintext += payload_name;
     result.plaintext += log_header.getDelimiterFor(payload_name.size());
     result.plaintext += event_message.has_value() ? *event_message : event_message.error().message();

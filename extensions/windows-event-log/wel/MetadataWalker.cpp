@@ -122,31 +122,31 @@ std::vector<std::string> MetadataWalker::getIdentifiers(const std::string &text)
   return found_strings;
 }
 
-std::string MetadataWalker::getMetadata(METADATA metadata) const {
+std::string MetadataWalker::getMetadata(Metadata metadata) const {
     switch (metadata) {
-      case METADATA::LOG_NAME:
+      case Metadata::LOG_NAME:
         return log_name_;
-      case METADATA::SOURCE:
+      case Metadata::SOURCE:
         return getString(metadata_, "Provider");
-      case METADATA::TIME_CREATED:
+      case Metadata::TIME_CREATED:
         return windows_event_log_metadata_.getEventTimestamp();
-      case METADATA::EVENTID:
+      case Metadata::EVENTID:
         return getString(metadata_, "EventID");
-      case METADATA::EVENT_RECORDID:
+      case Metadata::EVENT_RECORDID:
         return getString(metadata_, "EventRecordID");
-      case METADATA::OPCODE:
+      case Metadata::OPCODE:
         return getString(metadata_, "Opcode");
-      case METADATA::TASK_CATEGORY:
+      case Metadata::TASK_CATEGORY:
         return getString(metadata_, "Task");
-      case METADATA::LEVEL:
+      case Metadata::LEVEL:
         return getString(metadata_, "Level");
-      case METADATA::KEYWORDS:
+      case Metadata::KEYWORDS:
         return getString(metadata_, "Keywords");
-      case METADATA::EVENT_TYPE:
+      case Metadata::EVENT_TYPE:
         return std::to_string(windows_event_log_metadata_.getEventTypeIndex());
-      case METADATA::COMPUTER:
+      case Metadata::COMPUTER:
         return WindowsEventLogMetadata::getComputerName();
-      case METADATA::USER:
+      case Metadata::USER:
         break;  // TODO(fgerlits) do we need this here?
     }
     return "N/A";
