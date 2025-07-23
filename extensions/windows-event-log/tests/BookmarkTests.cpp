@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 
-#include "wel/Bookmark.h"
-
 #include <memory>
 #include <regex>
 
 #include "unit/TestBase.h"
 #include "unit/Catch.h"
 #include "utils/gsl.h"
+#include "wel/Bookmark.h"
 #include "wel/UniqueEvtHandle.h"
 #include "CWELTestUtils.h"
 
