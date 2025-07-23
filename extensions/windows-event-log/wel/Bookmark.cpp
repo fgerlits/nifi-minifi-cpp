@@ -26,7 +26,7 @@
 #include "utils/file/FileUtils.h"
 #include "utils/OsUtils.h"
 #include "utils/UnicodeConversion.h"
-#include "wel/WindowsError.h"
+#include "WindowsError.h"
 
 namespace org::apache::nifi::minifi::processors {
 static const std::string BOOKMARK_KEY = "bookmark";

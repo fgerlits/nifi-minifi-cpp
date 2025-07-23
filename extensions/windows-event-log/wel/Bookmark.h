@@ -26,10 +26,10 @@
 
 #include "core/ProcessContext.h"
 #include "core/ProcessSession.h"
-#include "wel/UniqueEvtHandle.h"
 #include "core/logging/Logger.h"
 #include "utils/expected.h"
-#include "wel/EventPath.h"
+#include "EventPath.h"
+#include "UniqueEvtHandle.h"
 
 namespace org::apache::nifi::minifi::processors {
 

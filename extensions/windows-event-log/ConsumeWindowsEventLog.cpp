@@ -29,17 +29,16 @@
 #include <string>
 #include <memory>
 
+#include "wel/Bookmark.h"
 #include "wel/LookupCacher.h"
 #include "wel/MetadataWalker.h"
 #include "wel/XMLString.h"
 #include "wel/JSONUtils.h"
 #include "wel/WindowsError.h"
 
-#include "io/BufferStream.h"
 #include "core/ProcessContext.h"
 #include "core/ProcessSession.h"
 #include "core/Resource.h"
-#include "Bookmark.h"
 #include "utils/Deleters.h"
 #include "core/logging/LoggerFactory.h"
 
