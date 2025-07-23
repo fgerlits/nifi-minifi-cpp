@@ -33,6 +33,7 @@
 #include "wel/MetadataWalker.h"
 #include "wel/XMLString.h"
 #include "wel/JSONUtils.h"
+#include "wel/WindowsError.h"
 
 #include "io/BufferStream.h"
 #include "core/ProcessContext.h"
@@ -43,7 +44,6 @@
 #include "core/logging/LoggerFactory.h"
 
 #include "utils/gsl.h"
-#include "utils/Error.h"
 #include "utils/RegexUtils.h"
 #include "utils/StringUtils.h"
 #include "utils/UnicodeConversion.h"
@@ -63,7 +63,7 @@ ConsumeWindowsEventLog::ConsumeWindowsEventLog(core::ProcessorMetadata metadata)
   if (GetComputerName(buff, &size)) {
     computerName_ = buff;
   } else {
-    logger_->log_error("{}", utils::getLastError());
+    logger_->log_error("GetComputerName failed due to {}", wel::getLastError());
   }
 }
 
@@ -75,7 +75,7 @@ void ConsumeWindowsEventLog::notifyStop() {
     if (FreeLibrary(hMsobjsDll_)) {
       hMsobjsDll_ = nullptr;
     } else {
-      logger_->log_error("FreeLibrary failed due to {}", utils::getLastError());
+      logger_->log_error("FreeLibrary failed due to {}", wel::getLastError());
     }
   }
   logger_->log_trace("finish notifyStop");
@@ -141,10 +141,10 @@ void ConsumeWindowsEventLog::onSchedule(core::ProcessContext& context, core::Pro
     if (GetSystemDirectory(systemDir, sizeof(systemDir))) {
       hMsobjsDll_ = LoadLibrary((systemDir + std::string("\\msobjs.dll")).c_str());
       if (!hMsobjsDll_) {
-        logger_->log_error("LoadLibrary failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
+        logger_->log_error("LoadLibrary failed due to {}", wel::getLastError());
       }
     } else {
-      logger_->log_error("GetSystemDirectory failed due to {}", utils::OsUtils::windowsErrorToErrorCode(GetLastError()));
+      logger_->log_error("GetSystemDirectory failed due to {}", wel::getLastError());
     }
   }
 
@@ -227,7 +227,7 @@ std::tuple<size_t, std::wstring> ConsumeWindowsEventLog::processEventLogs(core::
     DWORD handles_set_count{};
     if (!EvtNext(event_query_results, 1, &next_event, timeout_milliseconds, 0, &handles_set_count)) {
       if (ERROR_NO_MORE_ITEMS != GetLastError()) {
-        logger_->log_error("Failed to get next event: {}", utils::getLastError());
+        logger_->log_error("Failed to get next event due to {}", wel::getLastError());
         continue;
         /* According to MS this iteration should only end when the return value is false AND
           the error code is NO_MORE_ITEMS. See the following page for further details:
@@ -279,7 +279,7 @@ void ConsumeWindowsEventLog::onTrigger(core::ProcessContext& context, core::Proc
 
   wel::unique_evt_handle event_query_results{EvtQuery(nullptr, path_.wstr().c_str(), wstr_query_.c_str(), path_.getQueryFlags())};
   if (!event_query_results) {
-    logger_->log_error("EvtQuery failed due to {}", utils::getLastError());
+    logger_->log_error("EvtQuery failed due to {}", wel::getLastError());
     context.yield();
     return;
   }
@@ -295,7 +295,7 @@ void ConsumeWindowsEventLog::onTrigger(core::ProcessContext& context, core::Proc
   }
 
   if (!EvtSeek(event_query_results.get(), 1, bookmark_handle, 0, EvtSeekRelativeToBookmark)) {
-    logger_->log_error("EvtSeek failed due to {}", utils::getLastError());
+    logger_->log_error("EvtSeek failed due to {}", wel::getLastError());
     context.yield();
     return;
   }
@@ -323,8 +323,9 @@ wel::WindowsEventLogHandler& ConsumeWindowsEventLog::getEventLogHandler(const st
   LPCWSTR widechar = temp_wstring.c_str();
 
   auto opened_publisher_metadata_provider = EvtOpenPublisherMetadata(nullptr, widechar, nullptr, 0, 0);
-  if (!opened_publisher_metadata_provider)
-    logger_->log_warn("EvtOpenPublisherMetadata failed due to {}", utils::getLastError());
+  if (!opened_publisher_metadata_provider) {
+    logger_->log_warn("EvtOpenPublisherMetadata failed due to {}", wel::getLastError());
+  }
   providers_.emplace(name, opened_publisher_metadata_provider);
   logger_->log_info("Handler not found for {}, creating. Number of cached handlers: {}", name, providers_.size());
   return providers_[name];
@@ -387,7 +388,7 @@ void ConsumeWindowsEventLog::substituteXMLPercentageItems(pugi::xml_document& do
             // Add "" to xmlPercentageItemsResolutions_ - don't need to call FormaMessage for this 'key' again.
             xmlPercentageItemsResolutions_.insert({key, ""});
 
-            logger_->log_error("FormatMessage failed due to {}. '{}' is not found in msobjs.dll.", utils::getLastError(), key.c_str());
+            logger_->log_error("FormatMessage failed due to {}. '{}' is not found in msobjs.dll.", wel::getLastError(), key.c_str());
           }
         } else {
           value = it->second;
@@ -427,20 +428,18 @@ nonstd::expected<std::string, std::string> ConsumeWindowsEventLog::renderEventAs
   DWORD propertyCount = 0;
   if (!EvtRender(nullptr, event_handle, EvtRenderEventXml, size, buf.get(), &used, &propertyCount)) {
     if (ERROR_INSUFFICIENT_BUFFER != GetLastError()) {
-      std::string error_message = fmt::format("EvtRender failed due to {}", utils::getLastError());
-      return nonstd::make_unexpected(error_message);
+      return nonstd::make_unexpected(fmt::format("EvtRender failed due to {}", wel::getLastError()));
     }
     if (used > max_buffer_size_) {
-      std::string error_message = fmt::format("Dropping event because it couldn't be rendered within {} bytes.", max_buffer_size_);
-      return nonstd::make_unexpected(error_message);
+      return nonstd::make_unexpected(fmt::format("Dropping event because it couldn't be rendered within {} bytes.", max_buffer_size_));
     }
     size = used;
     buf.reset((LPWSTR) malloc(size));
-    if (!buf)
+    if (!buf) {
       return nonstd::make_unexpected("malloc failed");
+    }
     if (!EvtRender(nullptr, event_handle, EvtRenderEventXml, size, buf.get(), &used, &propertyCount)) {
-      std::string error_message = fmt::format("EvtRender failed due to {}", utils::getLastError().message());
-      return nonstd::make_unexpected(error_message);
+      return nonstd::make_unexpected(fmt::format("EvtRender failed due to {}", wel::getLastError()));
     }
   }
   logger_->log_trace("Event rendered with size {}", used);
