@@ -226,13 +226,6 @@ class ConsumeWindowsEventLog : public core::ProcessorImpl {
   bool commitAndSaveBookmark(const std::wstring& bookmarkXml, core::ProcessContext& context, core::ProcessSession& session);
   std::tuple<size_t, std::wstring> processEventLogs(core::ProcessSession& session, const EVT_HANDLE& event_query_results);
 
-  struct TimeDiff {
-    auto operator()() const {
-      return std::chrono::steady_clock::now() - time_;
-    }
-    const decltype(std::chrono::steady_clock::now()) time_ = std::chrono::steady_clock::now();
-  };
-
   core::StateManager* state_manager_{nullptr};
   wel::HeaderNames header_names_;
   std::optional<std::string> header_delimiter_;

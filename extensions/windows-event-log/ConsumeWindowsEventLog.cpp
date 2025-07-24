@@ -53,6 +53,15 @@
 
 using namespace std::literals::chrono_literals;
 
+namespace {
+struct TimeDiff {
+  auto operator()() const {
+    return std::chrono::steady_clock::now() - time_;
+  }
+  const decltype(std::chrono::steady_clock::now()) time_ = std::chrono::steady_clock::now();
+};
+}  // namespace
+
 namespace org::apache::nifi::minifi::processors {
 
 ConsumeWindowsEventLog::ConsumeWindowsEventLog(core::ProcessorMetadata metadata)
