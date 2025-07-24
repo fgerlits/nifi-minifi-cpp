@@ -137,7 +137,6 @@ void ConsumeWindowsEventLog::onSchedule(core::ProcessContext& context, core::Pro
 
   resolve_as_attributes_ = utils::parseBoolProperty(context, ResolveAsAttributes);
   apply_identifier_function_ = utils::parseBoolProperty(context, IdentifierFunction);
-
   header_delimiter_ = utils::parseOptionalProperty(context, EventHeaderDelimiter);
   batch_commit_size_ = utils::parseU64Property(context, BatchCommitSize);
   header_names_ = createHeaderNames(utils::parseOptionalProperty(context, EventHeader));
@@ -157,7 +156,7 @@ void ConsumeWindowsEventLog::onSchedule(core::ProcessContext& context, core::Pro
     }
   }
 
-  path_ = wel::EventPath{context.getProperty(Channel).value()};
+  path_ = wel::EventPath{utils::parseProperty(context, Channel)};
   if (path_.kind() == wel::EventPath::Kind::FILE) {
     logger_->log_debug("Using saved log file as log source");
   } else {
@@ -165,9 +164,7 @@ void ConsumeWindowsEventLog::onSchedule(core::ProcessContext& context, core::Pro
   }
 
   std::string query = context.getProperty(Query).value_or("");
-  wstr_query_ = std::wstring(query.begin(), query.end());
-
-  bool processOldEvents = utils::parseBoolProperty(context, ProcessOldEvents);
+  wstr_query_ = utils::to_wstring(query);
 
   if (!bookmark_) {
     std::string bookmarkDir = context.getProperty(BookmarkRootDirectory).value_or("");
@@ -175,8 +172,9 @@ void ConsumeWindowsEventLog::onSchedule(core::ProcessContext& context, core::Pro
       logger_->log_error("State Directory is empty");
       throw Exception(PROCESS_SCHEDULE_EXCEPTION, "State Directory is empty");
     }
+    bool processOldEvents = utils::parseBoolProperty(context, ProcessOldEvents);
     bookmark_ = std::make_unique<Bookmark>(path_, wstr_query_, bookmarkDir, getUUID(), processOldEvents, state_manager_, logger_);
-    if (!*bookmark_) {
+    if (!bookmark_->isValid()) {
       bookmark_.reset();
       throw Exception(PROCESS_SCHEDULE_EXCEPTION, "Bookmark is empty");
     }
@@ -211,7 +209,7 @@ bool ConsumeWindowsEventLog::commitAndSaveBookmark(const std::wstring &bookmark_
     const TimeDiff time_diff;
     session.commit();
     context.getStateManager()->beginTransaction();
-    logger_->log_debug("processQueue commit took {}", time_diff());
+    logger_->log_debug("ConsumeWindowsEventLog: commit took {}", time_diff());
   }
 
   if (!bookmark_->saveBookmarkXml(bookmark_xml)) {

@@ -106,7 +106,7 @@ Bookmark::Bookmark(const wel::EventPath& path,
 
 Bookmark::~Bookmark() = default;
 
-Bookmark::operator bool() const noexcept {
+bool Bookmark::isValid() const noexcept {
   return ok_;
 }
 
