@@ -34,11 +34,7 @@ namespace org::apache::nifi::minifi::modbus {
 
 
 void FetchModbusTcp::onSchedule(core::ProcessContext& context, core::ProcessSessionFactory&) {
-  const auto record_set_writer_name = context.getProperty(RecordSetWriter).value_or("");;
-  record_set_writer_ = std::dynamic_pointer_cast<core::RecordSetWriter>(context.getControllerService(record_set_writer_name, getUUID()));
-  if (!record_set_writer_) {
-    throw Exception{ExceptionType::PROCESS_SCHEDULE_EXCEPTION, "Invalid or missing RecordSetWriter"};
-  }
+  record_set_writer_ = utils::parseControllerService<core::RecordSetWriter>(context, RecordSetWriter, getUUID());
 
   // if the required properties are missing or empty even before evaluating the EL expression, then we can throw in onSchedule, before we waste any flow files
   if (!context.getProperty(Hostname.name)) {
@@ -58,18 +54,13 @@ void FetchModbusTcp::onSchedule(core::ProcessContext& context, core::ProcessSess
     connections_.emplace();
   }
 
-  ssl_context_.reset();
-  if (const auto controller_service_name = context.getProperty(SSLContextService); controller_service_name && !IsNullOrEmpty(*controller_service_name)) {
-    if (auto controller_service = context.getControllerService(*controller_service_name, getUUID())) {
-      if (const auto ssl_context_service = std::dynamic_pointer_cast<minifi::controllers::SSLContextService>(controller_service)) {
-        ssl_context_ = utils::net::getSslContext(*ssl_context_service);
-      } else {
-        throw Exception(PROCESS_SCHEDULE_EXCEPTION, *controller_service_name + " is not an SSL Context Service");
-      }
-    } else {
-      throw Exception(PROCESS_SCHEDULE_EXCEPTION, "Invalid controller service: " + *controller_service_name);
+  ssl_context_ = [&]() -> std::optional<asio::ssl::context> {
+    auto service = utils::parseOptionalControllerService<minifi::controllers::SSLContextService>(context, SSLContextService, getUUID());
+    if (service) {
+      return {utils::net::getSslContext(*service)};
     }
-  }
+    return std::nullopt;
+  }();
 }
 
 void FetchModbusTcp::onTrigger(core::ProcessContext& context, core::ProcessSession& session) {

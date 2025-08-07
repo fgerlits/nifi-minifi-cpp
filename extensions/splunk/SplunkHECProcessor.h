@@ -77,7 +77,6 @@ class SplunkHECProcessor : public core::ProcessorImpl {
 
  protected:
   std::string getNetworkLocation() const;
-  std::shared_ptr<minifi::controllers::SSLContextService> getSSLContextService(core::ProcessContext& context) const;
   void initializeClient(http::HTTPClient& client, const std::string &url, std::shared_ptr<minifi::controllers::SSLContextService> ssl_context_service) const;
 
   std::string token_;
