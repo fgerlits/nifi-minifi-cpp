@@ -173,19 +173,21 @@ void PropertiesImpl::loadConfigureFile(const std::filesystem::path& configuratio
   }
 
   std::error_code ec;
-  properties_file_ = std::filesystem::canonical(configuration_file, ec);
+  base_properties_file_ = std::filesystem::canonical(configuration_file, ec);
 
   if (ec.value() != 0) {
     logger_->log_warn("Configuration file '{}' does not exist, and it could not be created", configuration_file);
     return;
   }
 
-  logger_->log_info("Using configuration file to load configuration for {} from {} (located at {})",
-                    getName().c_str(), configuration_file.string(), properties_file_.string());
 
-  std::ifstream file(properties_file_, std::ifstream::in);
+
+  logger_->log_info("Using configuration file to load configuration for {} from {} (located at {})",
+                    getName().c_str(), configuration_file.string(), base_properties_file_.string());
+
+  std::ifstream file(base_properties_file_, std::ifstream::in);
   if (!file.good()) {
-    logger_->log_error("load configure file failed {}", properties_file_);
+    logger_->log_error("load configure file failed {}", base_properties_file_);
     return;
   }
   properties_.clear();
@@ -199,12 +201,12 @@ void PropertiesImpl::loadConfigureFile(const std::filesystem::path& configuratio
     dirty_ = dirty_ || need_to_persist_new_value;
     properties_[key] = {persisted_value, value, need_to_persist_new_value};
   }
-  checksum_calculator_.setFileLocation(properties_file_);
+  checksum_calculator_.setFileLocation(base_properties_file_);
 }
 
 std::filesystem::path PropertiesImpl::getFilePath() const {
   std::lock_guard<std::mutex> lock(mutex_);
-  return properties_file_;
+  return base_properties_file_;
 }
 
 bool PropertiesImpl::commitChanges() {
@@ -213,13 +215,13 @@ bool PropertiesImpl::commitChanges() {
     logger_->log_info("Attempt to persist, but properties are not updated");
     return true;
   }
-  std::ifstream file(properties_file_, std::ifstream::in);
+  std::ifstream file(base_properties_file_, std::ifstream::in);
   if (!file) {
-    logger_->log_error("load configure file failed {}", properties_file_);
+    logger_->log_error("load configure file failed {}", base_properties_file_);
     return false;
   }
 
-  auto new_file = properties_file_;
+  auto new_file = base_properties_file_;
   new_file += ".new";
 
   PropertiesFile current_content{file};
@@ -237,20 +239,20 @@ bool PropertiesImpl::commitChanges() {
   try {
     current_content.writeTo(new_file);
   } catch (const std::exception&) {
-    logger_->log_error("Could not update {}", properties_file_);
+    logger_->log_error("Could not update {}", base_properties_file_);
     return false;
   }
 
-  auto backup = properties_file_;
+  auto backup = base_properties_file_;
   backup += ".bak";
-  if (utils::file::FileUtils::copy_file(properties_file_, backup) == 0 && utils::file::FileUtils::copy_file(new_file, properties_file_) == 0) {
-    logger_->log_info("Persisted {}", properties_file_);
+  if (utils::file::FileUtils::copy_file(base_properties_file_, backup) == 0 && utils::file::FileUtils::copy_file(new_file, base_properties_file_) == 0) {
+    logger_->log_info("Persisted {}", base_properties_file_);
     checksum_calculator_.invalidateChecksum();
     dirty_ = false;
     return true;
   }
 
-  logger_->log_error("Could not update {}", properties_file_);
+  logger_->log_error("Could not update {}", base_properties_file_);
   return false;
 }
 

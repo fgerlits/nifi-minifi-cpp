@@ -104,7 +104,6 @@ class PropertiesImpl : public virtual Properties {
 
   void loadConfigureFile(const std::filesystem::path& configuration_file, std::string_view prefix = "") override;
 
-
   std::vector<std::string> getConfiguredKeys() const override {
     std::vector<std::string> keys;
     for (auto &property : properties_) {
@@ -123,17 +122,12 @@ class PropertiesImpl : public virtual Properties {
 
  private:
   std::map<std::string, PropertyValue> properties_;
-
   bool dirty_{false};
-
-  std::filesystem::path properties_file_;
-
+  std::filesystem::path base_properties_file_;
+  std::vector<std::filesystem::path> properties_files_;
   utils::ChecksumCalculator checksum_calculator_;
-
-  // Mutex for protection
   mutable std::mutex mutex_;
   std::shared_ptr<core::logging::Logger> logger_;
-
   std::string name_;
 };
 
