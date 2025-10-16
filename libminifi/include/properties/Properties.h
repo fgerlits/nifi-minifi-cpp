@@ -37,13 +37,15 @@ class PropertiesImpl : public virtual Properties {
   struct PropertyValue {
     std::string persisted_value;
     std::string active_value;
-    bool need_to_persist_new_value{false};
+    std::optional<std::filesystem::path> persist_to_file;
   };
 
  public:
   explicit PropertiesImpl(std::string name = "");
 
   ~PropertiesImpl() override = default;
+
+  static constexpr std::string_view C2PropertiesFileName = "90_c2_properties";
 
   const std::string& getName() const override {
     return name_;

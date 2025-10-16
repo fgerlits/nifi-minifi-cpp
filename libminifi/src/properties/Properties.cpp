@@ -129,32 +129,31 @@ std::optional<std::string> ensureIntegerValidatedPropertyHasNoUnit(const core::P
 
 // If the loaded property is time period or data size validated, and it has no explicit units, then ms or B will be appended.
 // If the loaded property is integer validated, and it has some explicit unit (time period or data size), it will be converted to ms or B, and its unit is cut off.
-void fixValidatedProperty(const std::string& property_name,
+bool fixValidatedProperty(const std::string& property_name,
     std::string& persisted_value,
     std::string& value,
-    bool& needs_to_persist_new_value,
     core::logging::Logger& logger) {
   auto validator = getValidator(property_name);
   if (!validator)
-    return;
+    return false;
 
   auto fixed_property_value = ensureTimePeriodValidatedPropertyHasExplicitUnit(validator, value)
       | utils::valueOrElse([&] { return ensureDataSizeValidatedPropertyHasExplicitUnit(validator, value);})
       | utils::valueOrElse([&] { return ensureIntegerValidatedPropertyHasNoUnit(validator, value);});
 
   if (!fixed_property_value) {
-    return;
+    return false;
   }
 
   if (persisted_value == value) {
     logger.log_info("Changed validated property from {} to {}, this change will be persisted",  value, *fixed_property_value);
     value = *fixed_property_value;
     persisted_value = value;
-    needs_to_persist_new_value = true;
+    return true;
   } else {
     logger.log_info("Changed validated property from {} to {}, this change won't be persisted", value, *fixed_property_value);
     value = *fixed_property_value;
-    needs_to_persist_new_value = false;
+    return false;
   }
 }
 }  // namespace
@@ -198,32 +197,37 @@ void PropertiesImpl::loadConfigureFile(const std::filesystem::path& configuratio
 
   logger_->log_info("Using configuration file to load configuration for {} from {} (located at {})",
                     getName().c_str(), configuration_file.string(), base_properties_file_.string());
-  if (!extra_properties_files_dir.empty()) {
-    auto list_of_files = extra_properties_file_names
-        | std::ranges::views::drop(1)
-        | std::ranges::views::transform([](const auto& path) { return path.string(); })
-        | std::ranges::views::join_with(std::string_view{", "})
-        | std::ranges::to<std::string>();
+  if (!extra_properties_file_names.empty()) {
+    auto list_of_files = utils::string::join(", ", extra_properties_file_names, [](const auto& path) { return path.string(); });
     logger_->log_info("Also reading configuration from files {} in {}", list_of_files, extra_properties_files_dir.string());
   }
 
-  std::ifstream file(base_properties_file_, std::ifstream::in);
-  if (!file.good()) {
-    logger_->log_error("load configure file failed {}", base_properties_file_);
-    return;
-  }
   properties_.clear();
   dirty_ = false;
-  for (const auto& line : PropertiesFile{file}) {
-    auto key = line.getKey();
-    auto persisted_value = line.getValue();
-    auto value = utils::string::replaceEnvironmentVariables(persisted_value);
-    bool need_to_persist_new_value = false;
-    fixValidatedProperty(std::string(prefix) + key, persisted_value, value, need_to_persist_new_value, *logger_);
-    dirty_ = dirty_ || need_to_persist_new_value;
-    properties_[key] = {persisted_value, value, need_to_persist_new_value};
+  for (const auto& properties_file : properties_files_) {
+    std::ifstream file(properties_file, std::ifstream::in);
+    if (!file.good()) {
+      logger_->log_error("load configure file failed {}", properties_file);
+      continue;
+    }
+    for (const auto& line : PropertiesFile{file}) {
+      auto key = line.getKey();
+      auto persisted_value = line.getValue();
+      auto value = utils::string::replaceEnvironmentVariables(persisted_value);
+      const bool need_to_persist_new_value = fixValidatedProperty(std::string(prefix) + key, persisted_value, value, *logger_);
+      dirty_ = dirty_ || need_to_persist_new_value;
+      properties_[key] = {persisted_value, value, need_to_persist_new_value ? std::optional{properties_file} : std::nullopt};
+    }
   }
-  checksum_calculator_.setFileLocation(base_properties_file_);
+
+  const auto checksummed_properties_file = [&] {
+    const auto c2_properties_file = std::ranges::find(extra_properties_file_names, C2PropertiesFileName);
+    if (c2_properties_file != extra_properties_file_names.end()) {
+      return *c2_properties_file;
+    }
+    return base_properties_file_;
+  }();
+  checksum_calculator_.setFileLocation(checksummed_properties_file);
 }
 
 std::filesystem::path PropertiesImpl::getFilePath() const {
@@ -234,7 +238,7 @@ std::filesystem::path PropertiesImpl::getFilePath() const {
 bool PropertiesImpl::commitChanges() {
   std::lock_guard<std::mutex> lock(mutex_);
   if (!dirty_) {
-    logger_->log_info("Attempt to persist, but properties are not updated");
+    logger_->log_debug("commitChanges() called, but properties have not changed, nothing to do");
     return true;
   }
   std::ifstream file(base_properties_file_, std::ifstream::in);
@@ -248,7 +252,7 @@ bool PropertiesImpl::commitChanges() {
 
   PropertiesFile current_content{file};
   for (const auto& prop : properties_) {
-    if (!prop.second.need_to_persist_new_value) {
+    if (!prop.second.persist_to_file) {
       continue;
     }
     if (current_content.hasValue(prop.first)) {
