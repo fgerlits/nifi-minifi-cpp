@@ -18,12 +18,12 @@
 #include "properties/Properties.h"
 
 #include <fstream>
+#include <ranges>
 #include <string>
 
 #include "core/logging/LoggerConfiguration.h"
 #include "properties/Configuration.h"
 #include "properties/PropertiesFile.h"
-#include "range/v3/algorithm/all_of.hpp"
 #include "utils/StringUtils.h"
 #include "utils/file/FileUtils.h"
 
@@ -72,12 +72,12 @@ const core::PropertyValidator* getValidator(const std::string& lookup_value) {
 
 // isdigit requires unsigned chars as input
 bool allDigits(const std::string& value) {
-  return ranges::all_of(value, [](const unsigned char c){ return ::isdigit(c); });
+  return std::ranges::all_of(value, [](const unsigned char c){ return ::isdigit(c); });
 }
 
 // isdigit requires unsigned chars as input
 bool allDigitsOrSpaces(const std::string& value) {
-  return ranges::all_of(value, [](const unsigned char c) { return std::isdigit(c) || std::isspace(c);});
+  return std::ranges::all_of(value, [](const unsigned char c) { return std::isdigit(c) || std::isspace(c);});
 }
 
 std::optional<std::string> ensureTimePeriodValidatedPropertyHasExplicitUnit(const core::PropertyValidator* const validator, const std::string& value) {
@@ -180,10 +180,32 @@ void PropertiesImpl::loadConfigureFile(const std::filesystem::path& configuratio
     return;
   }
 
+  properties_files_ = { base_properties_file_ };
 
+  auto extra_properties_files_dir = base_properties_file_;
+  extra_properties_files_dir += ".d";
+  std::vector<std::filesystem::path> extra_properties_file_names;
+  if (utils::file::exists(extra_properties_files_dir) && utils::file::is_directory(extra_properties_files_dir)) {
+    utils::file::list_dir(extra_properties_files_dir, [&](const std::filesystem::path&, const std::filesystem::path& file_name) {
+      extra_properties_file_names.push_back(file_name);
+      return true;
+    }, logger_, /* recursive = */ false);
+  }
+  std::ranges::sort(extra_properties_file_names);
+  for (const auto& file_name : extra_properties_file_names) {
+    properties_files_.push_back(extra_properties_files_dir / file_name);
+  }
 
   logger_->log_info("Using configuration file to load configuration for {} from {} (located at {})",
                     getName().c_str(), configuration_file.string(), base_properties_file_.string());
+  if (!extra_properties_files_dir.empty()) {
+    auto list_of_files = extra_properties_file_names
+        | std::ranges::views::drop(1)
+        | std::ranges::views::transform([](const auto& path) { return path.string(); })
+        | std::ranges::views::join_with(std::string_view{", "})
+        | std::ranges::to<std::string>();
+    logger_->log_info("Also reading configuration from files {} in {}", list_of_files, extra_properties_files_dir.string());
+  }
 
   std::ifstream file(base_properties_file_, std::ifstream::in);
   if (!file.good()) {
