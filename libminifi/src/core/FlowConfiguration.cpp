@@ -55,7 +55,7 @@ FlowConfiguration::FlowConfiguration(ConfigurationContext ctx)
       logger_->log_error("Couldn't find config file \"{}\".", ctx.path->string());
       config_path_ = ctx.path;
     }
-    checksum_calculator_.setFileLocation(*config_path_);
+    checksum_calculator_.setFileLocations(std::vector{*config_path_});
   }
 }
 

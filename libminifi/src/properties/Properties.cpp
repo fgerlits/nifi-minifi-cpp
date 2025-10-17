@@ -222,14 +222,7 @@ void PropertiesImpl::loadConfigureFile(const std::filesystem::path& configuratio
     }
   }
 
-  const auto checksummed_properties_file = [&] {
-    const auto c2_properties_file = std::ranges::find(extra_properties_file_names, C2PropertiesFileName);
-    if (c2_properties_file != extra_properties_file_names.end()) {
-      return *c2_properties_file;
-    }
-    return base_properties_file_;
-  }();
-  checksum_calculator_.setFileLocation(checksummed_properties_file);
+  checksum_calculator_.setFileLocations(properties_files_);
 }
 
 std::filesystem::path PropertiesImpl::getFilePath() const {
