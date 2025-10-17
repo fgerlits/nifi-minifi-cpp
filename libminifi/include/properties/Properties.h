@@ -37,7 +37,7 @@ class PropertiesImpl : public virtual Properties {
   struct PropertyValue {
     std::string persisted_value;
     std::string active_value;
-    std::optional<std::filesystem::path> persist_to_file;
+    bool need_to_persist_new_value{false};
   };
 
  public:

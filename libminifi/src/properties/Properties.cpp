@@ -129,31 +129,32 @@ std::optional<std::string> ensureIntegerValidatedPropertyHasNoUnit(const core::P
 
 // If the loaded property is time period or data size validated, and it has no explicit units, then ms or B will be appended.
 // If the loaded property is integer validated, and it has some explicit unit (time period or data size), it will be converted to ms or B, and its unit is cut off.
-bool fixValidatedProperty(const std::string& property_name,
+void fixValidatedProperty(const std::string& property_name,
     std::string& persisted_value,
     std::string& value,
+    bool& needs_to_persist_new_value,
     core::logging::Logger& logger) {
   auto validator = getValidator(property_name);
   if (!validator)
-    return false;
+    return;
 
   auto fixed_property_value = ensureTimePeriodValidatedPropertyHasExplicitUnit(validator, value)
       | utils::valueOrElse([&] { return ensureDataSizeValidatedPropertyHasExplicitUnit(validator, value);})
       | utils::valueOrElse([&] { return ensureIntegerValidatedPropertyHasNoUnit(validator, value);});
 
   if (!fixed_property_value) {
-    return false;
+    return;
   }
 
   if (persisted_value == value) {
     logger.log_info("Changed validated property from {} to {}, this change will be persisted",  value, *fixed_property_value);
     value = *fixed_property_value;
     persisted_value = value;
-    return true;
+    needs_to_persist_new_value = true;
   } else {
     logger.log_info("Changed validated property from {} to {}, this change won't be persisted", value, *fixed_property_value);
     value = *fixed_property_value;
-    return false;
+    needs_to_persist_new_value = false;
   }
 }
 }  // namespace
@@ -214,9 +215,10 @@ void PropertiesImpl::loadConfigureFile(const std::filesystem::path& configuratio
       auto key = line.getKey();
       auto persisted_value = line.getValue();
       auto value = utils::string::replaceEnvironmentVariables(persisted_value);
-      const bool need_to_persist_new_value = fixValidatedProperty(std::string(prefix) + key, persisted_value, value, *logger_);
+      bool need_to_persist_new_value = false;
+      fixValidatedProperty(std::string(prefix) + key, persisted_value, value, need_to_persist_new_value, *logger_);
       dirty_ = dirty_ || need_to_persist_new_value;
-      properties_[key] = {persisted_value, value, need_to_persist_new_value ? std::optional{properties_file} : std::nullopt};
+      properties_[key] = {persisted_value, value, need_to_persist_new_value};
     }
   }
 
@@ -252,7 +254,7 @@ bool PropertiesImpl::commitChanges() {
 
   PropertiesFile current_content{file};
   for (const auto& prop : properties_) {
-    if (!prop.second.persist_to_file) {
+    if (!prop.second.need_to_persist_new_value) {
       continue;
     }
     if (current_content.hasValue(prop.first)) {
