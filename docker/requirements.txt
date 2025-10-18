@@ -9,5 +9,4 @@ pyopenssl==25.3.0
 azure-storage-blob==12.27.0
 prometheus-api-client==0.6.0
 humanfriendly==10.0
-requests<2.29  # https://github.com/docker/docker-py/issues/3113
 couchbase==4.5.0
