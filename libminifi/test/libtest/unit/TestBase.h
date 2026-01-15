@@ -42,6 +42,7 @@
 #include "properties/Configuration.h"
 #include "core/Processor.h"
 #include "core/ProcessGroup.h"
+#include "TestUtils.h"
 
 namespace minifi = org::apache::nifi::minifi;
 namespace utils = minifi::utils;
@@ -386,23 +387,6 @@ class TestPlan {
   std::shared_ptr<logging::Logger> logger_;
 };
 
-namespace internal {
-template <class Rep, class Period, typename Fun>
-bool verifyEventHappenedInPollTime(
-    const std::chrono::duration<Rep, Period>& wait_duration,
-    Fun&& check,
-    std::chrono::microseconds check_interval = std::chrono::milliseconds(100)) {
-  std::chrono::steady_clock::time_point wait_end = std::chrono::steady_clock::now() + wait_duration;
-  do {
-    if (std::forward<Fun>(check)()) {
-      return true;
-    }
-    std::this_thread::sleep_for(check_interval);
-  } while (std::chrono::steady_clock::now() < wait_end);
-  return false;
-}
-}  // namespace internal
-
 class TestController {
  public:
   struct PlanConfig {
@@ -442,7 +426,7 @@ class TestController {
       const std::string logs = log_test_controller_.getLogs();
       return ((logs.find(patterns) != std::string::npos) && ...);
     };
-    return internal::verifyEventHappenedInPollTime(wait_duration, check);
+    return minifi::test::utils::verifyEventHappenedInPollTime(wait_duration, check);
   }
 
   template <class Rep, class Period, typename ...String>
@@ -451,7 +435,7 @@ class TestController {
       const std::string logs = log_test_controller_..getLogs();
       return ((logs.find(patterns) != std::string::npos) || ...);
     };
-    return internal::verifyEventHappenedInPollTime(wait_duration, check);
+    return minifi::test::utils::verifyEventHappenedInPollTime(wait_duration, check);
   }
 
  protected:

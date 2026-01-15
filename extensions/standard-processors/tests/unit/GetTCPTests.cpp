@@ -154,7 +154,7 @@ class TcpTestServer {
 TEST_CASE("GetTCP test with delimiter", "[GetTCP]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<GetTCP>("GetTCP")};
   const auto get_tcp = controller.getProcessor();
-  test_controller.getLogTestController().setTrace<GetTCP>();
+  controller.getLogTestController().setTrace<GetTCP>();
   REQUIRE(get_tcp->setProperty(GetTCP::MaxBatchSize.name, "2"));
 
 
@@ -185,7 +185,7 @@ TEST_CASE("GetTCP test with delimiter", "[GetTCP]") {
 TEST_CASE("GetTCP test with too large message", "[GetTCP]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<GetTCP>("GetTCP")};
   const auto get_tcp = controller.getProcessor();
-  test_controller.getLogTestController().setTrace<GetTCP>();
+  controller.getLogTestController().setTrace<GetTCP>();
   REQUIRE(get_tcp->setProperty(GetTCP::MaxBatchSize.name, "2"));
   REQUIRE(get_tcp->setProperty(GetTCP::MaxMessageSize.name, "10"));
   REQUIRE(get_tcp->setProperty(GetTCP::MessageDelimiter.name, "\r"));
@@ -226,7 +226,7 @@ TEST_CASE("GetTCP test with too large message", "[GetTCP]") {
 TEST_CASE("GetTCP test multiple endpoints", "[GetTCP]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<GetTCP>("GetTCP")};
   const auto get_tcp = controller.getProcessor();
-  test_controller.getLogTestController().setTrace<GetTCP>();
+  controller.getLogTestController().setTrace<GetTCP>();
   REQUIRE(get_tcp->setProperty(GetTCP::MaxBatchSize.name, "2"));
 
   TcpTestServer server_1;
@@ -270,7 +270,7 @@ TEST_CASE("GetTCP test multiple endpoints", "[GetTCP]") {
 TEST_CASE("GetTCP max queue and max batch size test", "[GetTCP]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<GetTCP>("GetTCP")};
   const auto get_tcp = controller.getProcessor();
-  test_controller.getLogTestController().setTrace<GetTCP>();
+  controller.getLogTestController().setTrace<GetTCP>();
   REQUIRE(get_tcp->setProperty(GetTCP::MaxBatchSize.name, "10"));
   REQUIRE(get_tcp->setProperty(GetTCP::MaxQueueSize.name, "50"));
 
@@ -283,7 +283,7 @@ TEST_CASE("GetTCP max queue and max batch size test", "[GetTCP]") {
     REQUIRE(get_tcp->setProperty(GetTCP::SSLContextService.name, "SSLContextService"));
   }
 
-  test_controller.getLogTestController().setWarn<GetTCP>();
+  controller.getLogTestController().setWarn<GetTCP>();
 
   for (auto i = 0; i < 100; ++i) {
     server.queueMessage("some_message\n");
