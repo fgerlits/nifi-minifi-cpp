@@ -72,8 +72,8 @@ TEST_CASE("Test Physical memory usage", "[testphysicalmemoryusage]") {
 }
 
 TEST_CASE("FileSystemRepository can clear orphan entries") {
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
   auto configuration = std::make_shared<org::apache::nifi::minifi::ConfigureImpl>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir.string());
   {
@@ -86,20 +86,20 @@ TEST_CASE("FileSystemRepository can clear orphan entries") {
     content_repo->incrementStreamCount(claim);
   }
 
-  REQUIRE(minifi::utils::file::list_dir_all(dir, testController.getLogger()).size() == 1);
+  REQUIRE(minifi::utils::file::list_dir_all(dir, test_controller.getLogger()).size() == 1);
 
   auto content_repo = std::make_shared<core::repository::FileSystemRepository>();
   REQUIRE(content_repo->initialize(configuration));
   content_repo->clearOrphans();
 
-  REQUIRE(minifi::utils::file::list_dir_all(dir, testController.getLogger()).empty());
+  REQUIRE(minifi::utils::file::list_dir_all(dir, test_controller.getLogger()).empty());
 }
 
 TEST_CASE("FileSystemRepository can retry removing entry that previously failed to be removed") {
   if (utils::runningAsUnixRoot())
     SKIP("Cannot test insufficient permissions with root user");
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
   auto configuration = std::make_shared<org::apache::nifi::minifi::ConfigureImpl>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir.string());
 
@@ -108,29 +108,29 @@ TEST_CASE("FileSystemRepository can retry removing entry that previously failed 
   {
     minifi::ResourceClaimImpl claim(content_repo);
     content_repo->write(claim)->write("hi");
-    auto files = minifi::utils::file::list_dir_all(dir, testController.getLogger());
+    auto files = minifi::utils::file::list_dir_all(dir, test_controller.getLogger());
     REQUIRE(files.size() == 1);
     // ensure that the content is not deleted during resource claim destruction
     utils::makeFileOrDirectoryNotWritable(dir);
   }
 
   utils::makeFileOrDirectoryWritable(dir);
-  REQUIRE(minifi::utils::file::list_dir_all(dir, testController.getLogger()).size() == 1);
+  REQUIRE(minifi::utils::file::list_dir_all(dir, test_controller.getLogger()).size() == 1);
   {
     minifi::ResourceClaimImpl claim(content_repo);
     content_repo->write(claim)->write("hi");
-    REQUIRE(minifi::utils::file::list_dir_all(dir, testController.getLogger()).size() == 2);
+    REQUIRE(minifi::utils::file::list_dir_all(dir, test_controller.getLogger()).size() == 2);
   }
 
-  REQUIRE(minifi::utils::file::list_dir_all(dir, testController.getLogger()).empty());
+  REQUIRE(minifi::utils::file::list_dir_all(dir, test_controller.getLogger()).empty());
   REQUIRE(content_repo->getPurgeList().empty());
 }
 
 TEST_CASE("FileSystemRepository removes non-existing resource file from purge list") {
   if (utils::runningAsUnixRoot())
     SKIP("Cannot test insufficient permissions with root user");
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
   auto configuration = std::make_shared<org::apache::nifi::minifi::ConfigureImpl>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir.string());
 
@@ -140,7 +140,7 @@ TEST_CASE("FileSystemRepository removes non-existing resource file from purge li
   {
     minifi::ResourceClaimImpl claim(content_repo);
     content_repo->write(claim)->write("hi");
-    auto files = minifi::utils::file::list_dir_all(dir, testController.getLogger());
+    auto files = minifi::utils::file::list_dir_all(dir, test_controller.getLogger());
     REQUIRE(files.size() == 1);
     // ensure that the content is not deleted during resource claim destruction
     filename = (files[0].first / files[0].second).string();
@@ -149,20 +149,20 @@ TEST_CASE("FileSystemRepository removes non-existing resource file from purge li
 
   utils::makeFileOrDirectoryWritable(dir);
   REQUIRE(std::filesystem::remove(filename));
-  REQUIRE(minifi::utils::file::list_dir_all(dir, testController.getLogger()).empty());
+  REQUIRE(minifi::utils::file::list_dir_all(dir, test_controller.getLogger()).empty());
   {
     minifi::ResourceClaimImpl claim(content_repo);
     content_repo->write(claim)->write("hi");
-    REQUIRE(minifi::utils::file::list_dir_all(dir, testController.getLogger()).size() == 1);
+    REQUIRE(minifi::utils::file::list_dir_all(dir, test_controller.getLogger()).size() == 1);
   }
 
-  REQUIRE(minifi::utils::file::list_dir_all(dir, testController.getLogger()).empty());
+  REQUIRE(minifi::utils::file::list_dir_all(dir, test_controller.getLogger()).empty());
   REQUIRE(content_repo->getPurgeList().empty());
 }
 
 TEST_CASE("Append Claim") {
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
   auto content_repo = std::make_shared<TestFileSystemRepository>();
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::ConfigureImpl>();

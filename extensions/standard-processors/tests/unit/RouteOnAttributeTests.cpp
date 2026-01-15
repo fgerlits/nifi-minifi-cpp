@@ -24,14 +24,14 @@
 #include "processors/UpdateAttribute.h"
 
 TEST_CASE("RouteOnAttributeMatchedTest", "[routeOnAttributeMatchedTest]") {
-  TestController testController;
+  TestController test_controller;
 
   LogTestController::getInstance().setDebug<minifi::processors::UpdateAttribute>();
   LogTestController::getInstance().setDebug<minifi::processors::RouteOnAttribute>();
   LogTestController::getInstance().setDebug<TestPlan>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
   plan->addProcessor("GenerateFlowFile", "generate");
 
@@ -47,11 +47,11 @@ TEST_CASE("RouteOnAttributeMatchedTest", "[routeOnAttributeMatchedTest]") {
 
   plan->addProcessor("LogAttribute", "log", core::Relationship("success", "description"), true);
 
-  testController.runSession(plan, false);  // generate
-  testController.runSession(plan, false);  // update
-  testController.runSession(plan, false);  // route
-  testController.runSession(plan, false);  // update_matched
-  testController.runSession(plan, false);  // log
+  test_controller.runSession(plan, false);  // generate
+  test_controller.runSession(plan, false);  // update
+  test_controller.runSession(plan, false);  // route
+  test_controller.runSession(plan, false);  // update_matched
+  test_controller.runSession(plan, false);  // log
 
   REQUIRE(LogTestController::getInstance().contains("key:route_check_attr value:good"));
 
@@ -59,14 +59,14 @@ TEST_CASE("RouteOnAttributeMatchedTest", "[routeOnAttributeMatchedTest]") {
 }
 
 TEST_CASE("RouteOnAttributeUnmatchedTest", "[routeOnAttributeUnmatchedTest]") {
-  TestController testController;
+  TestController test_controller;
 
   LogTestController::getInstance().setDebug<minifi::processors::UpdateAttribute>();
   LogTestController::getInstance().setDebug<minifi::processors::RouteOnAttribute>();
   LogTestController::getInstance().setDebug<TestPlan>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
   plan->addProcessor("GenerateFlowFile", "generate");
 
@@ -81,11 +81,11 @@ TEST_CASE("RouteOnAttributeUnmatchedTest", "[routeOnAttributeUnmatchedTest]") {
 
   plan->addProcessor("LogAttribute", "log", core::Relationship("success", "description"), true);
 
-  testController.runSession(plan, false);  // generate
-  testController.runSession(plan, false);  // update
-  testController.runSession(plan, false);  // route
-  testController.runSession(plan, false);  // update_matched
-  testController.runSession(plan, false);  // log
+  test_controller.runSession(plan, false);  // generate
+  test_controller.runSession(plan, false);  // update
+  test_controller.runSession(plan, false);  // route
+  test_controller.runSession(plan, false);  // update_matched
+  test_controller.runSession(plan, false);  // log
 
   REQUIRE(LogTestController::getInstance().contains("key:route_check_attr value:good"));
 

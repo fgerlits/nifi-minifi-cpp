@@ -37,12 +37,12 @@
 
 // TODO(_): valid capture test needs to be fixed
 TEST_CASE("CaptureRTSPFrame::ValidCapture", "[!mayfail]") {
-    TestController testController;
+    TestController test_controller;
 
     LogTestController::getInstance().setTrace<minifi::processors::CaptureRTSPFrame>();
     LogTestController::getInstance().setDebug<core::ProcessSession>();
 
-    std::shared_ptr<TestPlan> plan = testController.createPlan();
+    std::shared_ptr<TestPlan> plan = test_controller.createPlan();
     auto captureRTSP = plan->addProcessor("CaptureRTSPFrame", "CaptureRTSPFrame");
     // the RTSP url below comes from a public RTSP stream (hopefully still alive by the time you read this)
     // alternatively, we can set our own server using vlc.
@@ -53,19 +53,19 @@ TEST_CASE("CaptureRTSPFrame::ValidCapture", "[!mayfail]") {
     plan->setProperty(captureRTSP, minifi::processors::CaptureRTSPFrame::RTSPPort, "");
     plan->setProperty(captureRTSP, minifi::processors::CaptureRTSPFrame::ImageEncoding, ".jpg");
 
-    testController.runSession(plan, true);
+    test_controller.runSession(plan, true);
     std::shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
     REQUIRE(record);
     REQUIRE(LogTestController::getInstance().contains("A frame is captured"));
 }
 
 TEST_CASE("CaptureRTSPFrame::InvalidURI", "[opencvtest2]") {
-  TestController testController;
+  TestController test_controller;
 
   LogTestController::getInstance().setTrace<minifi::processors::CaptureRTSPFrame>();
   LogTestController::getInstance().setDebug<core::ProcessSession>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   auto captureRTSP = plan->addProcessor("CaptureRTSPFrame", "CaptureRTSPFrame");
 
   plan->setProperty(captureRTSP, minifi::processors::CaptureRTSPFrame::RTSPHostname, "170.93.143.139");
@@ -79,6 +79,6 @@ TEST_CASE("CaptureRTSPFrame::InvalidURI", "[opencvtest2]") {
           core::Relationship("failure", "description"),
           true);
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
   REQUIRE(LogTestController::getInstance().contains("Unable to open RTSP stream"));
 }

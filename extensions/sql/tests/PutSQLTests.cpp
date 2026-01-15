@@ -27,16 +27,16 @@
 #include "processors/GetFile.h"
 
 TEST_CASE("Test Creation of PutSQL", "[PutSQLCreate]") {
-  TestController testController;
+  TestController test_controller;
   std::shared_ptr<core::Processor>
       processor = minifi::test::utils::make_processor<org::apache::nifi::minifi::processors::PutSQL>("processorname");
   REQUIRE(processor->getName() == "processorname");
 }
 
 TEST_CASE("Statement from processor property") {
-  SQLTestController testController;
+  SQLTestController test_controller;
 
-  auto plan = testController.createSQLPlan("PutSQL", {{"success", "d"}});
+  auto plan = test_controller.createSQLPlan("PutSQL", {{"success", "d"}});
   auto sql_proc = plan->getSQLProcessor();
 
   auto input_file = plan->addInput({
@@ -54,16 +54,16 @@ TEST_CASE("Statement from processor property") {
   REQUIRE(output.at(0) == input_file);
 
   // Verify output state
-  auto rows = testController.fetchValues();
+  auto rows = test_controller.fetchValues();
   REQUIRE(rows.size() == 1);
   REQUIRE(rows[0].int_col == 42);
   REQUIRE(rows[0].text_col == "asdf");
 }
 
 TEST_CASE("Statement from flow file content") {
-  SQLTestController testController;
+  SQLTestController test_controller;
 
-  auto plan = testController.createSQLPlan("PutSQL", {{"success", "d"}});
+  auto plan = test_controller.createSQLPlan("PutSQL", {{"success", "d"}});
   auto input_file = plan->addInput({
     {"sql.args.1.value", "4242"},
     {"sql.args.2.value", "fdsa"}
@@ -76,16 +76,16 @@ TEST_CASE("Statement from flow file content") {
   REQUIRE(output.at(0) == input_file);
 
   // Verify output state
-  auto rows = testController.fetchValues();
+  auto rows = test_controller.fetchValues();
   REQUIRE(rows.size() == 1);
   REQUIRE(rows[0].int_col == 4242);
   REQUIRE(rows[0].text_col == "fdsa");
 }
 
 TEST_CASE("PutSQL routes to failure on malformed statement") {
-  SQLTestController testController;
+  SQLTestController test_controller;
 
-  auto plan = testController.createSQLPlan("PutSQL", {{"success", "d"}, {"failure", "d"}});
+  auto plan = test_controller.createSQLPlan("PutSQL", {{"success", "d"}, {"failure", "d"}});
   auto sql_proc = plan->getSQLProcessor();
 
   std::shared_ptr<core::FlowFile> input_file;
@@ -112,9 +112,9 @@ TEST_CASE("PutSQL routes to failure on malformed statement") {
 }
 
 TEST_CASE("PutSQL routes to failure on malformed content statement") {
-  SQLTestController testController;
+  SQLTestController test_controller;
 
-  auto plan = testController.createSQLPlan("PutSQL", {{"success", "d"}, {"failure", "d"}});
+  auto plan = test_controller.createSQLPlan("PutSQL", {{"success", "d"}, {"failure", "d"}});
 
   std::shared_ptr<core::FlowFile> input_file;
   SECTION("No parameters") {

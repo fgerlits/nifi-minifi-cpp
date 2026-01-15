@@ -60,8 +60,8 @@ class RetryFlowFileTest {
 
  protected:
   void reInitialize() {
-    testController_ = std::make_unique<TestController>();
-    plan_ = testController_->createPlan();
+    test_controller_ = std::make_unique<TestController>();
+    plan_ = test_controller_->createPlan();
     logTestController_.setDebug<TestPlan>();
     logTestController_.setDebug<GenerateFlowFile>();
     logTestController_.setDebug<UpdateAttribute>();
@@ -140,9 +140,9 @@ class RetryFlowFileTest {
     plan_->setDynamicProperty(retryflowfile, "retries_exceeded_property_key_1", "retries_exceeded_property_value_1");
     plan_->setDynamicProperty(retryflowfile, "retries_exceeded_property_key_2", "retries_exceeded_property_value_2");
 
-    const auto retry_dir            = testController_->createTempDirectory();
-    const auto retries_exceeded_dir = testController_->createTempDirectory();
-    const auto failure_dir          = testController_->createTempDirectory();
+    const auto retry_dir            = test_controller_->createTempDirectory();
+    const auto retries_exceeded_dir = test_controller_->createTempDirectory();
+    const auto failure_dir          = test_controller_->createTempDirectory();
 
     plan_->setProperty(putfile_on_retry, PutFile::Directory, retry_dir.string());
     plan_->setProperty(putfile_on_retries_exceeded, PutFile::Directory, retries_exceeded_dir.string());
@@ -181,7 +181,7 @@ class RetryFlowFileTest {
     return logContainsText(pattern);
   }
 
-  std::unique_ptr<TestController> testController_;
+  std::unique_ptr<TestController> test_controller_;
   std::shared_ptr<TestPlan> plan_;
   LogTestController& logTestController_;
   std::shared_ptr<logging::Logger> logger_;

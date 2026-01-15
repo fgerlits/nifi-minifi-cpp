@@ -55,8 +55,8 @@ class ExecutePythonProcessorTestBase {
 
  protected:
   void reInitialize() {
-    testController_ = std::make_unique<TestController>();
-    plan_ = testController_->createPlan();
+    test_controller_ = std::make_unique<TestController>();
+    plan_ = test_controller_->createPlan();
     logTestController_.setDebug<TestPlan>();
     logTestController_.setDebug<minifi::processors::PutFile>();
   }
@@ -69,7 +69,7 @@ class ExecutePythonProcessorTestBase {
   static const std::string TEST_FILE_CONTENT;
 
   std::filesystem::path SCRIPT_FILES_DIRECTORY;
-  std::unique_ptr<TestController> testController_;
+  std::unique_ptr<TestController> test_controller_;
   std::shared_ptr<TestPlan> plan_;
   LogTestController& logTestController_;
   std::shared_ptr<logging::Logger> logger_;
@@ -90,7 +90,7 @@ class SimplePythonFlowFileTransferTest : public ExecutePythonProcessorTestBase {
   void testSimpleFilePassthrough(const Expectation expectation, const core::Relationship& execute_python_out_conn, const std::string& used_as_script_file) {
     reInitialize();
 
-    auto input_dir = testController_->createTempDirectory();
+    auto input_dir = test_controller_->createTempDirectory();
     putFileToDir(input_dir, TEST_FILE_NAME, TEST_FILE_CONTENT);
     addGetFileProcessorToPlan(input_dir);
     if (Expectation::INITIALIZATION_EXCEPTION == expectation) {
@@ -100,7 +100,7 @@ class SimplePythonFlowFileTransferTest : public ExecutePythonProcessorTestBase {
       REQUIRE_NOTHROW(addExecutePythonProcessorToPlan(used_as_script_file));
     }
 
-    const auto output_dir = testController_->createTempDirectory();
+    const auto output_dir = test_controller_->createTempDirectory();
     addPutFileProcessorToPlan(execute_python_out_conn, output_dir.string());
 
     plan_->runNextProcessor();  // GetFile
@@ -120,7 +120,7 @@ class SimplePythonFlowFileTransferTest : public ExecutePythonProcessorTestBase {
   }
   void testsStatefulProcessor() {
     reInitialize();
-    const auto output_dir = testController_->createTempDirectory();
+    const auto output_dir = test_controller_->createTempDirectory();
     addExecutePythonProcessorToPlan(getScriptFullPath("stateful_processor.py"), false);
     addPutFileProcessorToPlan(core::Relationship("success", "description"), output_dir);
     plan_->runNextProcessor();  // ExecutePythonProcessor

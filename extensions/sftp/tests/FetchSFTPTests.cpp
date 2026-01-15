@@ -151,10 +151,10 @@ class FetchSFTPTestsFixture {
   }
 
  protected:
-  TestController testController;
-  std::filesystem::path src_dir{testController.createTempDirectory()};
-  std::filesystem::path dst_dir{testController.createTempDirectory()};
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  TestController test_controller;
+  std::filesystem::path src_dir{test_controller.createTempDirectory()};
+  std::filesystem::path dst_dir{test_controller.createTempDirectory()};
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::unique_ptr<SFTPTestServer> sftp_server;
   core::Processor* generate_flow_file;
   core::Processor* update_attribute;
@@ -167,7 +167,7 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP fetch one file", "[FetchSFTP]
 
   createFile("nifi_test/tstFile.ext", "Test content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile(IN_SOURCE, "nifi_test/tstFile.ext", "Test content 1");
   testFile(IN_DESTINATION, "nifi_test/tstFile.ext", "Test content 1");
@@ -187,7 +187,7 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP public key authentication", "
 
   createFile("nifi_test/tstFile.ext", "Test content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile(IN_SOURCE, "nifi_test/tstFile.ext", "Test content 1");
   testFile(IN_DESTINATION, "nifi_test/tstFile.ext", "Test content 1");
@@ -205,7 +205,7 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP public key authentication", "
 TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP fetch non-existing file", "[FetchSFTP][basic]") {
   plan->setProperty(fetch_sftp, "Remote File", "nifi_test/tstFile.ext");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("Failed to open remote file \"nifi_test/tstFile.ext\", error: LIBSSH2_FX_NO_SUCH_FILE"));
   REQUIRE(LogTestController::getInstance().contains("from FetchSFTP to relationship not.found"));
@@ -223,7 +223,7 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP fetch non-readable file", "[F
   createFile("nifi_test/tstFile.ext", "Test content 1");
   std::filesystem::permissions(src_dir / "vfs" / "nifi_test" / "tstFile.ext", static_cast<std::filesystem::perms>(0000));
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("Failed to open remote file \"nifi_test/tstFile.ext\", error: LIBSSH2_FX_PERMISSION_DENIED"));
   REQUIRE(LogTestController::getInstance().contains("from FetchSFTP to relationship permission.denied"));
@@ -236,12 +236,12 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP fetch connection error", "[Fe
   createFile("nifi_test/tstFile.ext", "Test content 1");
 
   /* Run it once normally to open the connection */
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
   plan->reset();
 
   /* Stop the server to create a connection error */
   sftp_server.reset();
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("Failed to open remote file \"nifi_test/tstFile.ext\" due to an underlying SSH error"));
   REQUIRE(LogTestController::getInstance().contains("from FetchSFTP to relationship comms.failure"));
@@ -253,7 +253,7 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP Completion Strategy Delete Fi
 
   createFile("nifi_test/tstFile.ext", "Test content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFileNotExists(IN_SOURCE, "nifi_test/tstFile.ext");
   testFile(IN_DESTINATION, "nifi_test/tstFile.ext", "Test content 1");
@@ -278,7 +278,7 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP Completion Strategy Delete Fi
   /* By making the parent directory non-writable we make it impossible do delete the source file */
   std::filesystem::permissions(src_dir / "vfs" / "nifi_test", static_cast<std::filesystem::perms>(0500));
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   /* We should succeed even if the completion strategy fails */
   testFile(IN_SOURCE, "nifi_test/tstFile.ext", "Test content 1");
@@ -304,7 +304,7 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP Completion Strategy Move File
 
   createFile("nifi_test/tstFile.ext", "Test content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFileNotExists(IN_SOURCE, "nifi_test/tstFile.ext");
   testFile(IN_SOURCE, "nifi_done/tstFile.ext", "Test content 1");
@@ -327,7 +327,7 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP Completion Strategy Move File
 
   createFile("nifi_test/tstFile.ext", "Test content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   /* We should succeed even if the completion strategy fails */
   testFileNotExists(IN_SOURCE, "nifi_done/tstFile.ext");
@@ -368,7 +368,7 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP expression language test", "[
 
   createFile("nifi_test/tstFile.ext", "Test content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFileNotExists(IN_SOURCE, "nifi_test/tstFile.ext");
   testFile(IN_SOURCE, "nifi_done/tstFile.ext", "Test content 1");

@@ -48,23 +48,23 @@ const char* SHA256_CHECKSUM = "66D5B2CC06203137F8A0E9714638DC1085C57A3F1FA26C882
 namespace org::apache::nifi::minifi::processors::test {
 
 TEST_CASE("Test Creation of HashContent", "[HashContentCreate]") {
-  TestController testController;
+  TestController test_controller;
   auto processor = minifi::test::utils::make_processor<org::apache::nifi::minifi::processors::HashContent>("processorname");
   REQUIRE(processor->getName() == "processorname");
   REQUIRE(processor->getUUID());
 }
 
 TEST_CASE("Test usage of ExtractText", "[extracttextTest]") {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::GetFile>();
   LogTestController::getInstance().setTrace<core::ProcessSession>();
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::HashContent>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
 
-  auto tempdir = testController.createTempDirectory();
+  auto tempdir = test_controller.createTempDirectory();
   REQUIRE(!tempdir.empty());
 
   auto getfile = plan->addProcessor("GetFile", "getfileCreate2");
@@ -125,14 +125,14 @@ TEST_CASE("Test usage of ExtractText", "[extracttextTest]") {
 
 TEST_CASE("TestingFailOnEmptyProperty", "[HashContentPropertiesCheck]") {
   using minifi::processors::HashContent;
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::GetFile>();
   LogTestController::getInstance().setTrace<core::ProcessSession>();
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::HashContent>();
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
-  auto tempdir = testController.createTempDirectory();
+  auto tempdir = test_controller.createTempDirectory();
   auto getfile = plan->addProcessor("GetFile", "getfileCreate2");
   plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::Directory, tempdir.string());
   plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::KeepSourceFile, "true");

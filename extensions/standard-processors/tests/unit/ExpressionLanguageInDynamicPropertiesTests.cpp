@@ -27,7 +27,7 @@
 namespace org::apache::nifi::minifi::test {
 
 TEST_CASE("GetFile PutFile dynamic attribute", "[expressionLanguageTestGetFilePutFileDynamicAttribute]") {
-  TestController testController;
+  TestController test_controller;
 
   LogTestController::getInstance().setTrace<TestPlan>();
   LogTestController::getInstance().setTrace<minifi::processors::PutFile>();
@@ -41,13 +41,13 @@ TEST_CASE("GetFile PutFile dynamic attribute", "[expressionLanguageTestGetFilePu
 
   conf->set("nifi.my.own.property", "custom_value");
 
-  auto plan = testController.createPlan(conf);
+  auto plan = test_controller.createPlan(conf);
 
-  auto in_dir = testController.createTempDirectory();
+  auto in_dir = test_controller.createTempDirectory();
   REQUIRE(!in_dir.empty());
 
   auto in_file = in_dir / "file";
-  auto out_dir = testController.createTempDirectory();
+  auto out_dir = test_controller.createTempDirectory();
   REQUIRE(!out_dir.empty());
 
   auto out_file = out_dir / "extracted_attr" / "file";

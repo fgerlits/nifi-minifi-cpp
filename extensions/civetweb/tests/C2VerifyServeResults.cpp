@@ -34,7 +34,7 @@ namespace org::apache::nifi::minifi::test {
 class VerifyC2Server : public HTTPIntegrationBase {
  public:
   explicit VerifyC2Server(const std::filesystem::path& test_file_location) : HTTPIntegrationBase(test_file_location) {
-    dir_ = testController.createTempDirectory();
+    dir_ = test_controller.createTempDirectory();
   }
 
   void testSetup() override {
@@ -79,7 +79,7 @@ class VerifyC2Server : public HTTPIntegrationBase {
  protected:
   std::filesystem::path dir_;
   std::filesystem::path test_file_;
-  TestController testController;
+  TestController test_controller;
 };
 
 TEST_CASE("C2VerifyServeResults", "[c2test]") {

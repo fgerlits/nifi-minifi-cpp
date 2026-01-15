@@ -48,8 +48,8 @@ struct ReplaceTextTestAccessor {
 }  // namespace org::apache::nifi::minifi::processors
 
 TEST_CASE("ReplaceText can parse its properties", "[onSchedule]") {
-  TestController testController;
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  TestController test_controller;
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   LogTestController::getInstance().setDebug<minifi::processors::ReplaceText>();
 
   auto generate_flow_file = plan->addProcessor("GenerateFlowFile", "generate_flow_file");
@@ -64,7 +64,7 @@ TEST_CASE("ReplaceText can parse its properties", "[onSchedule]") {
   plan->setProperty(replace_text, minifi::processors::ReplaceText::SearchValue, "apple");
   plan->setProperty(replace_text, minifi::processors::ReplaceText::ReplacementValue, "orange");
 
-  testController.runSession(plan);
+  test_controller.runSession(plan);
 
   CHECK(LogTestController::getInstance().contains("the Evaluation Mode property is set to Entire text"));
   CHECK(LogTestController::getInstance().contains("the Line-by-Line Evaluation Mode property is set to Except-First-Line"));
@@ -187,8 +187,8 @@ TEST_CASE("Substitute Variables works correctly in ReplaceText", "[applyReplacem
 }
 
 TEST_CASE("Regex Replace works correctly in ReplaceText in line by line mode", "[Line-by-Line][Regex Replace]") {
-  TestController testController;
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  TestController test_controller;
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
 
   auto generate_flow_file = plan->addProcessor("GenerateFlowFile", "generate_flow_file");
@@ -285,7 +285,7 @@ TEST_CASE("Regex Replace works correctly in ReplaceText in line by line mode", "
   auto log_attribute = plan->addProcessor("LogAttribute", "log_attribute", minifi::processors::ReplaceText::Success, true);
   plan->setProperty(log_attribute, minifi::processors::LogAttribute::LogPayload, "true");
 
-  testController.runSession(plan);
+  test_controller.runSession(plan);
 
   CHECK(LogTestController::getInstance().contains(expected_output));
   LogTestController::getInstance().reset();
@@ -311,15 +311,15 @@ class HandleEmptyIncomingFlowFile {
     auto log_attribute = plan->addProcessor("LogAttribute", "log_attribute", minifi::processors::ReplaceText::Success, true);
     plan->setProperty(log_attribute, minifi::processors::LogAttribute::LogPayload, "true");
 
-    testController.runSession(plan);
+    test_controller.runSession(plan);
 
     CHECK(LogTestController::getInstance().contains(expected_output_));
     LogTestController::getInstance().reset();
   }
 
  private:
-  TestController testController;
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  TestController test_controller;
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   minifi::processors::EvaluationModeType evaluation_mode_ = minifi::processors::EvaluationModeType::LINE_BY_LINE;
   minifi::processors::ReplacementStrategyType replacement_strategy_ = minifi::processors::ReplacementStrategyType::REGEX_REPLACE;
   std::string expected_output_;
@@ -380,15 +380,15 @@ class UseExpressionLanguage {
     auto log_attribute = plan->addProcessor("LogAttribute", "log_attribute", minifi::processors::ReplaceText::Success, true);
     plan->setProperty(log_attribute, minifi::processors::LogAttribute::LogPayload, "true");
 
-    testController.runSession(plan);
+    test_controller.runSession(plan);
 
     CHECK(LogTestController::getInstance().contains(expected_output_));
     LogTestController::getInstance().reset();
   }
 
  private:
-  TestController testController;
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  TestController test_controller;
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::string search_value_;
   std::string replacement_value_;
   std::string expected_output_;

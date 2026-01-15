@@ -165,14 +165,14 @@ std::unique_ptr<core::Processor> setupMergeProcessor(const utils::Identifier& id
 }
 
 TEST_CASE("Processors Can Store FlowFiles", "[TestP1]") {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setTrace<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setTrace<minifi::ResourceClaim>();
   LogTestController::getInstance().setTrace<minifi::FlowFileRecord>();
   LogTestController::getInstance().setTrace<core::repository::FlowFileRepository>();
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   auto config = std::make_shared<minifi::ConfigureImpl>();
   config->set(minifi::Configure::nifi_dbcontent_repository_directory_default, (dir / "content_repository").string());
@@ -276,7 +276,7 @@ std::unique_ptr<core::Processor> setupContentUpdaterProcessor(const utils::Ident
 }
 
 TEST_CASE("Persisted flowFiles are updated on modification", "[TestP1]") {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setTrace<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setTrace<core::repository::VolatileContentRepository>();
@@ -285,7 +285,7 @@ TEST_CASE("Persisted flowFiles are updated on modification", "[TestP1]") {
   LogTestController::getInstance().setTrace<core::repository::FlowFileRepository>();
   LogTestController::getInstance().setTrace<core::repository::DatabaseContentRepository>();
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   auto config = std::make_shared<minifi::ConfigureImpl>();
   config->set(minifi::Configure::nifi_dbcontent_repository_directory_default, (dir / "content_repository").string());
@@ -296,15 +296,15 @@ TEST_CASE("Persisted flowFiles are updated on modification", "[TestP1]") {
   std::shared_ptr<core::Repository> ff_repository = std::make_shared<core::repository::FlowFileRepository>("flowFileRepository");
   std::shared_ptr<core::ContentRepository> content_repo;
   SECTION("VolatileContentRepository") {
-    testController.getLogger()->log_info("Using VolatileContentRepository");
+    test_controller.getLogger()->log_info("Using VolatileContentRepository");
     content_repo = std::make_shared<core::repository::VolatileContentRepository>();
   }
   SECTION("FileSystemContentRepository") {
-    testController.getLogger()->log_info("Using FileSystemRepository");
+    test_controller.getLogger()->log_info("Using FileSystemRepository");
     content_repo = std::make_shared<core::repository::FileSystemRepository>();
   }
   SECTION("DatabaseContentRepository") {
-    testController.getLogger()->log_info("Using DatabaseContentRepository");
+    test_controller.getLogger()->log_info("Using DatabaseContentRepository");
     content_repo = std::make_shared<core::repository::DatabaseContentRepository>();
   }
   ff_repository->initialize(config);

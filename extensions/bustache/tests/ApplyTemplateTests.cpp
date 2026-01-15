@@ -47,14 +47,14 @@ const char* TEST_FILE = "test_file.txt";
 const char* EXPECT_OUTPUT = "TemplateBegins\nExampleValue\nTemplateEnds";
 
 TEST_CASE("Test Creation of ApplyTemplate", "[ApplyTemplateCreate]") {
-  TestController testController;
+  TestController test_controller;
   std::shared_ptr<core::Processor> processor = minifi::test::utils::make_processor<org::apache::nifi::minifi::processors::ApplyTemplate>("processor_name");
   REQUIRE(processor->getName() == "processor_name");
   REQUIRE(processor->getUUID());
 }
 
 TEST_CASE("Test usage of ApplyTemplate", "[ApplyTemplateTest]") {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setTrace<ApplyTemplate>();
   LogTestController::getInstance().setTrace<PutFile>();
   LogTestController::getInstance().setTrace<GetFile>();
@@ -65,12 +65,12 @@ TEST_CASE("Test usage of ApplyTemplate", "[ApplyTemplateTest]") {
   LogTestController::getInstance().setTrace<core::Connectable>();
   LogTestController::getInstance().setTrace<core::FlowFile>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
 
-  auto get_file_source_dir = testController.createTempDirectory();
-  auto template_source_dir = testController.createTempDirectory();
-  auto put_file_destination_dir = testController.createTempDirectory();
+  auto get_file_source_dir = test_controller.createTempDirectory();
+  auto template_source_dir = test_controller.createTempDirectory();
+  auto put_file_destination_dir = test_controller.createTempDirectory();
 
   REQUIRE_FALSE(get_file_source_dir.empty());
   REQUIRE_FALSE(template_source_dir.empty());

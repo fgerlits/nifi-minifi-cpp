@@ -41,7 +41,7 @@ class SiteToSiteTestHarness : public HTTPIntegrationBase {
  public:
   explicit SiteToSiteTestHarness(const std::filesystem::path& test_file_path, bool isSecure, std::chrono::seconds waitTime = 1s)
       : HTTPIntegrationBase(test_file_path, {}, waitTime), isSecure(isSecure) {
-    dir = testController.createTempDirectory();
+    dir = test_controller.createTempDirectory();
   }
 
   void testSetup() override {
@@ -70,7 +70,7 @@ class SiteToSiteTestHarness : public HTTPIntegrationBase {
  protected:
   bool isSecure;
   std::filesystem::path dir;
-  TestController testController;
+  TestController test_controller;
 };
 
 struct defaulted_handler{

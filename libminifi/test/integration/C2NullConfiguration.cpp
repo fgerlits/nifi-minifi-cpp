@@ -35,7 +35,7 @@ class VerifyC2Server : public HTTPIntegrationBase {
  public:
   explicit VerifyC2Server(const std::filesystem::path& test_file_path)
       : HTTPIntegrationBase(test_file_path) {
-    dir = testController.createTempDirectory();
+    dir = test_controller.createTempDirectory();
   }
 
   void testSetup() override {
@@ -77,7 +77,7 @@ class VerifyC2Server : public HTTPIntegrationBase {
 
  protected:
   std::filesystem::path dir;
-  TestController testController;
+  TestController test_controller;
 };
 
 TEST_CASE("C2NullConfiguration", "[c2test]") {

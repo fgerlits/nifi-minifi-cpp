@@ -49,20 +49,20 @@ const char* FOCUSED_FILE = FILE_NAMES[0];
 const char* FOCUSED_CONTENT = FILE_CONTENT[0];
 
 TEST_CASE("Test Creation of FocusArchiveEntry", "[getfileCreate]") {
-  TestController testController;
+  TestController test_controller;
   auto processor = minifi::test::utils::make_processor<FocusArchiveEntry>("processorname");
   REQUIRE(processor->getName() == "processorname");
 }
 
 TEST_CASE("Test Creation of UnfocusArchiveEntry", "[getfileCreate]") {
-  TestController testController;
+  TestController test_controller;
   auto processor = minifi::test::utils::make_processor<UnfocusArchiveEntry>("processorname");
   REQUIRE(processor->getName() == "processorname");
   REQUIRE(processor->getUUID());
 }
 
 TEST_CASE("FocusArchive", "[testFocusArchive]") {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setTrace<FocusArchiveEntry>();
   LogTestController::getInstance().setTrace<UnfocusArchiveEntry>();
   LogTestController::getInstance().setTrace<PutFile>();
@@ -74,12 +74,12 @@ TEST_CASE("FocusArchive", "[testFocusArchive]") {
   LogTestController::getInstance().setTrace<core::Connectable>();
   LogTestController::getInstance().setTrace<core::FlowFile>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
 
-  auto dir1 = testController.createTempDirectory();
-  auto dir2 = testController.createTempDirectory();
-  auto dir3 = testController.createTempDirectory();
+  auto dir1 = test_controller.createTempDirectory();
+  auto dir2 = test_controller.createTempDirectory();
+  auto dir3 = test_controller.createTempDirectory();
 
   REQUIRE(!dir1.empty());
   REQUIRE(!dir2.empty());

@@ -49,7 +49,7 @@ using PROP_MAP_T = std::vector<std::pair<core::PropertyReference, std::string>>;
 namespace org::apache::nifi::minifi::processors::test {
 
 bool run_archive_test(OrderedTestArchive& input_archive, const OrderedTestArchive& output_archive, const PROP_MAP_T& properties, bool check_attributes = true) {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setTrace<FocusArchiveEntry>();
   LogTestController::getInstance().setTrace<UnfocusArchiveEntry>();
   LogTestController::getInstance().setTrace<ManipulateArchive>();
@@ -62,11 +62,11 @@ bool run_archive_test(OrderedTestArchive& input_archive, const OrderedTestArchiv
   LogTestController::getInstance().setTrace<core::Connectable>();
   LogTestController::getInstance().setTrace<core::FlowFile>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
 
-  auto dir1 = testController.createTempDirectory();
-  auto dir2 = testController.createTempDirectory();
+  auto dir1 = test_controller.createTempDirectory();
+  auto dir2 = test_controller.createTempDirectory();
 
   REQUIRE(!dir1.empty());
   REQUIRE(!dir2.empty());
@@ -110,7 +110,7 @@ bool run_archive_test(TAE_MAP_T input_map, TAE_MAP_T output_map, const PROP_MAP_
 }
 
 TEST_CASE("Test creation of ManipulateArchive", "[manipulatearchiveCreate]") {
-  TestController testController;
+  TestController test_controller;
   auto processor = minifi::test::utils::make_processor<ManipulateArchive>("processorname");
   REQUIRE(processor->getName() == "processorname");
   REQUIRE(processor->getUUID());

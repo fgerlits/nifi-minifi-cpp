@@ -185,10 +185,10 @@ class PutSFTPTestsFixture {
   }
 
  protected:
-  TestController testController;
-  std::filesystem::path src_dir = testController.createTempDirectory();
-  std::filesystem::path dst_dir = testController.createTempDirectory();
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  TestController test_controller;
+  std::filesystem::path src_dir = test_controller.createTempDirectory();
+  std::filesystem::path dst_dir = test_controller.createTempDirectory();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::unique_ptr<SFTPTestServer> sftp_server;
   core::Processor* get_file;
   core::Processor* put;
@@ -203,7 +203,7 @@ std::size_t directoryContentCount(const std::filesystem::path& dir) {
 TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP put one file", "[PutSFTP][basic]") {
   createFile(src_dir, "tstFile.ext", "tempFile");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile("nifi_test/tstFile.ext", "tempFile");
 }
@@ -212,7 +212,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP put two files", "[PutSFTP][basic]
   createFile(src_dir, "tstFile1.ext", "content 1");
   createFile(src_dir, "tstFile2.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile("nifi_test/tstFile1.ext", "content 1");
   testFile("nifi_test/tstFile2.ext", "content 2");
@@ -223,7 +223,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP bad password", "[PutSFTP][authent
   createFile(src_dir, "tstFile.ext", "tempFile");
 
   try {
-    testController.runSession(plan, true);
+    test_controller.runSession(plan, true);
   } catch (std::exception &e) {
     const std::string expected = minifi::Exception(minifi::PROCESS_SESSION_EXCEPTION, "Can not find the transfer relationship for the updated flow").what();
     REQUIRE(0 == std::string(e.what()).compare(0, expected.size(), expected));
@@ -239,7 +239,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP public key authentication success
 
   createFile(src_dir, "tstFile.ext", "tempFile");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("Successfully authenticated with publickey"));
   testFile("nifi_test/tstFile.ext", "tempFile");
@@ -253,7 +253,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP public key authentication bad pas
   createFile(src_dir, "tstFile.ext", "tempFile");
 
   try {
-    testController.runSession(plan, true);
+    test_controller.runSession(plan, true);
   } catch (std::exception &e) {
     const std::string expected = minifi::Exception(minifi::PROCESS_SESSION_EXCEPTION, "Can not find the transfer relationship for the updated flow").what();
     REQUIRE(0 == std::string(e.what()).compare(0, expected.size(), expected));
@@ -268,7 +268,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP public key authentication bad pas
 
   createFile(src_dir, "tstFile.ext", "tempFile");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains(PUBLIC_KEY_AUTH_ERROR_MESSAGE));
   REQUIRE(LogTestController::getInstance().contains("Successfully authenticated with password"));
@@ -281,7 +281,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP host key checking success", "[Put
 
   createFile(src_dir, "tstFile.ext", "tempFile");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("Host key verification succeeded for localhost"));
   testFile("nifi_test/tstFile.ext", "tempFile");
@@ -296,7 +296,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP host key checking missing strict"
   createFile(src_dir, "tstFile.ext", "tempFile");
 
   try {
-    testController.runSession(plan, true);
+    test_controller.runSession(plan, true);
   } catch (std::exception &e) {
     const std::string expected = minifi::Exception(minifi::PROCESS_SESSION_EXCEPTION, "Can not find the transfer relationship for the updated flow").what();
     REQUIRE(0 == std::string(e.what()).compare(0, expected.size(), expected));
@@ -313,7 +313,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP host key checking missing non-str
 
   createFile(src_dir, "tstFile.ext", "tempFile");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("Host 127.0.0.1 not found in the host key file"));
   testFile("nifi_test/tstFile.ext", "tempFile");
@@ -326,7 +326,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP host key checking mismatch strict
   createFile(src_dir, "tstFile.ext", "tempFile");
 
   try {
-    testController.runSession(plan, true);
+    test_controller.runSession(plan, true);
   } catch (std::exception &e) {
     const std::string expected = minifi::Exception(minifi::PROCESS_SESSION_EXCEPTION, "Can not find the transfer relationship for the updated flow").what();
     REQUIRE(0 == std::string(e.what()).compare(0, expected.size(), expected));
@@ -355,7 +355,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution rename", "[Pu
   REQUIRE(0 == utils::file::create_dir(dst_dir / "vfs" / "nifi_test"));
   createFile(dst_dir / "vfs", "nifi_test/tstFile1.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
   testFile("nifi_test/1.tstFile1.ext", "content 1");
@@ -369,7 +369,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution reject", "[Pu
   REQUIRE(0 == utils::file::create_dir(dst_dir / "vfs" / "nifi_test"));
   createFile(dst_dir / "vfs", "nifi_test/tstFile1.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship reject"));
   testFile("nifi_test/tstFile1.ext", "content 2");
@@ -382,7 +382,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution fail", "[PutS
   REQUIRE(0 == utils::file::FileUtils::create_dir(dst_dir / "vfs" / "nifi_test"));
   createFile(dst_dir / "vfs", "nifi_test/tstFile1.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
   testFile("nifi_test/tstFile1.ext", "content 2");
@@ -395,7 +395,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution ignore", "[Pu
   REQUIRE(0 == utils::file::FileUtils::create_dir(dst_dir / "vfs" / "nifi_test"));
   createFile(dst_dir / "vfs", "nifi_test/tstFile1.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("Routing tstFile1.ext to SUCCESS despite a file with the same name already existing"));
   REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
@@ -409,7 +409,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution replace", "[P
   REQUIRE(0 == utils::file::FileUtils::create_dir(dst_dir / "vfs" / "nifi_test"));
   createFile(dst_dir / "vfs", "nifi_test/tstFile1.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
   testFile("nifi_test/tstFile1.ext", "content 1");
@@ -422,7 +422,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution none", "[PutS
   REQUIRE(0 == utils::file::FileUtils::create_dir(dst_dir / "vfs" / "nifi_test"));
   createFile(dst_dir / "vfs", "nifi_test/tstFile1.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
   testFile("nifi_test/tstFile1.ext", "content 2");
@@ -454,7 +454,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution with director
   REQUIRE(0 == utils::file::FileUtils::create_dir(dst_dir / "vfs" / "nifi_test"));
   REQUIRE(0 == utils::file::FileUtils::create_dir(dst_dir / "vfs" / "nifi_test" / "tstFile1.ext"));
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   if (should_predetect_failure) {
     REQUIRE(LogTestController::getInstance().contains("Rejecting tstFile1.ext because a directory with the same name already exists"));
@@ -470,7 +470,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP reject zero-byte false", "[PutSFT
 
   createFile(src_dir, "tstFile1.ext", "");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
   testFile("nifi_test/tstFile1.ext", "");
@@ -481,7 +481,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP reject zero-byte true", "[PutSFTP
 
   createFile(src_dir, "tstFile1.ext", "");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("Rejecting tstFile1.ext because it is zero bytes"));
   REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship reject"));
@@ -493,7 +493,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP set mtime", "[PutSFTP]") {
 
   createFile(src_dir, "tstFile1.ext", "content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile("nifi_test/tstFile1.ext", "content 1");
   constexpr auto modification_time = date::sys_days(date::January / 24 / 2065) + 5h + 20min;
@@ -506,7 +506,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP set permissions", "[PutSFTP]") {
 
   createFile(src_dir, "tstFile1.ext", "content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile("nifi_test/tstFile1.ext", "content 1");
   testPermissions("nifi_test/tstFile1.ext", 0613);
@@ -524,7 +524,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP set uid and gid", "[PutSFTP]") {
 
   createFile(src_dir, "tstFile1.ext", "content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile("nifi_test/tstFile1.ext", "content 1");
   testOwner("nifi_test/tstFile1.ext", 1234);
@@ -537,7 +537,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP disable directory creation", "[Pu
 
   createFile(src_dir, "tstFile1.ext", "content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
   testFileNotExists("nifi_test/tstFile1.ext");
@@ -563,7 +563,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP test dot rename", "[PutSFTP]") {
   REQUIRE(0 == utils::file::FileUtils::create_dir(dst_dir / "vfs" / "nifi_test"));
   createFile(dst_dir / "vfs", "nifi_test/.tstFile1.ext", "");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   if (should_fail) {
     REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
@@ -595,7 +595,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP test temporary filename", "[PutSF
   REQUIRE(0 == utils::file::FileUtils::create_dir(dst_dir / "vfs" / "nifi_test"));
   createFile(dst_dir / "vfs", "nifi_test/tstFile1.ext.temp", "");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   if (should_fail) {
     REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
@@ -613,7 +613,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP test temporary file cleanup", "[P
   REQUIRE(0 == utils::file::FileUtils::create_dir(dst_dir / "vfs" / "nifi_test"));
   createFile(dst_dir / "vfs", "nifi_test/tstFile1.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
   testFile("nifi_test/tstFile1.ext", "content 2");
@@ -633,7 +633,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP test disable directory listing", 
 
   createFile(src_dir, "tstFile1.ext", "content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
   testFileNotExists("nifi_test/inner/tstFile1.ext");
@@ -645,7 +645,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP connection caching reuse", "[PutS
   createFile(src_dir, "tstFile1.ext", "content 1");
   createFile(src_dir, "tstFile2.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile("nifi_test/tstFile1.ext", "content 1");
   testFile("nifi_test/tstFile2.ext", "content 2");
@@ -662,20 +662,20 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP connection caching does not reuse
   sftp_server.reset();
 
   try {
-    testController.runSession(plan, true);
+    test_controller.runSession(plan, true);
   } catch (std::exception &e) {
     const std::string expected = minifi::Exception(minifi::PROCESS_SESSION_EXCEPTION, "Can not find the transfer relationship for the updated flow").what();
     REQUIRE(0 == std::string(e.what()).compare(0, expected.size(), expected));
   }
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(false == LogTestController::getInstance().contains("Adding nifiuser@localhost:" + std::to_string(port) + " to SFTP connection pool"));
   REQUIRE(LogTestController::getInstance().contains("Cannot connect to SFTP server"));
 }
 
 TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP connection caching reaches limit", "[PutSFTP][connection-caching]") {
-  plan = testController.createPlan();
+  plan = test_controller.createPlan();
   get_file = plan->addProcessor(
       "GetFile",
       "GetFile");
@@ -724,12 +724,12 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP connection caching reaches limit"
   std::vector<std::unique_ptr<SFTPTestServer>> sftp_servers;
 
   for (size_t i = 0; i < 10; i++) {
-    std::string destination_dir = testController.createTempDirectory();
+    std::string destination_dir = test_controller.createTempDirectory();
     sftp_servers.emplace_back(std::make_unique<SFTPTestServer>(destination_dir));
     REQUIRE(true == sftp_servers.back()->start());
     createFile(src_dir, "tstFile" + std::to_string(i) + ".ext", std::to_string(sftp_servers.back()->getPort()));
 
-    testController.runSession(plan, true);
+    test_controller.runSession(plan, true);
     plan->reset();
 
     if (i == 8) {
@@ -750,7 +750,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP batching two files in one batch",
   createFile(src_dir, "tstFile1.ext", "content 1");
   createFile(src_dir, "tstFile2.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   REQUIRE(2U == directoryContentCount(dst_dir / "vfs" / "nifi_test"));
 }
@@ -761,14 +761,14 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP batching two files in two batches
   createFile(src_dir, "tstFile1.ext", "content 1");
   createFile(src_dir, "tstFile2.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
   REQUIRE(1U == directoryContentCount(dst_dir / "vfs" / "nifi_test"));
   plan->reset();
 
   createFile(src_dir, "tstFile1.ext", "content 1");
   createFile(src_dir, "tstFile2.ext", "content 2");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
   REQUIRE(2U == directoryContentCount(dst_dir / "vfs" / "nifi_test"));
   plan->reset();
 }
@@ -785,7 +785,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP batching does not fail even if on
   createFile(dst_dir / "vfs", "nifi_test/tstFile1.ext", "content other");
   createFile(dst_dir / "vfs", "nifi_test/tstFile2.ext", "content other");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile("nifi_test/tstFile3.ext", "content 3");
 
@@ -800,13 +800,13 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP put large file", "[PutSFTP]") {
 
   createFile(src_dir, "tstFile.ext", content);
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile("nifi_test/tstFile.ext", content);
 }
 
 TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP expression language test", "[PutSFTP]") {
-  plan = testController.createPlan();
+  plan = test_controller.createPlan();
   get_file = plan->addProcessor(
       "GetFile",
       "GetFile");
@@ -869,7 +869,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP expression language test", "[PutS
 
   createFile(src_dir, "tstFile.ext", "some content");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile("nifi_test/tstFile.ext", "some content");
 }

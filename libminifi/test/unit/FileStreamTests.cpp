@@ -26,8 +26,8 @@
 #include "utils/file/FileUtils.h"
 
 TEST_CASE("TestFileOverWrite", "[TestFiles]") {
-  TestController testController;
-  const auto path = testController.createTempDirectory() / "tstFile.ext";
+  TestController test_controller;
+  const auto path = test_controller.createTempDirectory() / "tstFile.ext";
 
   std::fstream file;
   file.open(path, std::ios::out);
@@ -59,8 +59,8 @@ TEST_CASE("TestFileOverWrite", "[TestFiles]") {
 }
 
 TEST_CASE("TestFileBadArgumentNoChange", "[TestLoader]") {
-  TestController testController;
-  const auto path = testController.createTempDirectory() / "tstFile.ext";
+  TestController test_controller;
+  const auto path = test_controller.createTempDirectory() / "tstFile.ext";
 
   std::fstream file;
   file.open(path, std::ios::out);
@@ -92,8 +92,8 @@ TEST_CASE("TestFileBadArgumentNoChange", "[TestLoader]") {
 }
 
 TEST_CASE("TestFileBadArgumentNoChange2", "[TestLoader]") {
-  TestController testController;
-  const auto path = testController.createTempDirectory() / "tstFile.ext";
+  TestController test_controller;
+  const auto path = test_controller.createTempDirectory() / "tstFile.ext";
 
   std::fstream file;
   file.open(path, std::ios::out);
@@ -125,8 +125,8 @@ TEST_CASE("TestFileBadArgumentNoChange2", "[TestLoader]") {
 }
 
 TEST_CASE("TestFileBadArgumentNoChange3", "[TestLoader]") {
-  TestController testController;
-  auto path = testController.createTempDirectory() / "tstFile.ext";
+  TestController test_controller;
+  auto path = test_controller.createTempDirectory() / "tstFile.ext";
 
   std::fstream file;
   file.open(path, std::ios::out);
@@ -155,8 +155,8 @@ TEST_CASE("TestFileBadArgumentNoChange3", "[TestLoader]") {
 }
 
 TEST_CASE("TestFileBeyondEnd3", "[TestLoader]") {
-  TestController testController;
-  const auto path = testController.createTempDirectory() / "tstFile.ext";
+  TestController test_controller;
+  const auto path = test_controller.createTempDirectory() / "tstFile.ext";
 
   std::fstream file;
   file.open(path, std::ios::out);
@@ -185,8 +185,8 @@ TEST_CASE("TestFileBeyondEnd3", "[TestLoader]") {
 }
 
 TEST_CASE("TestFileExceedSize", "[TestLoader]") {
-  TestController testController;
-  auto path = testController.createTempDirectory() / "tstFile.ext";
+  TestController test_controller;
+  auto path = test_controller.createTempDirectory() / "tstFile.ext";
 
   std::fstream file;
   file.open(path, std::ios::out);
@@ -215,15 +215,15 @@ TEST_CASE("TestFileExceedSize", "[TestLoader]") {
 }
 
 TEST_CASE("Write zero bytes") {
-  TestController testController;
-  const auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  const auto dir = test_controller.createTempDirectory();
   minifi::io::FileStream stream(dir / "test.txt", 0, true);
   REQUIRE(stream.write(nullptr, 0) == 0);
 }
 
 TEST_CASE("Read zero bytes") {
-  TestController testController;
-  const auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  const auto dir = test_controller.createTempDirectory();
   minifi::io::FileStream stream(dir / "test.txt", 0, true);
   std::array<std::byte, 1> fake_buffer{};
   REQUIRE(stream.read(std::span(fake_buffer).subspan(0, 0)) == 0);

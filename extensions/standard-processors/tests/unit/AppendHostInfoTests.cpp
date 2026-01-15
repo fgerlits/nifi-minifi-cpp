@@ -25,23 +25,23 @@ using AppendHostInfo = org::apache::nifi::minifi::processors::AppendHostInfo;
 using LogAttribute = org::apache::nifi::minifi::processors::LogAttribute;
 
 TEST_CASE("AppendHostInfoTest", "[appendhostinfotest]") {
-  TestController testController;
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  TestController test_controller;
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   LogTestController::getInstance().setTrace<minifi::processors::AppendHostInfo>();
   LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
   plan->addProcessor("GenerateFlowFile", "generate_flow_file");
   plan->addProcessor("AppendHostInfo", "append_host_info", core::Relationship("success", "description"), true);
   plan->addProcessor("LogAttribute", "log_attributes", core::Relationship("success", "description"), true);
 
-  testController.runSession(plan);
+  test_controller.runSession(plan);
 
   REQUIRE(LogTestController::getInstance().contains("source.hostname"));
   REQUIRE(LogTestController::getInstance().contains("source.ipv4"));
 }
 
 TEST_CASE("AppendHostInfoTestWithUnmatchableRegex", "[appendhostinfotestunmatchableregex]") {
-  TestController testController;
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  TestController test_controller;
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   LogTestController::getInstance().setTrace<minifi::processors::AppendHostInfo>();
   LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
   plan->addProcessor("GenerateFlowFile", "generate_flow_file");
@@ -50,7 +50,7 @@ TEST_CASE("AppendHostInfoTestWithUnmatchableRegex", "[appendhostinfotestunmatcha
 
   plan->setProperty(append_host_info, AppendHostInfo::InterfaceNameFilter, "\b");
 
-  testController.runSession(plan);
+  test_controller.runSession(plan);
 
   using namespace std::literals;
   REQUIRE(LogTestController::getInstance().contains("source.hostname", 0s, 0ms));
@@ -58,8 +58,8 @@ TEST_CASE("AppendHostInfoTestWithUnmatchableRegex", "[appendhostinfotestunmatcha
 }
 
 TEST_CASE("AppendHostInfoTestCanFilterOutLoopbackInterfacesWithRegex", "[appendhostinfotestfilterloopback]") {
-  TestController testController;
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  TestController test_controller;
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   LogTestController::getInstance().setTrace<minifi::processors::AppendHostInfo>();
   LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
   plan->addProcessor("GenerateFlowFile", "generate_flow_file");
@@ -68,7 +68,7 @@ TEST_CASE("AppendHostInfoTestCanFilterOutLoopbackInterfacesWithRegex", "[appendh
 
   plan->setProperty(append_host_info, AppendHostInfo::InterfaceNameFilter, "(?!Loopback|lo).*?");  // set up the regex to accept everything except interfaces starting with Loopback or lo
 
-  testController.runSession(plan);
+  test_controller.runSession(plan);
 
   using namespace std::literals;
   REQUIRE(LogTestController::getInstance().contains("source.hostname", 0s, 0ms));

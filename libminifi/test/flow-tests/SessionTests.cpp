@@ -47,7 +47,7 @@ class TestProcessor : public minifi::core::ProcessorImpl {
 };
 
 TEST_CASE("Import null data") {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setTrace<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setTrace<core::repository::VolatileContentRepository>();
@@ -56,7 +56,7 @@ TEST_CASE("Import null data") {
   LogTestController::getInstance().setTrace<core::repository::FlowFileRepository>();
   LogTestController::getInstance().setTrace<core::repository::DatabaseContentRepository>();
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   auto config = std::make_shared<minifi::ConfigureImpl>();
   config->set(minifi::Configure::nifi_dbcontent_repository_directory_default, (dir / "content_repository").string());
@@ -66,15 +66,15 @@ TEST_CASE("Import null data") {
   std::shared_ptr<core::Repository> ff_repository = std::make_shared<core::repository::FlowFileRepository>("flowFileRepository");
   std::shared_ptr<core::ContentRepository> content_repo;
   SECTION("VolatileContentRepository") {
-    testController.getLogger()->log_info("Using VolatileContentRepository");
+    test_controller.getLogger()->log_info("Using VolatileContentRepository");
     content_repo = std::make_shared<core::repository::VolatileContentRepository>();
   }
   SECTION("FileSystemContentRepository") {
-    testController.getLogger()->log_info("Using FileSystemRepository");
+    test_controller.getLogger()->log_info("Using FileSystemRepository");
     content_repo = std::make_shared<core::repository::FileSystemRepository>();
   }
   SECTION("DatabaseContentRepository") {
-    testController.getLogger()->log_info("Using DatabaseContentRepository");
+    test_controller.getLogger()->log_info("Using DatabaseContentRepository");
     content_repo = std::make_shared<core::repository::DatabaseContentRepository>();
   }
   ff_repository->initialize(config);

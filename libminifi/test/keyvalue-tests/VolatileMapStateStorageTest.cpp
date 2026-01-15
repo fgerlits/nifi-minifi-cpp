@@ -63,7 +63,7 @@ class VolatileMapStateStorageTestFixture {
     LogTestController::getInstance().setTrace<minifi::controllers::KeyValueStateStorage>();
     LogTestController::getInstance().setTrace<minifi::controllers::AutoPersistor>();
 
-    std::filesystem::current_path(testController.createTempDirectory());
+    std::filesystem::current_path(test_controller.createTempDirectory());
 
     configuration->set(minifi::Configure::nifi_flow_configuration_file, config_yaml);
     content_repo->initialize(configuration);
@@ -106,7 +106,7 @@ class VolatileMapStateStorageTestFixture {
 
   std::shared_ptr<minifi::controllers::KeyValueStateStorage> controller;
 
-  TestController testController;
+  TestController test_controller;
 };
 
 TEST_CASE_METHOD(VolatileMapStateStorageTestFixture, "VolatileMapStateStorageTest set and get", "[basic]") {

@@ -72,7 +72,7 @@ class ListenHTTPTestsFixture {
     LogTestController::getInstance().setDebug<minifi::controllers::SSLContextServiceInterface>();
 
     // Create temporary directories
-    tmp_dir = testController.createTempDirectory();
+    tmp_dir = test_controller.createTempDirectory();
     REQUIRE(!tmp_dir.empty());
 
     // Define test input file
@@ -82,7 +82,7 @@ class ListenHTTPTestsFixture {
     }
 
     // Build MiNiFi processing graph
-    plan = testController.createPlan();
+    plan = test_controller.createPlan();
     get_file = plan->addProcessor(
         "GetFile",
         "GetFile");
@@ -251,7 +251,7 @@ class ListenHTTPTestsFixture {
 
  protected:
   std::filesystem::path tmp_dir;
-  TestController testController;
+  TestController test_controller;
   std::shared_ptr<TestPlan> plan;
   core::Processor* get_file = nullptr;
   core::Processor* update_attribute = nullptr;
@@ -269,7 +269,7 @@ class ListenHTTPTestsFixture {
 };
 
 TEST_CASE("ListenHTTP creation", "[basic]") {
-  TestController testController;
+  TestController test_controller;
   std::shared_ptr<core::Processor>
       processor = minifi::test::utils::make_processor<org::apache::nifi::minifi::processors::ListenHTTP>("processorname");
   REQUIRE(processor->getName() == "processorname");

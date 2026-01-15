@@ -30,7 +30,7 @@ class VerifyC2DescribeCoreComponentState : public VerifyC2Describe {
  public:
   explicit VerifyC2DescribeCoreComponentState(const std::filesystem::path& test_file_path, std::atomic_bool& verified)
     : VerifyC2Describe(test_file_path, verified) {
-    temp_dir_ = testController.createTempDirectory();
+    temp_dir_ = test_controller.createTempDirectory();
 
     test_file_1_ = temp_dir_ / "test1.txt";
     test_file_2_ = temp_dir_ / "test2.txt";
@@ -55,7 +55,7 @@ class VerifyC2DescribeCoreComponentState : public VerifyC2Describe {
       [&](minifi::state::StateController& component) {setFileName(test_file_2_, component);});
   }
 
-  TestController testController;
+  TestController test_controller;
   std::filesystem::path temp_dir_;
   std::filesystem::path test_file_1_;
   std::filesystem::path test_file_2_;

@@ -40,7 +40,7 @@ class SiteToSiteTestHarness : public HTTPIntegrationBase {
  public:
   explicit SiteToSiteTestHarness(const std::filesystem::path& test_file_path, std::chrono::seconds waitTime = 2s)
       : HTTPIntegrationBase(test_file_path, {}, waitTime) {
-    dir = testController.createTempDirectory();
+    dir = test_controller.createTempDirectory();
   }
 
   void testSetup() override {
@@ -68,7 +68,7 @@ class SiteToSiteTestHarness : public HTTPIntegrationBase {
 
  protected:
   std::filesystem::path dir;
-  TestController testController;
+  TestController test_controller;
 };
 
 struct test_profile {

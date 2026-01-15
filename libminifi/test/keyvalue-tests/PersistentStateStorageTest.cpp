@@ -63,7 +63,7 @@ class PersistentStateStorageTestsFixture {
     LogTestController::getInstance().setTrace<minifi::controllers::KeyValueStateStorage>();
     LogTestController::getInstance().setTrace<minifi::controllers::AutoPersistor>();
 
-    std::filesystem::current_path(testController.createTempDirectory());
+    std::filesystem::current_path(test_controller.createTempDirectory());
     loadYaml();
   }
 
@@ -116,7 +116,7 @@ class PersistentStateStorageTestsFixture {
   }
 
  protected:
-  TestController testController;
+  TestController test_controller;
   std::shared_ptr<minifi::Configure> configuration;
   std::shared_ptr<core::Repository> test_repo;
   std::shared_ptr<core::Repository> test_flow_repo;

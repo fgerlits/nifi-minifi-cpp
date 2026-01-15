@@ -72,8 +72,8 @@ TEST_CASE("Test Repo Empty Value Attribute", "[TestFFR1]") {
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
-  TestController testController;
-  const auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  const auto dir = test_controller.createTempDirectory();
   const auto repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir.string(), 0ms, 0, 1ms);
 
   const auto configuration = std::make_shared<minifi::ConfigureImpl>();
@@ -93,8 +93,8 @@ TEST_CASE("Test Repo Empty Key Attribute ", "[TestFFR2]") {
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
-  TestController testController;
-  const auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  const auto dir = test_controller.createTempDirectory();
   const auto repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir.string(), 0ms, 0, 1ms);
 
   const auto configuration = std::make_shared<minifi::ConfigureImpl>();
@@ -115,8 +115,8 @@ TEST_CASE("Test Repo Key Attribute Verify ", "[TestFFR3]") {
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
   const auto repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir.string(), 0ms, 0, 1ms);
 
   const auto configuration = std::make_shared<minifi::ConfigureImpl>();
@@ -158,13 +158,13 @@ TEST_CASE("Test Repo Key Attribute Verify ", "[TestFFR3]") {
 }
 
 TEST_CASE("Test Delete Content ", "[TestFFR4]") {
-  TestController testController;
+  TestController test_controller;
 
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   const auto repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir.string(), 0ms, 0, 1ms);
 
@@ -207,14 +207,14 @@ TEST_CASE("Test Delete Content ", "[TestFFR4]") {
 }
 
 TEST_CASE("Test Validate Checkpoint ", "[TestFFR5]") {
-  TestController testController;
+  TestController test_controller;
 
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setTrace<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setTrace<minifi::ResourceClaim>();
   LogTestController::getInstance().setTrace<minifi::FlowFileRecord>();
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   const auto repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir.string(), 0ms, 0, 1ms);
 
@@ -267,14 +267,14 @@ TEST_CASE("Test Validate Checkpoint ", "[TestFFR5]") {
 }
 
 TEST_CASE("Test FlowFile Restore", "[TestFFR6]") {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setTrace<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setTrace<minifi::ResourceClaim>();
   LogTestController::getInstance().setTrace<minifi::FlowFileRecord>();
   LogTestController::getInstance().setTrace<minifi::core::repository::FlowFileRepository>();
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   auto config = std::make_shared<minifi::ConfigureImpl>();
   config->set(minifi::Configure::nifi_dbcontent_repository_directory_default, (dir / "content_repository").string());
@@ -373,8 +373,8 @@ TEST_CASE("Flush deleted flowfiles before shutdown", "[TestFFR7]") {
     std::function<void()> onFlush_;
   };
 
-  TestController testController;
-  const auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  const auto dir = test_controller.createTempDirectory();
 
   const auto config = std::make_shared<minifi::ConfigureImpl>();
   config->set(minifi::Configure::nifi_flowfile_repository_directory_default, (dir / "flowfile_repository").string());
@@ -448,9 +448,9 @@ TEST_CASE("FlowFileRepository triggers content repo orphan clear") {
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
-  TestController testController;
-  auto ff_dir = testController.createTempDirectory();
-  auto content_dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto ff_dir = test_controller.createTempDirectory();
+  auto content_dir = test_controller.createTempDirectory();
 
   auto config = std::make_shared<minifi::ConfigureImpl>();
   config->set(minifi::Configure::nifi_flowfile_repository_directory_default, ff_dir.string());
@@ -465,7 +465,7 @@ TEST_CASE("FlowFileRepository triggers content repo orphan clear") {
     content_repo->incrementStreamCount(claim);
   }
 
-  REQUIRE(utils::file::list_dir_all(content_dir, testController.getLogger()).size() == 1);
+  REQUIRE(utils::file::list_dir_all(content_dir, test_controller.getLogger()).size() == 1);
 
   auto ff_repo = std::make_shared<core::repository::FlowFileRepository>();
   REQUIRE(ff_repo->initialize(config));
@@ -474,16 +474,16 @@ TEST_CASE("FlowFileRepository triggers content repo orphan clear") {
 
   ff_repo->loadComponent(content_repo);
 
-  REQUIRE(utils::file::list_dir_all(content_dir, testController.getLogger()).empty());
+  REQUIRE(utils::file::list_dir_all(content_dir, test_controller.getLogger()).empty());
 }
 
 TEST_CASE("FlowFileRepository synchronously pushes existing flow files") {
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
-  TestController testController;
-  const auto ff_dir = testController.createTempDirectory();
-  const auto content_dir = testController.createTempDirectory();
+  TestController test_controller;
+  const auto ff_dir = test_controller.createTempDirectory();
+  const auto content_dir = test_controller.createTempDirectory();
 
   const auto config = std::make_shared<minifi::ConfigureImpl>();
   config->set(minifi::Configure::nifi_flowfile_repository_directory_default, ff_dir.string());
@@ -537,8 +537,8 @@ TEST_CASE("Test getting flow file repository size properties", "[TestGettingRepo
   LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
   LogTestController::getInstance().setDebug<minifi::provenance::ProvenanceRepository>();
   LogTestController::getInstance().setDebug<core::repository::VolatileProvenanceRepository>();
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
 
   std::shared_ptr<core::Repository> repository;
   auto expected_is_full = false;
@@ -602,7 +602,7 @@ TEST_CASE("Test getting flow file repository size properties", "[TestGettingRepo
 }
 
 TEST_CASE("Test getting noop repository size properties", "[TestGettingRepositorySize]") {
-  TestController testController;
+  TestController test_controller;
 
   const auto repository = minifi::core::createRepository("NoOpRepository", "ff");
 
@@ -627,12 +627,12 @@ TEST_CASE("Test getting content repository size properties", "[TestGettingReposi
   LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setDebug<core::repository::VolatileContentRepository>();
   LogTestController::getInstance().setDebug<core::repository::DatabaseContentRepository>();
-  TestController testController;
-  const auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  const auto dir = test_controller.createTempDirectory();
 
   const auto repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir.string(), 0ms, 0, 1ms);
 
-  const auto content_repo_dir = testController.createTempDirectory();
+  const auto content_repo_dir = test_controller.createTempDirectory();
   const auto configuration = std::make_shared<minifi::ConfigureImpl>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, content_repo_dir.string());
   const std::string content = "content";
@@ -699,8 +699,8 @@ TEST_CASE("Flow file repositories can be stopped", "[TestRepoIsRunning]") {
   LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
   LogTestController::getInstance().setDebug<minifi::provenance::ProvenanceRepository>();
   LogTestController::getInstance().setDebug<core::repository::VolatileProvenanceRepository>();
-  TestController testController;
-  const auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  const auto dir = test_controller.createTempDirectory();
 
   std::shared_ptr<core::Repository> repository;
   SECTION("FlowFileRepository") {
@@ -734,7 +734,7 @@ TEST_CASE("Content repositories are always running", "[TestRepoIsRunning]") {
   LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setDebug<core::repository::VolatileContentRepository>();
   LogTestController::getInstance().setDebug<core::repository::DatabaseContentRepository>();
-  TestController testController;
+  TestController test_controller;
 
   std::shared_ptr<core::ContentRepository> content_repo;
   SECTION("FileSystemRepository") {
@@ -775,9 +775,9 @@ TEST_CASE("FlowFileRepository can filter out too small contents") {
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
-  TestController testController;
-  const auto ff_dir = testController.createTempDirectory();
-  const auto content_dir = testController.createTempDirectory();
+  TestController test_controller;
+  const auto ff_dir = test_controller.createTempDirectory();
+  const auto content_dir = test_controller.createTempDirectory();
 
   auto config = std::make_shared<minifi::ConfigureImpl>();
   config->set(minifi::Configure::nifi_flowfile_repository_directory_default, ff_dir.string());
@@ -786,7 +786,7 @@ TEST_CASE("FlowFileRepository can filter out too small contents") {
   size_t expected_flowfiles = std::numeric_limits<size_t>::max();
   std::shared_ptr<core::ContentRepository> content_repo;
 
-  // Sections are used instead of GENERATE macro to have the content_repo destructed before testController and be able to delete the temp directories
+  // Sections are used instead of GENERATE macro to have the content_repo destructed before test_controller and be able to delete the temp directories
   SECTION("nifi.flowfile.repository.check.health set to false") {
     config->set(minifi::Configure::nifi_flow_file_repository_check_health, "false");
     expected_flowfiles = 2;

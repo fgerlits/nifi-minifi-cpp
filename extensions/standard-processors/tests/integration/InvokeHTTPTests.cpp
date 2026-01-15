@@ -109,12 +109,12 @@ class TestHTTPServer {
 TEST_CASE("HTTPTestsPenalizeNoRetry", "[httptest1]") {
   using minifi::processors::InvokeHTTP;
 
-  TestController testController;
+  TestController test_controller;
   TestHTTPServer http_server;
 
   LogTestController::getInstance().setInfo<minifi::core::ProcessSession>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   plan->addProcessor("GenerateFlowFile", "genfile");
   auto invokehttp = plan->addProcessor("InvokeHTTP", "invokehttp", core::Relationship("success", "description"), true);
 
@@ -126,13 +126,13 @@ TEST_CASE("HTTPTestsPenalizeNoRetry", "[httptest1]") {
 
   SECTION("with penalize on no retry set to true") {
     REQUIRE(plan->setProperty(invokehttp, InvokeHTTP::PenalizeOnNoRetry, "true"));
-    testController.runSession(plan);
+    test_controller.runSession(plan);
     REQUIRE(LogTestController::getInstance().matchesRegex(PENALIZE_LOG_PATTERN));
   }
 
   SECTION("with penalize on no retry set to false") {
     REQUIRE(plan->setProperty(invokehttp, InvokeHTTP::PenalizeOnNoRetry, "false"));
-    testController.runSession(plan);
+    test_controller.runSession(plan);
     REQUIRE_FALSE(LogTestController::getInstance().matchesRegex(PENALIZE_LOG_PATTERN));
   }
 }

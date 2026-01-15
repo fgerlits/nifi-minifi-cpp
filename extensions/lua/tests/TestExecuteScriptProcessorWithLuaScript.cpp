@@ -239,13 +239,13 @@ end
 }
 
 TEST_CASE("Lua: Test Require", "[executescriptLuaRequire]") {
-  TestController testController;
+  TestController test_controller;
 
   LogTestController &logTestController = LogTestController::getInstance();
   logTestController.setDebug<TestPlan>();
   logTestController.setDebug<ExecuteScript>();
 
-  auto plan = testController.createPlan();
+  auto plan = test_controller.createPlan();
 
   auto executeScript = plan->addProcessor("ExecuteScript", "executeScript");
 
@@ -265,7 +265,7 @@ TEST_CASE("Lua: Test Require", "[executescriptLuaRequire]") {
     end
   )"));
 
-  REQUIRE_NOTHROW(testController.runSession(plan, false));
+  REQUIRE_NOTHROW(test_controller.runSession(plan, false));
 
   REQUIRE(LogTestController::getInstance().contains("[info] OK"));
 

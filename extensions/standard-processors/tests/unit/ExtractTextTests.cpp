@@ -45,7 +45,7 @@ const char* TEST_FILE = "test_file.txt";
 const char* TEST_ATTR = "ExtractedText";
 
 TEST_CASE("Test creation of ExtractText", "[extracttextCreate]") {
-  TestController testController;
+  TestController test_controller;
   auto processor = minifi::test::utils::make_processor<org::apache::nifi::minifi::processors::ExtractText>("processorname");
   REQUIRE(processor->getName() == "processorname");
   utils::Identifier processoruuid = processor->getUUID();
@@ -53,7 +53,7 @@ TEST_CASE("Test creation of ExtractText", "[extracttextCreate]") {
 }
 
 TEST_CASE("Test usage of ExtractText", "[extracttextTest]") {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::ExtractText>();
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::GetFile>();
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
@@ -63,10 +63,10 @@ TEST_CASE("Test usage of ExtractText", "[extracttextTest]") {
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::core::Connectable>();
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::core::FlowFile>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
 
-  auto temp_dir = testController.createTempDirectory();
+  auto temp_dir = test_controller.createTempDirectory();
   REQUIRE(!temp_dir.empty());
   auto getfile = plan->addProcessor("GetFile", "getfileCreate2");
   plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::Directory, temp_dir.string());
@@ -123,15 +123,15 @@ TEST_CASE("Test usage of ExtractText", "[extracttextTest]") {
 }
 
 TEST_CASE("Test usage of ExtractText in regex mode", "[extracttextRegexTest]") {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::ExtractText>();
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::GetFile>();
   LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
 
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
   REQUIRE(!dir.empty());
   auto getfile = plan->addProcessor("GetFile", "getfileCreate2");
   plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::Directory, dir.string());
@@ -158,7 +158,7 @@ TEST_CASE("Test usage of ExtractText in regex mode", "[extracttextRegexTest]") {
   SECTION("Do not include capture group 0") {
     plan->setProperty(maprocessor, org::apache::nifi::minifi::processors::ExtractText::IncludeCaptureGroupZero, "false");
 
-    testController.runSession(plan);
+    test_controller.runSession(plan);
 
     expected_logs = {
       "key:RegexAttr value:130",
@@ -168,7 +168,7 @@ TEST_CASE("Test usage of ExtractText in regex mode", "[extracttextRegexTest]") {
   }
 
   SECTION("Include capture group 0") {
-    testController.runSession(plan);
+    test_controller.runSession(plan);
 
     expected_logs = {
       "key:RegexAttr value:Speed limit 130",

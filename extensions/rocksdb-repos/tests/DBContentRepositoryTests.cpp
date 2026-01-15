@@ -39,8 +39,8 @@ class TestDatabaseContentRepository : public core::repository::DatabaseContentRe
 };
 
 TEST_CASE("Write Claim", "[TestDBCR1]") {
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
   auto content_repo = std::make_shared<TestDatabaseContentRepository>();
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::ConfigureImpl>();
@@ -84,9 +84,9 @@ TEST_CASE("Write Claim", "[TestDBCR1]") {
 }
 
 TEST_CASE("Delete Claim", "[TestDBCR2]") {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setDebug<core::repository::DatabaseContentRepository>();
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
   auto content_repo = std::make_shared<TestDatabaseContentRepository>();
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::ConfigureImpl>();
@@ -142,8 +142,8 @@ TEST_CASE("Delete Claim", "[TestDBCR2]") {
 }
 
 TEST_CASE("Append Claim", "[TestDBCR1]") {
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
   auto content_repo = std::make_shared<TestDatabaseContentRepository>();
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::ConfigureImpl>();
@@ -183,8 +183,8 @@ TEST_CASE("Append Claim", "[TestDBCR1]") {
 }
 
 TEST_CASE("Test Empty Claim", "[TestDBCR3]") {
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
   auto content_repo = std::make_shared<TestDatabaseContentRepository>();
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::ConfigureImpl>();
@@ -218,8 +218,8 @@ TEST_CASE("Test Empty Claim", "[TestDBCR3]") {
 }
 
 TEST_CASE("Delete NonExistent Claim", "[TestDBCR4]") {
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
   auto content_repo = std::make_shared<TestDatabaseContentRepository>();
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::ConfigureImpl>();
@@ -258,8 +258,8 @@ TEST_CASE("Delete NonExistent Claim", "[TestDBCR4]") {
 }
 
 TEST_CASE("Delete Remove Count Claim", "[TestDBCR5]") {
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
   auto content_repo = std::make_shared<TestDatabaseContentRepository>();
 
   auto configuration = std::make_shared<org::apache::nifi::minifi::ConfigureImpl>();
@@ -331,8 +331,8 @@ size_t getDbSize(const std::filesystem::path& dir) {
 }
 
 TEST_CASE("DBContentRepository can clear orphan entries") {
-  TestController testController;
-  auto dir = testController.createTempDirectory();
+  TestController test_controller;
+  auto dir = test_controller.createTempDirectory();
   auto configuration = std::make_shared<org::apache::nifi::minifi::ConfigureImpl>();
   configuration->set(minifi::Configure::nifi_dbcontent_repository_directory_default, dir.string());
   {

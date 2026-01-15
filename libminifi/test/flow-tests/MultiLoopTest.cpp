@@ -92,11 +92,11 @@ Controller Services:
 )";
 
 TEST_CASE("Flow with two loops", "[MultiLoopFlow]") {
-  TestControllerWithFlow testController(flowConfigurationYaml);
-  testController.startFlow();
+  TestControllerWithFlow test_controller(flowConfigurationYaml);
+  test_controller.startFlow();
 
-  auto controller = testController.controller_;
-  auto root = testController.root_;
+  auto controller = test_controller.controller_;
+  auto root = test_controller.root_;
 
   TypedProcessorWrapper<org::apache::nifi::minifi::processors::TestFlowFileGenerator> procGenerator = root->findProcessorByName("Generator");
   gsl_Assert(procGenerator);

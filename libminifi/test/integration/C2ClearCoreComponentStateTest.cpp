@@ -35,7 +35,7 @@ class VerifyC2ClearCoreComponentState : public VerifyC2Base {
   explicit VerifyC2ClearCoreComponentState(const std::filesystem::path& test_file_location, const std::atomic_bool& component_cleared_successfully)
       : VerifyC2Base(test_file_location),
         component_cleared_successfully_(component_cleared_successfully) {
-    auto temp_dir = testController.createTempDirectory();
+    auto temp_dir = test_controller.createTempDirectory();
     test_file_1_ = utils::putFileToDir(temp_dir, "test1.txt", "foo\n");
     test_file_2_ = utils::putFileToDir(temp_dir, "test2.txt", "foobar\n");
   }
@@ -72,7 +72,7 @@ class VerifyC2ClearCoreComponentState : public VerifyC2Base {
       [&](minifi::state::StateController& component) {setFileName(test_file_2_, component);});
   }
 
-  TestController testController;
+  TestController test_controller;
   std::filesystem::path test_file_1_;
   std::filesystem::path test_file_2_;
   const std::atomic_bool& component_cleared_successfully_;

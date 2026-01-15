@@ -700,11 +700,11 @@ void writeString(const std::string& str, const std::shared_ptr<minifi::io::Outpu
 }
 
 TEST_CASE("FlowFile serialization", "[testFlowFileSerialization]") {
-  MergeTestController testController;
-  auto context = testController.context_;
-  auto& merge_content_processor = testController.merge_content_processor_;
-  auto& input = testController.input_;
-  auto& output = testController.output_;
+  MergeTestController test_controller;
+  auto context = test_controller.context_;
+  auto& merge_content_processor = test_controller.merge_content_processor_;
+  auto& input = test_controller.input_;
+  auto& output = test_controller.output_;
 
   std::string header = "BEGIN{";
   std::string footer = "}END";

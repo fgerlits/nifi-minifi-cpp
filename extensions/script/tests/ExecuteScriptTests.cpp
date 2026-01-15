@@ -27,8 +27,8 @@
 namespace org::apache::nifi::minifi::processors::test {
 
 TEST_CASE("Script engine is not set", "[executescriptMisconfiguration]") {
-  TestController testController;
-  auto plan = testController.createPlan();
+  TestController test_controller;
+  auto plan = test_controller.createPlan();
 
   auto executeScript = plan->addProcessor("ExecuteScript", "executeScript");
 
@@ -37,18 +37,18 @@ TEST_CASE("Script engine is not set", "[executescriptMisconfiguration]") {
 }
 
 TEST_CASE("Script engine is not available", "[executescriptMisconfiguration]") {
-  TestController testController;
-  auto plan = testController.createPlan();
+  TestController test_controller;
+  auto plan = test_controller.createPlan();
 
   auto executeScript = plan->addProcessor("ExecuteScript", "executeScript");
 
   SECTION("lua") {
     plan->setProperty(executeScript, ExecuteScript::ScriptEngine, "lua");
-    REQUIRE_THROWS_WITH(testController.runSession(plan, true), "Process Schedule Operation: Could not instantiate: LuaScriptExecutor. Make sure that the lua scripting extension is loaded");
+    REQUIRE_THROWS_WITH(test_controller.runSession(plan, true), "Process Schedule Operation: Could not instantiate: LuaScriptExecutor. Make sure that the lua scripting extension is loaded");
   }
   SECTION("python") {
     plan->setProperty(executeScript, ExecuteScript::ScriptEngine, "python");
-    REQUIRE_THROWS_WITH(testController.runSession(plan, true), "Process Schedule Operation: Could not instantiate: PythonScriptExecutor. Make sure that the python scripting extension is loaded");
+    REQUIRE_THROWS_WITH(test_controller.runSession(plan, true), "Process Schedule Operation: Could not instantiate: PythonScriptExecutor. Make sure that the python scripting extension is loaded");
   }
 }
 

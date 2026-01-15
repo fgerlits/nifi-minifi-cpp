@@ -39,7 +39,7 @@ class TailFileTestHarness : public IntegrationBase {
  public:
   explicit TailFileTestHarness(const std::filesystem::path& test_file_location)
       : IntegrationBase(test_file_location) {
-    dir = testController.createTempDirectory();
+    dir = test_controller.createTempDirectory();
 
     statefile = dir / "statefile";
     std::fstream file;
@@ -83,7 +83,7 @@ class TailFileTestHarness : public IntegrationBase {
 
   std::filesystem::path statefile;
   std::filesystem::path dir;
-  TestController testController;
+  TestController test_controller;
 };
 
 TEST_CASE("TailFile integration test", "[tailfile]") {

@@ -74,7 +74,7 @@ class OutputProcessor : public core::ProcessorImpl {
 };
 
 TEST_CASE("Connection will on-demand swap flow files") {
-  TestController testController;
+  TestController test_controller;
   LogTestController::getInstance().setDebug<core::ContentRepository>();
   LogTestController::getInstance().setTrace<core::repository::FileSystemRepository>();
   LogTestController::getInstance().setTrace<core::repository::VolatileContentRepository>();
@@ -84,7 +84,7 @@ TEST_CASE("Connection will on-demand swap flow files") {
   LogTestController::getInstance().setTrace<minifi::FlowFileLoader>();
   LogTestController::getInstance().setTrace<core::repository::FlowFileRepository>();
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   auto config = std::make_shared<minifi::ConfigureImpl>();
   config->set(minifi::Configure::nifi_dbcontent_repository_directory_default, (dir / "content_repository").string());

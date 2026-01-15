@@ -101,11 +101,11 @@ bool verifyWithBusyWait(std::chrono::milliseconds timeout, const Fn& fn) {
 }
 
 TEST_CASE("Flow shutdown drains connections", "[TestFlow1]") {
-  TestControllerWithFlow testController(yamlConfig);
-  auto controller = testController.controller_;
-  auto root = testController.root_;
+  TestControllerWithFlow test_controller(yamlConfig);
+  auto controller = test_controller.controller_;
+  auto root = test_controller.root_;
 
-  testController.configuration_->set(minifi::Configure::nifi_flowcontroller_drain_timeout, "100 ms");
+  test_controller.configuration_->set(minifi::Configure::nifi_flowcontroller_drain_timeout, "100 ms");
 
   TypedProcessorWrapper<minifi::processors::TestProcessor> sinkProc = root->findProcessorByName("TestProcessor");
   gsl_Assert(sinkProc);
@@ -118,7 +118,7 @@ TEST_CASE("Flow shutdown drains connections", "[TestFlow1]") {
   // adds the single connection to the map both by name and id
   REQUIRE(connectionMap.size() == 2);
 
-  testController.startFlow();
+  test_controller.startFlow();
 
   // wait for the generator to create some files
   std::this_thread::sleep_for(std::chrono::milliseconds{1000});
@@ -137,11 +137,11 @@ TEST_CASE("Flow shutdown drains connections", "[TestFlow1]") {
 }
 
 TEST_CASE("Flow shutdown waits for a while", "[TestFlow2]") {
-  TestControllerWithFlow testController(yamlConfig);
-  auto controller = testController.controller_;
-  auto root = testController.root_;
+  TestControllerWithFlow test_controller(yamlConfig);
+  auto controller = test_controller.controller_;
+  auto root = test_controller.root_;
 
-  testController.configuration_->set(minifi::Configure::nifi_flowcontroller_drain_timeout, "10 s");
+  test_controller.configuration_->set(minifi::Configure::nifi_flowcontroller_drain_timeout, "10 s");
 
   TypedProcessorWrapper<minifi::processors::TestFlowFileGenerator> sourceProc = root->findProcessorByName("Generator");
   TypedProcessorWrapper<minifi::processors::TestProcessor> sinkProc = root->findProcessorByName("TestProcessor");
@@ -152,7 +152,7 @@ TEST_CASE("Flow shutdown waits for a while", "[TestFlow2]") {
     execSinkFuture.wait();
   };
 
-  testController.startFlow();
+  test_controller.startFlow();
 
   // wait for the source processor to enqueue its flowFiles
   auto flowFilesEnqueued = [&] { return root->getTotalFlowFileCount() >= 3; };
@@ -168,11 +168,11 @@ TEST_CASE("Flow shutdown waits for a while", "[TestFlow2]") {
 }
 
 TEST_CASE("Flow stopped after grace period", "[TestFlow3]") {
-  TestControllerWithFlow testController(yamlConfig);
-  auto controller = testController.controller_;
-  auto root = testController.root_;
+  TestControllerWithFlow test_controller(yamlConfig);
+  auto controller = test_controller.controller_;
+  auto root = test_controller.root_;
 
-  testController.configuration_->set(minifi::Configure::nifi_flowcontroller_drain_timeout, "1000 ms");
+  test_controller.configuration_->set(minifi::Configure::nifi_flowcontroller_drain_timeout, "1000 ms");
 
   TypedProcessorWrapper<minifi::processors::TestFlowFileGenerator> sourceProc = root->findProcessorByName("Generator");
   TypedProcessorWrapper<minifi::processors::TestProcessor> sinkProc = root->findProcessorByName("TestProcessor");
@@ -189,7 +189,7 @@ TEST_CASE("Flow stopped after grace period", "[TestFlow3]") {
     }
   };
 
-  testController.startFlow();
+  test_controller.startFlow();
 
   // wait for the source processor to enqueue its flowFiles
   auto flowFilesEnqueued = [&] { return root->getTotalFlowFileCount() >= 3; };
@@ -205,13 +205,13 @@ TEST_CASE("Flow stopped after grace period", "[TestFlow3]") {
 }
 
 TEST_CASE("Extend the waiting period during shutdown", "[TestFlow4]") {
-  TestControllerWithFlow testController(yamlConfig);
-  auto controller = testController.controller_;
-  auto root = testController.root_;
+  TestControllerWithFlow test_controller(yamlConfig);
+  auto controller = test_controller.controller_;
+  auto root = test_controller.root_;
 
   std::chrono::milliseconds timeout_ms = 1000ms;
 
-  testController.configuration_->set(minifi::Configure::nifi_flowcontroller_drain_timeout, fmt::format("{}", timeout_ms));
+  test_controller.configuration_->set(minifi::Configure::nifi_flowcontroller_drain_timeout, fmt::format("{}", timeout_ms));
 
   TypedProcessorWrapper<minifi::processors::TestFlowFileGenerator> sourceProc = root->findProcessorByName("Generator");
   TypedProcessorWrapper<minifi::processors::TestProcessor> sinkProc = root->findProcessorByName("TestProcessor");
@@ -228,7 +228,7 @@ TEST_CASE("Extend the waiting period during shutdown", "[TestFlow4]") {
     }
   };
 
-  testController.startFlow();
+  test_controller.startFlow();
 
   // wait for the source processor to enqueue its flowFiles
   auto flowFilesEnqueued = [&] { return root->getTotalFlowFileCount() >= 3; };
@@ -247,9 +247,9 @@ TEST_CASE("Extend the waiting period during shutdown", "[TestFlow4]") {
   std::this_thread::sleep_for(std::chrono::milliseconds{500});
   while (shutdownDuration() < std::chrono::milliseconds(5000) && controller->isRunning()) {
     timeout_ms += 500ms;
-    testController.getLogger()->log_info("Controller still running after {}, extending the waiting period to {}, ff count: {}",
+    test_controller.getLogger()->log_info("Controller still running after {}, extending the waiting period to {}, ff count: {}",
         shutdownDuration(), timeout_ms, static_cast<unsigned int>(root->getTotalFlowFileCount()));
-    testController.configuration_->set(minifi::Configure::nifi_flowcontroller_drain_timeout, fmt::format("{}", timeout_ms));
+    test_controller.configuration_->set(minifi::Configure::nifi_flowcontroller_drain_timeout, fmt::format("{}", timeout_ms));
     std::this_thread::sleep_for(std::chrono::milliseconds{500});
   }
 

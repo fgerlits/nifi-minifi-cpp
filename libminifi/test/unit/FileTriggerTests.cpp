@@ -45,9 +45,9 @@ TEST_CASE("invalidfile file", "[t2]") {
 }
 
 TEST_CASE("test valid  file no update", "[t3]") {
-  TestController testController;
+  TestController test_controller;
 
-  auto path = testController.createTempDirectory() / "tstFile.ext";
+  auto path = test_controller.createTempDirectory() / "tstFile.ext";
   std::fstream file;
   file.open(path, std::ios::out);
   file << "tempFile";
@@ -63,9 +63,9 @@ TEST_CASE("test valid  file no update", "[t3]") {
 }
 
 TEST_CASE("test valid file update", "[t4]") {
-  TestController testController;
+  TestController test_controller;
 
-  auto path = testController.createTempDirectory() / "tstFile.ext";
+  auto path = test_controller.createTempDirectory() / "tstFile.ext";
   std::fstream file;
   file.open(path, std::ios::out);
   file << "tempFile";

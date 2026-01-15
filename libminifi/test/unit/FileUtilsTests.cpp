@@ -49,9 +49,9 @@ TEST_CASE("TestFileUtils::get_executable_dir", "[TestGetExecutableDir]") {
 }
 
 TEST_CASE("TestFileUtils::create_dir", "[TestCreateDir]") {
-  TestController testController;
+  TestController test_controller;
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   auto test_dir_path = dir / "random_dir";
 
@@ -64,9 +64,9 @@ TEST_CASE("TestFileUtils::create_dir", "[TestCreateDir]") {
 }
 
 TEST_CASE("TestFileUtils::create_dir recursively", "[TestCreateDir]") {
-  TestController testController;
+  TestController test_controller;
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   auto test_dir_path = dir / "random_dir" / "random_dir2" / "random_dir3";
 
@@ -77,7 +77,7 @@ TEST_CASE("TestFileUtils::create_dir recursively", "[TestCreateDir]") {
 }
 
 TEST_CASE("TestFileUtils::list_dir", "[TestListDir]") {
-  TestController testController;
+  TestController test_controller;
 
   struct ListDirLogger {};
   const std::shared_ptr<logging::Logger> logger_{logging::LoggerFactory<ListDirLogger>::getLogger()};
@@ -89,7 +89,7 @@ TEST_CASE("TestFileUtils::list_dir", "[TestListDir]") {
     return true;
   };
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
   auto foo = dir / "foo";
   FileUtils::create_dir(foo);
 
@@ -100,7 +100,7 @@ TEST_CASE("TestFileUtils::list_dir", "[TestListDir]") {
 }
 
 TEST_CASE("TestFileUtils::list_dir recursively", "[TestListDir]") {
-  TestController testController;
+  TestController test_controller;
 
   struct ListDirLogger {};
   const std::shared_ptr<logging::Logger> logger_{logging::LoggerFactory<ListDirLogger>::getLogger()};
@@ -112,7 +112,7 @@ TEST_CASE("TestFileUtils::list_dir recursively", "[TestListDir]") {
     return true;
   };
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
   auto foo = dir / "foo";
   auto bar = dir / "bar";
   auto fooBaz = foo / "baz";
@@ -130,7 +130,7 @@ TEST_CASE("TestFileUtils::list_dir recursively", "[TestListDir]") {
 }
 
 TEST_CASE("TestFileUtils::addFilesMatchingExtension", "[TestAddFilesMatchingExtension]") {
-  TestController testController;
+  TestController test_controller;
 
   struct addFilesMatchingExtension {};
   const std::shared_ptr<logging::Logger> logger_{logging::LoggerFactory<addFilesMatchingExtension>::getLogger()};
@@ -152,7 +152,7 @@ TEST_CASE("TestFileUtils::addFilesMatchingExtension", "[TestAddFilesMatchingExte
    *
    * */
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
   auto foo = dir / "foo";
   auto fooGood = foo / "fooFile.ext";
   auto fooBad = foo / "fooFile.noext";
@@ -188,9 +188,9 @@ TEST_CASE("FileUtils::last_write_time and last_write_time_point work", "[last_wr
   auto time_before_write = std::chrono::file_clock::now();
   auto time_point_before_write = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::file_clock::now());
 
-  TestController testController;
+  TestController test_controller;
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   auto test_file = dir / "test.txt";
   REQUIRE_FALSE(FileUtils::last_write_time(test_file).has_value());  // non existent file should not return last w.t.
@@ -242,9 +242,9 @@ TEST_CASE("FileUtils::last_write_time and last_write_time_point work", "[last_wr
 }
 
 TEST_CASE("FileUtils::file_size works", "[file_size]") {
-  TestController testController;
+  TestController test_controller;
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   auto test_file = dir / "test.txt";
   REQUIRE(FileUtils::file_size(test_file) == 0);
@@ -270,9 +270,9 @@ TEST_CASE("FileUtils::computeChecksum works", "[computeChecksum]") {
   constexpr uint64_t CHECKSUM_OF_4_BYTES = 2117232040U;
   constexpr uint64_t CHECKSUM_OF_11_BYTES = 3461392622U;
 
-  TestController testController;
+  TestController test_controller;
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   auto test_file = dir / "test.txt";
   REQUIRE(FileUtils::computeChecksum(test_file, 0) == CHECKSUM_OF_0_BYTES);
@@ -314,9 +314,9 @@ TEST_CASE("FileUtils::computeChecksum with large files", "[computeChecksum]") {
   constexpr uint64_t CHECKSUM_OF_4097_BYTES = 1619129554U;
   constexpr uint64_t CHECKSUM_OF_8192_BYTES = 305726917U;
 
-  TestController testController;
+  TestController test_controller;
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
 
   auto test_file = dir / "test.txt";
   REQUIRE(FileUtils::computeChecksum(test_file, 0) == CHECKSUM_OF_0_BYTES);
@@ -358,9 +358,9 @@ TEST_CASE("FileUtils::computeChecksum with large files", "[computeChecksum]") {
 
 #ifndef WIN32
 TEST_CASE("FileUtils::set_permissions and get_permissions", "[TestSetPermissions][TestGetPermissions]") {
-  TestController testController;
+  TestController test_controller;
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
   auto path = dir / "test_file.txt";
   std::ofstream outfile(path, std::ios::out | std::ios::binary);
 
@@ -371,9 +371,9 @@ TEST_CASE("FileUtils::set_permissions and get_permissions", "[TestSetPermissions
 }
 
 TEST_CASE("FileUtils::get_permission_string", "[TestGetPermissionString]") {
-  TestController testController;
+  TestController test_controller;
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
   auto path = dir / "test_file.txt";
   std::ofstream outfile(path, std::ios::out | std::ios::binary);
 
@@ -385,9 +385,9 @@ TEST_CASE("FileUtils::get_permission_string", "[TestGetPermissionString]") {
 #endif
 
 TEST_CASE("FileUtils::exists", "[TestExists]") {
-  TestController testController;
+  TestController test_controller;
 
-  auto dir = testController.createTempDirectory();
+  auto dir = test_controller.createTempDirectory();
   auto path = dir / "test_file.txt";
   std::ofstream outfile(path, std::ios::out | std::ios::binary);
   auto invalid_path = dir / "test_file2.txt";
@@ -397,7 +397,7 @@ TEST_CASE("FileUtils::exists", "[TestExists]") {
 }
 
 TEST_CASE("TestFileUtils::delete_dir should fail with empty path", "[TestEmptyDeleteDir]") {
-  TestController testController;
+  TestController test_controller;
   REQUIRE(FileUtils::delete_dir("") != 0);
   REQUIRE(FileUtils::delete_dir("", false) != 0);
 }

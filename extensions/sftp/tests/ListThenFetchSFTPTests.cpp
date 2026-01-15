@@ -183,10 +183,10 @@ class ListThenFetchSFTPTestsFixture {
   }
 
  protected:
-  TestController testController;
-  std::filesystem::path src_dir = testController.createTempDirectory();
-  std::filesystem::path dst_dir = testController.createTempDirectory();
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  TestController test_controller;
+  std::filesystem::path src_dir = test_controller.createTempDirectory();
+  std::filesystem::path dst_dir = test_controller.createTempDirectory();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::unique_ptr<SFTPTestServer> sftp_server;
   core::Processor* list_sftp;
   core::Processor* fetch_sftp;
@@ -197,7 +197,7 @@ class ListThenFetchSFTPTestsFixture {
 TEST_CASE_METHOD(ListThenFetchSFTPTestsFixture, "ListSFTP then FetchSFTP one file", "[ListThenFetchSFTP][basic]") {
   createFileWithModificationTimeDiff("nifi_test/tstFile.ext", "Test content 1");
 
-  testController.runSession(plan, true);
+  test_controller.runSession(plan, true);
 
   testFile(IN_SOURCE, "nifi_test/tstFile.ext", "Test content 1");
   testFile(IN_DESTINATION, "nifi_test/tstFile.ext", "Test content 1");

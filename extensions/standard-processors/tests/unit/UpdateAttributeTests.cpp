@@ -25,12 +25,12 @@
 #include "GenerateFlowFile.h"
 
 TEST_CASE("UpdateAttributeTest", "[updateAttributeTest]") {
-  TestController testController;
+  TestController test_controller;
 
   LogTestController::getInstance().setDebug<minifi::processors::UpdateAttribute>();
   LogTestController::getInstance().setDebug<TestPlan>();
   LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-  std::shared_ptr<TestPlan> plan = testController.createPlan();
+  std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
   plan->addProcessor("GenerateFlowFile", "generate");
   const auto &update_proc = plan->addProcessor("UpdateAttribute", "update", core::Relationship("success", "description"), true);
@@ -39,9 +39,9 @@ TEST_CASE("UpdateAttributeTest", "[updateAttributeTest]") {
   plan->setDynamicProperty(update_proc, "test_attr_1", "test_val_1");
   plan->setDynamicProperty(update_proc, "test_attr_2", "test_val_2");
 
-  testController.runSession(plan, false);  // generate
-  testController.runSession(plan, false);  // update
-  testController.runSession(plan, false);  // log
+  test_controller.runSession(plan, false);  // generate
+  test_controller.runSession(plan, false);  // update
+  test_controller.runSession(plan, false);  // log
 
   REQUIRE(LogTestController::getInstance().contains("key:test_attr_1 value:test_val_1"));
   REQUIRE(LogTestController::getInstance().contains("key:test_attr_2 value:test_val_2"));
