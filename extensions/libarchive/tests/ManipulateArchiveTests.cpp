@@ -50,17 +50,17 @@ namespace org::apache::nifi::minifi::processors::test {
 
 bool run_archive_test(OrderedTestArchive& input_archive, const OrderedTestArchive& output_archive, const PROP_MAP_T& properties, bool check_attributes = true) {
   TestController test_controller;
-  LogTestController::getInstance().setTrace<FocusArchiveEntry>();
-  LogTestController::getInstance().setTrace<UnfocusArchiveEntry>();
-  LogTestController::getInstance().setTrace<ManipulateArchive>();
-  LogTestController::getInstance().setTrace<PutFile>();
-  LogTestController::getInstance().setTrace<GetFile>();
-  LogTestController::getInstance().setTrace<LogAttribute>();
-  LogTestController::getInstance().setTrace<core::ProcessSession>();
-  LogTestController::getInstance().setTrace<core::repository::VolatileContentRepository>();
-  LogTestController::getInstance().setTrace<Connection>();
-  LogTestController::getInstance().setTrace<core::Connectable>();
-  LogTestController::getInstance().setTrace<core::FlowFile>();
+  test_controller.getLogTestController().setTrace<FocusArchiveEntry>();
+  test_controller.getLogTestController().setTrace<UnfocusArchiveEntry>();
+  test_controller.getLogTestController().setTrace<ManipulateArchive>();
+  test_controller.getLogTestController().setTrace<PutFile>();
+  test_controller.getLogTestController().setTrace<GetFile>();
+  test_controller.getLogTestController().setTrace<LogAttribute>();
+  test_controller.getLogTestController().setTrace<core::ProcessSession>();
+  test_controller.getLogTestController().setTrace<core::repository::VolatileContentRepository>();
+  test_controller.getLogTestController().setTrace<Connection>();
+  test_controller.getLogTestController().setTrace<core::Connectable>();
+  test_controller.getLogTestController().setTrace<core::FlowFile>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();

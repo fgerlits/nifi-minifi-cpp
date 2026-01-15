@@ -50,8 +50,8 @@ TEST_CASE("PutUDP", "[putudp]") {
   test::SingleProcessorTestController controller{minifi::test::utils::make_processor<PutUDP>("PutUDP")};
   const auto put_udp = controller.getProcessor();
 
-  LogTestController::getInstance().setTrace<PutUDP>();
-  LogTestController::getInstance().setTrace<core::ProcessContext>();
+  test_controller.getLogTestController().setTrace<PutUDP>();
+  test_controller.getLogTestController().setTrace<core::ProcessContext>();
   REQUIRE(put_udp->setProperty(PutUDP::Hostname.name, "${literal('localhost')}"));
 
   utils::net::UdpServer listener{std::nullopt, 0, core::logging::LoggerFactory<utils::net::UdpServer>::getLogger()};
@@ -98,19 +98,19 @@ TEST_CASE("PutUDP", "[putudp]") {
   }
 
   {
-    LogTestController::getInstance().clear();
+    test_controller.getLogTestController().clear();
     auto message = std::string(65536, 'a');
     const auto result = controller.trigger(message);
     const auto& failure_flow_files = result.at(PutUDP::Failure);
     REQUIRE(failure_flow_files.size() == 1);
     CHECK(result.at(PutUDP::Success).empty());
     CHECK(controller.plan->getContent(failure_flow_files[0]) == message);
-    CHECK((LogTestController::getInstance().contains("Message too long")
-        || LogTestController::getInstance().contains("A message sent on a datagram socket was larger than the internal message buffer")));
+    CHECK((test_controller.getLogTestController().contains("Message too long")
+        || test_controller.getLogTestController().contains("A message sent on a datagram socket was larger than the internal message buffer")));
   }
 
   {
-    LogTestController::getInstance().clear();
+    test_controller.getLogTestController().clear();
     const char* const message = "message for invalid host";
     controller.plan->setProperty(put_udp, PutUDP::Hostname, "invalid_hostname");
     const auto result = controller.trigger(message);
@@ -120,7 +120,7 @@ TEST_CASE("PutUDP", "[putudp]") {
     REQUIRE(failure_flow_files.size() == 1);
     CHECK(result.at(PutUDP::Success).empty());
     CHECK(controller.plan->getContent(failure_flow_files[0]) == message);
-    CHECK((LogTestController::getInstance().contains("Host not found") || LogTestController::getInstance().contains("No such host is known")));
+    CHECK((test_controller.getLogTestController().contains("Host not found") || test_controller.getLogTestController().contains("No such host is known")));
   }
 }
 }  // namespace org::apache::nifi::minifi::processors

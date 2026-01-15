@@ -117,11 +117,11 @@ TEST_CASE("Manifest indicates property type requirement") {
 }
 
 TEST_CASE("Processors do not get instantiated during manifest creation") {
-  LogTestController::getInstance().setDebug<core::Processor>();
+  test_controller.getLogTestController().setDebug<core::Processor>();
 
   const auto system_bundle_id = minifi::BundleIdentifier{.name = "minifi-system", .version = minifi::AgentBuild::VERSION};
   const auto system_components = minifi::ClassDescriptionRegistry::getClassDescriptions().at(system_bundle_id);
   minifi::state::response::serializeComponentManifest(system_components);
 
-  CHECK_FALSE(LogTestController::getInstance().contains("Processor ExampleProcessor created"));
+  CHECK_FALSE(test_controller.getLogTestController().contains("Processor ExampleProcessor created"));
 }

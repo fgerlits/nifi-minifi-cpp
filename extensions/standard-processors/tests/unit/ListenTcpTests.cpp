@@ -40,7 +40,7 @@ void check_for_attributes(core::FlowFile& flow_file, uint16_t port) {
 TEST_CASE("ListenTCP test multiple messages", "[ListenTCP][NetworkListenerProcessor]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<ListenTCP>("ListenTCP")};
   const auto listen_tcp = controller.getProcessor<ListenTCP>();
-  LogTestController::getInstance().setTrace<ListenTCP>();
+  test_controller.getLogTestController().setTrace<ListenTCP>();
   REQUIRE(listen_tcp->setProperty(ListenTCP::MaxBatchSize.name, "2"));
   auto port = utils::scheduleProcessorOnRandomPort(controller.plan, listen_tcp);
 
@@ -68,7 +68,7 @@ TEST_CASE("ListenTCP test multiple messages", "[ListenTCP][NetworkListenerProces
 TEST_CASE("ListenTCP can be rescheduled", "[ListenTCP][NetworkListenerProcessor]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<ListenTCP>("ListenTCP")};
   const auto listen_tcp = controller.getProcessor<ListenTCP>();
-  LogTestController::getInstance().setTrace<ListenTCP>();
+  test_controller.getLogTestController().setTrace<ListenTCP>();
   REQUIRE(listen_tcp->setProperty(ListenTCP::Port.name, "0"));
   REQUIRE(listen_tcp->setProperty(ListenTCP::MaxBatchSize.name, "100"));
 
@@ -80,7 +80,7 @@ TEST_CASE("ListenTCP can be rescheduled", "[ListenTCP][NetworkListenerProcessor]
 TEST_CASE("ListenTCP max queue and max batch size test", "[ListenTCP][NetworkListenerProcessor]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<ListenTCP>("ListenTCP")};
   const auto listen_tcp = controller.getProcessor<ListenTCP>();
-  LogTestController::getInstance().setTrace<ListenTCP>();
+  test_controller.getLogTestController().setTrace<ListenTCP>();
   REQUIRE(listen_tcp->setProperty(ListenTCP::MaxBatchSize.name, "10"));
   REQUIRE(listen_tcp->setProperty(ListenTCP::MaxQueueSize.name, "50"));
   auto port = utils::scheduleProcessorOnRandomPort(controller.plan, listen_tcp);
@@ -95,7 +95,7 @@ TEST_CASE("ListenTCP max queue and max batch size test", "[ListenTCP][NetworkLis
     endpoint = asio::ip::tcp::endpoint(asio::ip::address_v4::loopback(), port);
   }
 
-  LogTestController::getInstance().setWarn<ListenTCP>();
+  test_controller.getLogTestController().setWarn<ListenTCP>();
 
   for (auto i = 0; i < 100; ++i) {
     CHECK_THAT(utils::sendMessagesViaTCP({"test_message\n"}, endpoint), MatchesSuccess());
@@ -115,7 +115,7 @@ TEST_CASE("Test ListenTCP with SSL connection", "[ListenTCP][NetworkListenerProc
   SingleProcessorTestController controller{minifi::test::utils::make_processor<ListenTCP>("ListenTCP")};
   const auto listen_tcp = controller.getProcessor<ListenTCP>();
   auto ssl_context_service = controller.plan->addController("SSLContextService", "SSLContextService");
-  LogTestController::getInstance().setTrace<ListenTCP>();
+  test_controller.getLogTestController().setTrace<ListenTCP>();
   const auto executable_dir = minifi::utils::file::FileUtils::get_executable_dir();
   REQUIRE(controller.plan->setProperty(ssl_context_service, controllers::SSLContextService::CACertificate, (executable_dir / "resources" / "ca_A.crt").string()));
   REQUIRE(controller.plan->setProperty(ssl_context_service, controllers::SSLContextService::ClientCertificate, (executable_dir / "resources" / "localhost_by_A.pem").string()));
@@ -244,7 +244,7 @@ TEST_CASE("Test ListenTCP SSL/TLS compatibility", "[ListenTCP][NetworkListenerPr
   SingleProcessorTestController controller{minifi::test::utils::make_processor<ListenTCP>("ListenTCP")};
   const auto listen_tcp = controller.getProcessor<ListenTCP>();
   auto ssl_context_service = controller.plan->addController("SSLContextService", "SSLContextService");
-  LogTestController::getInstance().setTrace<ListenTCP>();
+  test_controller.getLogTestController().setTrace<ListenTCP>();
   const auto executable_dir = minifi::utils::file::FileUtils::get_executable_dir();
   REQUIRE(controller.plan->setProperty(ssl_context_service, controllers::SSLContextService::CACertificate, (executable_dir / "resources" / "ca_A.crt").string()));
   REQUIRE(controller.plan->setProperty(ssl_context_service, controllers::SSLContextService::ClientCertificate, (executable_dir / "resources" / "localhost_by_A.pem").string()));
@@ -290,7 +290,7 @@ TEST_CASE("Test ListenTCP SSL/TLS compatibility", "[ListenTCP][NetworkListenerPr
 TEST_CASE("Custom delimiter", "[ListenTCP][NetworkListenerProcessor]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<ListenTCP>("ListenTCP")};
   const auto listen_tcp = controller.getProcessor<ListenTCP>();
-  LogTestController::getInstance().setTrace<ListenTCP>();
+  test_controller.getLogTestController().setTrace<ListenTCP>();
 
   std::string delimiter = GENERATE("\n", "\\n", "foo", "💩", "foo\\nbar");
   const auto consume_delimiter = GENERATE(true, false);

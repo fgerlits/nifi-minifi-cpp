@@ -34,10 +34,10 @@ class PutS3ObjectTestsFixture : public FlowProcessorS3TestsFixture<minifi::aws::
   }
 
   static void checkEmptyPutObjectResults() {
-    CHECK_FALSE(LogTestController::getInstance().contains("key:s3.version value:", std::chrono::seconds(0), std::chrono::milliseconds(0)));
-    CHECK_FALSE(LogTestController::getInstance().contains("key:s3.etag value:", std::chrono::seconds(0), std::chrono::milliseconds(0)));
-    CHECK_FALSE(LogTestController::getInstance().contains("key:s3.expiration value:", std::chrono::seconds(0), std::chrono::milliseconds(0)));
-    CHECK_FALSE(LogTestController::getInstance().contains("key:s3.sseAlgorithm value:", std::chrono::seconds(0), std::chrono::milliseconds(0)));
+    CHECK_FALSE(test_controller.getLogTestController().contains("key:s3.version value:", std::chrono::seconds(0), std::chrono::milliseconds(0)));
+    CHECK_FALSE(test_controller.getLogTestController().contains("key:s3.etag value:", std::chrono::seconds(0), std::chrono::milliseconds(0)));
+    CHECK_FALSE(test_controller.getLogTestController().contains("key:s3.expiration value:", std::chrono::seconds(0), std::chrono::milliseconds(0)));
+    CHECK_FALSE(test_controller.getLogTestController().contains("key:s3.sseAlgorithm value:", std::chrono::seconds(0), std::chrono::milliseconds(0)));
   }
 };
 
@@ -120,7 +120,7 @@ TEST_CASE_METHOD(PutS3ObjectTestsFixture, "Test incomplete credentials in creden
   REQUIRE(verifyLogLinePresenceInPollTime(std::chrono::seconds(3), "AWS Credentials have not been set!"));
 
   // Test that no invalid credentials file was set from previous properties
-  REQUIRE_FALSE(LogTestController::getInstance().contains("load configure file failed", std::chrono::seconds(0), std::chrono::milliseconds(0)));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("load configure file failed", std::chrono::seconds(0), std::chrono::milliseconds(0)));
 }
 
 TEST_CASE_METHOD(PutS3ObjectTestsFixture, "Check default client configuration", "[awsS3ClientConfig]") {
@@ -300,7 +300,7 @@ TEST_CASE_METHOD(PutS3ObjectUploadLimitChangedTestsFixture, "Test multipart uplo
     test_controller.runSession(plan);
     CHECK(verifyLogLinePresenceInPollTime(std::chrono::seconds(3), "Failed to upload part 3 of 4"));
     plan->reset();
-    LogTestController::getInstance().clear();
+    test_controller.getLogTestController().clear();
     test_controller.runSession(plan);
   }
 
@@ -390,10 +390,10 @@ TEST_CASE_METHOD(PutS3ObjectUploadLimitChangedTestsFixture, "Local state is not 
   test_controller.runSession(plan);
   CHECK(verifyLogLinePresenceInPollTime(std::chrono::seconds(3), "Failed to upload part 3 of 4"));
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
   test_controller.runSession(plan);
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
   test_controller.runSession(plan);
 
   const auto& parts = mock_s3_request_sender_ptr->complete_multipart_upload_request.GetMultipartUpload().GetParts();
@@ -421,7 +421,7 @@ TEST_CASE_METHOD(PutS3ObjectUploadLimitChangedTestsFixture, "Do not continue mul
   test_controller.runSession(plan);
   CHECK(verifyLogLinePresenceInPollTime(std::chrono::seconds(3), "Failed to upload part 3 of 4"));
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
   test_controller.runSession(plan);
 
   const auto& parts = mock_s3_request_sender_ptr->complete_multipart_upload_request.GetMultipartUpload().GetParts();

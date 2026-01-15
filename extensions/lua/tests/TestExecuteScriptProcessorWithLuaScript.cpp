@@ -84,7 +84,7 @@ end
 TEST_CASE("Lua: Test session get should return None if there are no flowfiles in the incoming connections") {
   minifi::test::SingleProcessorTestController controller{minifi::test::utils::make_processor<ExecuteScript>("ExecuteScript")};
   const auto execute_script = controller.getProcessor();
-  LogTestController::getInstance().setTrace<ExecuteScript>();
+  test_controller.getLogTestController().setTrace<ExecuteScript>();
 
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptEngine.name, "lua"));
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptBody.name, R"(
@@ -103,10 +103,10 @@ end
 
 
 TEST_CASE("Lua: Test Log", "[executescriptLuaLog]") {
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
   minifi::test::SingleProcessorTestController controller{minifi::test::utils::make_processor<ExecuteScript>("ExecuteScript")};
   const auto execute_script = controller.getProcessor();
-  LogTestController::getInstance().setTrace<ExecuteScript>();
+  test_controller.getLogTestController().setTrace<ExecuteScript>();
 
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptEngine.name, "lua"));
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptBody.name, R"(
@@ -119,13 +119,13 @@ end
   REQUIRE(result.at(ExecuteScript::Success).empty());
   REQUIRE(result.at(ExecuteScript::Failure).empty());
 
-  REQUIRE(LogTestController::getInstance().contains("[org::apache::nifi::minifi::processors::ExecuteScript] [info] hello from lua"));
+  REQUIRE(test_controller.getLogTestController().contains("[org::apache::nifi::minifi::processors::ExecuteScript] [info] hello from lua"));
 }
 
 TEST_CASE("Lua: Test Read File", "[executescriptLuaRead]") {
   minifi::test::SingleProcessorTestController controller{minifi::test::utils::make_processor<ExecuteScript>("ExecuteScript")};
   const auto execute_script = controller.getProcessor();
-  LogTestController::getInstance().setTrace<ExecuteScript>();
+  test_controller.getLogTestController().setTrace<ExecuteScript>();
 
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptEngine.name, "lua"));
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptBody.name, R"(
@@ -156,7 +156,7 @@ end
 TEST_CASE("Lua: Test Write File", "[executescriptLuaWrite]") {
   minifi::test::SingleProcessorTestController controller{minifi::test::utils::make_processor<ExecuteScript>("ExecuteScript")};
   const auto execute_script = controller.getProcessor();
-  LogTestController::getInstance().setTrace<ExecuteScript>();
+  test_controller.getLogTestController().setTrace<ExecuteScript>();
 
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptEngine.name, "lua"));
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptBody.name, R"(
@@ -186,10 +186,10 @@ TEST_CASE("Lua: Test Write File", "[executescriptLuaWrite]") {
 }
 
 TEST_CASE("Lua: Test Create", "[executescriptLuaCreate]") {
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
   minifi::test::SingleProcessorTestController controller{minifi::test::utils::make_processor<ExecuteScript>("ExecuteScript")};
   const auto execute_script = controller.getProcessor();
-  LogTestController::getInstance().setTrace<ExecuteScript>();
+  test_controller.getLogTestController().setTrace<ExecuteScript>();
 
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptEngine.name, "lua"));
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptBody.name, R"(
@@ -207,14 +207,14 @@ end
   auto result = controller.trigger();
   REQUIRE(result.at(ExecuteScript::Success).size() == 1);
   REQUIRE(result.at(ExecuteScript::Failure).empty());
-  REQUIRE(LogTestController::getInstance().contains("[info] created flow file:"));
+  REQUIRE(test_controller.getLogTestController().contains("[info] created flow file:"));
 }
 
 TEST_CASE("Lua: Test Update Attribute", "[executescriptLuaUpdateAttribute]") {
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
   minifi::test::SingleProcessorTestController controller{minifi::test::utils::make_processor<ExecuteScript>("ExecuteScript")};
   const auto execute_script = controller.getProcessor();
-  LogTestController::getInstance().setTrace<ExecuteScript>();
+  test_controller.getLogTestController().setTrace<ExecuteScript>();
 
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptEngine.name, "lua"));
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptBody.name, R"(
@@ -241,7 +241,7 @@ end
 TEST_CASE("Lua: Test Require", "[executescriptLuaRequire]") {
   TestController test_controller;
 
-  LogTestController &logTestController = LogTestController::getInstance();
+  LogTestController &logTestController = test_controller.getLogTestController();
   logTestController.setDebug<TestPlan>();
   logTestController.setDebug<ExecuteScript>();
 
@@ -267,7 +267,7 @@ TEST_CASE("Lua: Test Require", "[executescriptLuaRequire]") {
 
   REQUIRE_NOTHROW(test_controller.runSession(plan, false));
 
-  REQUIRE(LogTestController::getInstance().contains("[info] OK"));
+  REQUIRE(test_controller.getLogTestController().contains("[info] OK"));
 
   logTestController.reset();
 }
@@ -277,7 +277,7 @@ TEST_CASE("Lua: Test Module Directory property", "[executescriptLuaModuleDirecto
 
   minifi::test::SingleProcessorTestController controller{minifi::test::utils::make_processor<ExecuteScript>("ExecuteScript")};
   const auto execute_script = controller.getProcessor();
-  LogTestController::getInstance().setTrace<ExecuteScript>();
+  test_controller.getLogTestController().setTrace<ExecuteScript>();
 
   const auto script_files_directory =  minifi::utils::file::FileUtils::get_executable_dir() / "resources" / "test_lua_scripts";
 
@@ -289,13 +289,13 @@ TEST_CASE("Lua: Test Module Directory property", "[executescriptLuaModuleDirecto
   REQUIRE(result.at(ExecuteScript::Success).size() == 1);
   REQUIRE(result.at(ExecuteScript::Failure).empty());
 
-  REQUIRE(LogTestController::getInstance().contains("foobar"));
+  REQUIRE(test_controller.getLogTestController().contains("foobar"));
 }
 
 TEST_CASE("Lua: Non existent script file should throw", "[executescriptLuaNonExistentScriptFile]") {
   minifi::test::SingleProcessorTestController controller{minifi::test::utils::make_processor<ExecuteScript>("ExecuteScript")};
   const auto execute_script = controller.getProcessor();
-  LogTestController::getInstance().setTrace<ExecuteScript>();
+  test_controller.getLogTestController().setTrace<ExecuteScript>();
 
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptEngine.name, "lua"));
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptFile.name, "/tmp/non-existent-file"));
@@ -306,7 +306,7 @@ TEST_CASE("Lua: Non existent script file should throw", "[executescriptLuaNonExi
 TEST_CASE("Lua can remove flowfiles", "[ExecuteScript]") {
   minifi::test::SingleProcessorTestController controller{minifi::test::utils::make_processor<ExecuteScript>("ExecuteScript")};
   const auto execute_script = controller.getProcessor();
-  LogTestController::getInstance().setTrace<ExecuteScript>();
+  test_controller.getLogTestController().setTrace<ExecuteScript>();
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptEngine.name, "lua"));
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptBody.name,
       R"(
@@ -323,7 +323,7 @@ TEST_CASE("Lua can remove flowfiles", "[ExecuteScript]") {
 TEST_CASE("Lua can store states in StateManager", "[ExecuteScript]") {
   minifi::test::SingleProcessorTestController controller{minifi::test::utils::make_processor<ExecuteScript>("ExecuteScript")};
   const auto execute_script = controller.getProcessor();
-  LogTestController::getInstance().setTrace<minifi::processors::ExecuteScript>();
+  test_controller.getLogTestController().setTrace<minifi::processors::ExecuteScript>();
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptEngine.name, "lua"));
   REQUIRE(execute_script->setProperty(ExecuteScript::ScriptBody.name,
       R"(
@@ -343,7 +343,7 @@ TEST_CASE("Lua can store states in StateManager", "[ExecuteScript]") {
 
   for (size_t i = 0; i < 4; ++i) {
     controller.trigger();
-    CHECK(LogTestController::getInstance().contains(fmt::format("lua_trigger_count: {}", i)));
+    CHECK(test_controller.getLogTestController().contains(fmt::format("lua_trigger_count: {}", i)));
   }
 }
 

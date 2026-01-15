@@ -75,7 +75,10 @@ class ProvenanceEventRecord;
 
 class LogTestController {
  public:
+  LogTestController() = default;
+  explicit LogTestController(const std::shared_ptr<logging::LoggerProperties> &loggerProps);
   ~LogTestController() = default;
+
   static LogTestController& getInstance() {
     static LogTestController instance;
     return instance;
@@ -156,12 +159,6 @@ class LogTestController {
   std::shared_ptr<logging::Logger> logger_;
 
  protected:
-  LogTestController()
-      : LogTestController(nullptr) {
-  }
-
-  explicit LogTestController(const std::shared_ptr<logging::LoggerProperties> &loggerProps);
-
   void init(const std::shared_ptr<logging::LoggerProperties>& logger_props);
   void setLevel(std::string_view name, spdlog::level::level_enum level);
   static bool contains(const std::function<std::string()>& log_string_getter, const std::string& ending, std::chrono::milliseconds timeout, std::chrono::milliseconds sleep_interval);
@@ -389,6 +386,23 @@ class TestPlan {
   std::shared_ptr<logging::Logger> logger_;
 };
 
+namespace internal {
+template <class Rep, class Period, typename Fun>
+bool verifyEventHappenedInPollTime(
+    const std::chrono::duration<Rep, Period>& wait_duration,
+    Fun&& check,
+    std::chrono::microseconds check_interval = std::chrono::milliseconds(100)) {
+  std::chrono::steady_clock::time_point wait_end = std::chrono::steady_clock::now() + wait_duration;
+  do {
+    if (std::forward<Fun>(check)()) {
+      return true;
+    }
+    std::this_thread::sleep_for(check_interval);
+  } while (std::chrono::steady_clock::now() < wait_end);
+  return false;
+}
+}  // namespace internal
+
 class TestController {
  public:
   struct PlanConfig {
@@ -413,18 +427,36 @@ class TestController {
   }
 
   [[nodiscard]] const std::shared_ptr<logging::Logger>& getLogger() const {
-    return log.logger_;
+    return log_test_controller_.logger_;
   }
 
-  [[nodiscard]] const LogTestController& getLog() const {
-    return log;
+  [[nodiscard]] LogTestController& getLogTestController() {
+    return log_test_controller_;
   }
 
   std::filesystem::path createTempDirectory();
 
+  template <class Rep, class Period, typename ...String>
+  bool verifyLogLinePresenceInPollTime(const std::chrono::duration<Rep, Period>& wait_duration, String&&... patterns) {
+    auto check = [this, &patterns...] {
+      const std::string logs = log_test_controller_.getLogs();
+      return ((logs.find(patterns) != std::string::npos) && ...);
+    };
+    return internal::verifyEventHappenedInPollTime(wait_duration, check);
+  }
+
+  template <class Rep, class Period, typename ...String>
+  bool verifyLogLineVariantPresenceInPollTime(const std::chrono::duration<Rep, Period>& wait_duration, String&&... patterns) {
+    auto check = [this, &patterns...] {
+      const std::string logs = log_test_controller_..getLogs();
+      return ((logs.find(patterns) != std::string::npos) || ...);
+    };
+    return internal::verifyEventHappenedInPollTime(wait_duration, check);
+  }
+
  protected:
   std::shared_ptr<minifi::state::response::FlowVersion> flow_version_;
-  LogTestController &log;
+  LogTestController log_test_controller_;
   std::vector<std::unique_ptr<TempDirectory>> directories;
 };
 

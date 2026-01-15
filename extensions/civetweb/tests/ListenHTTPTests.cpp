@@ -59,17 +59,17 @@ class ListenHTTPTestsFixture {
   };
 
   ListenHTTPTestsFixture() {
-    LogTestController::getInstance().setDebug<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<minifi::SchedulingAgent>();
-    LogTestController::getInstance().setDebug<minifi::core::ProcessGroup>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setTrace<minifi::processors::ListenHTTP>();
-    LogTestController::getInstance().setTrace<minifi::processors::ListenHTTP::Handler>();
-    LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setDebug<minifi::http::HTTPClient>();
-    LogTestController::getInstance().setDebug<minifi::controllers::SSLContextServiceInterface>();
+    test_controller.getLogTestController().setDebug<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<minifi::SchedulingAgent>();
+    test_controller.getLogTestController().setDebug<minifi::core::ProcessGroup>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setTrace<minifi::processors::ListenHTTP>();
+    test_controller.getLogTestController().setTrace<minifi::processors::ListenHTTP::Handler>();
+    test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setDebug<minifi::http::HTTPClient>();
+    test_controller.getLogTestController().setDebug<minifi::controllers::SSLContextServiceInterface>();
 
     // Create temporary directories
     tmp_dir = test_controller.createTempDirectory();
@@ -121,7 +121,7 @@ class ListenHTTPTestsFixture {
   ListenHTTPTestsFixture& operator=(const ListenHTTPTestsFixture&) = delete;
 
   virtual ~ListenHTTPTestsFixture() {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
   }
 
   void create_ssl_context_service(const char* ca, const char* client_cert) {
@@ -149,7 +149,7 @@ class ListenHTTPTestsFixture {
 
     std::string protocol = std::string("http") + (listen_http.get().isSecure() ? "s" : "");
     std::string portstr = listen_http.get().getPort();
-    REQUIRE(LogTestController::getInstance().contains("Listening on port " + portstr));
+    REQUIRE(test_controller.getLogTestController().contains("Listening on port " + portstr));
 
     url = protocol + "://localhost:" + portstr + "/contentListener/" + endpoint;
   }
@@ -231,9 +231,9 @@ class ListenHTTPTestsFixture {
     }
 
     if (expected_committed_requests > 0 && (method == HttpRequestMethod::Get || method == HttpRequestMethod::Post)) {
-      REQUIRE(LogTestController::getInstance().contains("Size:" + std::to_string(payload.size()) + " Offset:0"));
+      REQUIRE(test_controller.getLogTestController().contains("Size:" + std::to_string(payload.size()) + " Offset:0"));
     }
-    REQUIRE(LogTestController::getInstance().contains("Logged " + std::to_string(expected_committed_requests) + " flow files"));
+    REQUIRE(test_controller.getLogTestController().contains("Logged " + std::to_string(expected_committed_requests) + " flow files"));
   }
 
   std::unique_ptr<minifi::http::HTTPClient> initialize_client() {
@@ -369,8 +369,8 @@ TEST_CASE_METHOD(ListenHTTPTestsFixture, "HTTP all headers", "[basic][headers]")
   run_server();
   test_connect();
 
-  REQUIRE(LogTestController::getInstance().contains("key:foo value:1"));
-  REQUIRE(LogTestController::getInstance().contains("key:bar value:2"));
+  REQUIRE(test_controller.getLogTestController().contains("key:foo value:1"));
+  REQUIRE(test_controller.getLogTestController().contains("key:bar value:2"));
 }
 
 TEST_CASE_METHOD(ListenHTTPTestsFixture, "HTTP filtered headers", "[headers]") {
@@ -390,8 +390,8 @@ TEST_CASE_METHOD(ListenHTTPTestsFixture, "HTTP filtered headers", "[headers]") {
   run_server();
   test_connect();
 
-  REQUIRE(LogTestController::getInstance().contains("key:foo value:1"));
-  REQUIRE(false == LogTestController::getInstance().contains("key:bar value:2", 0s));
+  REQUIRE(test_controller.getLogTestController().contains("key:foo value:1"));
+  REQUIRE(false == test_controller.getLogTestController().contains("key:bar value:2", 0s));
 }
 
 TEST_CASE_METHOD(ListenHTTPTestsFixture, "HTTP Batch tests", "[batch]") {

@@ -65,7 +65,7 @@ TEST_CASE("Test Creation of GetFile", "[getfileCreate]") {
 // session->get() then no commit, same repo for flowFileRepo and provenance repo
 TEST_CASE("Test GetFileMultiple", "[getfileCreate3]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
   auto config = std::make_shared<minifi::ConfigureImpl>();
   std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
   content_repo->initialize(config);
@@ -147,7 +147,7 @@ TEST_CASE("Test GetFileMultiple", "[getfileCreate3]") {
 
 TEST_CASE("Test GetFile Ignore", "[getfileCreate3]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
   std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
   auto processor = minifi::test::utils::make_processor<minifi::processors::GetFile>("getfileCreate2");
   processor->initialize();
@@ -232,7 +232,7 @@ TEST_CASE("Test GetFile Ignore", "[getfileCreate3]") {
 
 TEST_CASE("TestConnectionFull", "[ConnectionFull]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<minifi::processors::GenerateFlowFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GenerateFlowFile>();
   std::shared_ptr<core::ContentRepository> content_repo = std::make_shared<core::repository::VolatileContentRepository>();
   content_repo->initialize(std::make_shared<minifi::ConfigureImpl>());
   auto processor = minifi::test::utils::make_processor<org::apache::nifi::minifi::processors::GenerateFlowFile>("GFF");
@@ -282,7 +282,7 @@ TEST_CASE("TestConnectionFull", "[ConnectionFull]") {
 
 TEST_CASE("LogAttributeTest", "[getfileCreate3]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   auto getfile = plan->addProcessor("GetFile", "getfileCreate2");
@@ -315,16 +315,16 @@ TEST_CASE("LogAttributeTest", "[getfileCreate3]") {
   records = plan->getProvenanceRecords();
   record = plan->getCurrentFlowFile();
 
-  CHECK(true == LogTestController::getInstance().contains("key:absolute.path value:" + (dir / "").string()));
-  CHECK(true == LogTestController::getInstance().contains("Size:8 Offset:0"));
-  CHECK(true == LogTestController::getInstance().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
-  LogTestController::getInstance().reset();
+  CHECK(true == test_controller.getLogTestController().contains("key:absolute.path value:" + (dir / "").string()));
+  CHECK(true == test_controller.getLogTestController().contains("Size:8 Offset:0"));
+  CHECK(true == test_controller.getLogTestController().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("LogAttributeTestInvalid", "[TestLogAttribute]") {
   TestController test_controller;
-  LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setTrace<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   auto getfile = plan->addProcessor("GetFile", "getfileCreate2");
@@ -336,13 +336,13 @@ TEST_CASE("LogAttributeTestInvalid", "[TestLogAttribute]") {
   plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::Directory, dir.string());
   plan->setProperty(getfile, org::apache::nifi::minifi::processors::GetFile::BatchSize, "1");
   REQUIRE_FALSE(plan->setProperty(loggattr, org::apache::nifi::minifi::processors::LogAttribute::FlowFilesToLog, "-1"));
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 void testMultiplesLogAttribute(int fileCount, int flowsToLog, std::string verifyStringFlowsLogged = "") {
   TestController test_controller;
-  LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setTrace<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   auto getfile = plan->addProcessor("GetFile", "getfileCreate2");
@@ -389,10 +389,10 @@ void testMultiplesLogAttribute(int fileCount, int flowsToLog, std::string verify
   records = plan->getProvenanceRecords();
   record = plan->getCurrentFlowFile();
 
-  CHECK(true == LogTestController::getInstance().contains("Size:8 Offset:0"));
-  CHECK(true == LogTestController::getInstance().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
-  CHECK(true == LogTestController::getInstance().contains("Logged " + verifyStringFlowsLogged + " flow files"));
-  LogTestController::getInstance().reset();
+  CHECK(true == test_controller.getLogTestController().contains("Size:8 Offset:0"));
+  CHECK(true == test_controller.getLogTestController().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
+  CHECK(true == test_controller.getLogTestController().contains("Logged " + verifyStringFlowsLogged + " flow files"));
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("LogAttributeTestSingle", "[TestLogAttribute]") {
@@ -409,7 +409,7 @@ TEST_CASE("LogAttributeTestAll", "[TestLogAttribute]") {
 
 TEST_CASE("Test Find file", "[getfileCreate3]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<minifi::provenance::ProvenanceReporter>();
+  test_controller.getLogTestController().setDebug<minifi::provenance::ProvenanceReporter>();
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   auto processor = plan->addProcessor("GetFile", "getfileCreate2");
   TypedProcessorWrapper<minifi::core::reporting::SiteToSiteProvenanceReportingTask> processorReport = plan->addProcessor(
@@ -511,9 +511,9 @@ REGISTER_RESOURCE(TestProcessorNoContent, Processor);
 
 TEST_CASE("TestEmptyContent", "[emptyContent]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-  LogTestController::getInstance().setDebug<minifi::core::ProcessSession>();
-  LogTestController::getInstance().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::core::ProcessSession>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   plan->addProcessor("TestProcessorNoContent", "TestProcessorNoContent");
@@ -522,7 +522,7 @@ TEST_CASE("TestEmptyContent", "[emptyContent]") {
 
   REQUIRE(minifi::test::utils::verifyLogLinePresenceInPollTime(std::chrono::seconds{0}, "did not create a ResourceClaim"));
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 /**
@@ -534,9 +534,9 @@ TEST_CASE("TestEmptyContent", "[emptyContent]") {
  */
 void testRPGBypass(const std::string &host, const std::string &port, bool has_error = true) {
   TestController test_controller;
-  LogTestController::getInstance().setTrace<minifi::RemoteProcessGroupPort>();
-  LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-  LogTestController::getInstance().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<minifi::RemoteProcessGroupPort>();
+  test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
 
   auto configuration = std::make_shared<minifi::ConfigureImpl>();
 
@@ -554,9 +554,9 @@ void testRPGBypass(const std::string &host, const std::string &port, bool has_er
   if (has_error) {
     rpg->onSchedule(*context, *psf);
     auto expected_error = "No peers selected during scheduling";
-    REQUIRE(LogTestController::getInstance().contains(expected_error));
+    REQUIRE(test_controller.getLogTestController().contains(expected_error));
   }
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("TestRPGNoSettings", "[TestRPG1]") {
@@ -601,7 +601,7 @@ class ProcessorWithIncomingConnectionTest {
 };
 
 ProcessorWithIncomingConnectionTest::ProcessorWithIncomingConnectionTest() {
-  LogTestController::getInstance().setDebug<core::Processor>();
+  test_controller.getLogTestController().setDebug<core::Processor>();
 
   const auto repo = std::make_shared<TestRepository>();
   const auto content_repo = std::make_shared<core::repository::VolatileContentRepository>();
@@ -620,7 +620,7 @@ ProcessorWithIncomingConnectionTest::ProcessorWithIncomingConnectionTest() {
 }
 
 ProcessorWithIncomingConnectionTest::~ProcessorWithIncomingConnectionTest() {
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 }  // namespace
@@ -717,8 +717,8 @@ TEST_CASE_METHOD(ProcessorWithIncomingConnectionTest, "A failed and re-penalized
 
 TEST_CASE("InputRequirementTestOk", "[InputRequirement]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<minifi::processors::GenerateFlowFile>();
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GenerateFlowFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   plan->addProcessor("GenerateFlowFile", "generateFlowFile");
@@ -730,7 +730,7 @@ TEST_CASE("InputRequirementTestOk", "[InputRequirement]") {
 
 TEST_CASE("InputRequirementTestForbidden", "[InputRequirement]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<minifi::processors::GenerateFlowFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GenerateFlowFile>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   plan->addProcessor("GenerateFlowFile", "generateFlowFile");
@@ -743,7 +743,7 @@ TEST_CASE("InputRequirementTestForbidden", "[InputRequirement]") {
 
 TEST_CASE("InputRequirementTestRequired", "[InputRequirement]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   auto log_proc = plan->addProcessor("LogAttribute", "logAttribute");
@@ -789,8 +789,8 @@ TEST_CASE("isSingleThreaded - one thread for a single threaded processor", "[isS
 
 TEST_CASE("isSingleThreaded - two threads for a single threaded processor", "[isSingleThreaded]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<minifi::core::Processor>();
-  LogTestController::getInstance().setDebug<minifi::processors::TailFile>();
+  test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+  test_controller.getLogTestController().setDebug<minifi::processors::TailFile>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   auto processor = plan->addProcessor("TailFile", "myProc");
@@ -798,7 +798,7 @@ TEST_CASE("isSingleThreaded - two threads for a single threaded processor", "[is
 
   REQUIRE_NOTHROW(plan->validateAnnotations());
   REQUIRE(processor->getMaxConcurrentTasks() == 1);
-  REQUIRE(LogTestController::getInstance().contains("[warning] Processor myProc can not be run in parallel, its "
+  REQUIRE(test_controller.getLogTestController().contains("[warning] Processor myProc can not be run in parallel, its "
                                                     "\"max concurrent tasks\" value is too high. It was set to 1 from 2."));
 }
 

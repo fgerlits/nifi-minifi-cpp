@@ -27,23 +27,23 @@ using LogAttribute = org::apache::nifi::minifi::processors::LogAttribute;
 TEST_CASE("AppendHostInfoTest", "[appendhostinfotest]") {
   TestController test_controller;
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
-  LogTestController::getInstance().setTrace<minifi::processors::AppendHostInfo>();
-  LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setTrace<minifi::processors::AppendHostInfo>();
+  test_controller.getLogTestController().setTrace<minifi::processors::LogAttribute>();
   plan->addProcessor("GenerateFlowFile", "generate_flow_file");
   plan->addProcessor("AppendHostInfo", "append_host_info", core::Relationship("success", "description"), true);
   plan->addProcessor("LogAttribute", "log_attributes", core::Relationship("success", "description"), true);
 
   test_controller.runSession(plan);
 
-  REQUIRE(LogTestController::getInstance().contains("source.hostname"));
-  REQUIRE(LogTestController::getInstance().contains("source.ipv4"));
+  REQUIRE(test_controller.getLogTestController().contains("source.hostname"));
+  REQUIRE(test_controller.getLogTestController().contains("source.ipv4"));
 }
 
 TEST_CASE("AppendHostInfoTestWithUnmatchableRegex", "[appendhostinfotestunmatchableregex]") {
   TestController test_controller;
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
-  LogTestController::getInstance().setTrace<minifi::processors::AppendHostInfo>();
-  LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setTrace<minifi::processors::AppendHostInfo>();
+  test_controller.getLogTestController().setTrace<minifi::processors::LogAttribute>();
   plan->addProcessor("GenerateFlowFile", "generate_flow_file");
   auto append_host_info = plan->addProcessor("AppendHostInfo", "append_host_info", core::Relationship("success", "description"), true);
   plan->addProcessor("LogAttribute", "log_attributes", core::Relationship("success", "description"), true);
@@ -53,15 +53,15 @@ TEST_CASE("AppendHostInfoTestWithUnmatchableRegex", "[appendhostinfotestunmatcha
   test_controller.runSession(plan);
 
   using namespace std::literals;
-  REQUIRE(LogTestController::getInstance().contains("source.hostname", 0s, 0ms));
-  REQUIRE_FALSE(LogTestController::getInstance().contains("source.ipv4", 0s, 0ms));
+  REQUIRE(test_controller.getLogTestController().contains("source.hostname", 0s, 0ms));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("source.ipv4", 0s, 0ms));
 }
 
 TEST_CASE("AppendHostInfoTestCanFilterOutLoopbackInterfacesWithRegex", "[appendhostinfotestfilterloopback]") {
   TestController test_controller;
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
-  LogTestController::getInstance().setTrace<minifi::processors::AppendHostInfo>();
-  LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setTrace<minifi::processors::AppendHostInfo>();
+  test_controller.getLogTestController().setTrace<minifi::processors::LogAttribute>();
   plan->addProcessor("GenerateFlowFile", "generate_flow_file");
   auto append_host_info = plan->addProcessor("AppendHostInfo", "append_host_info", core::Relationship("success", "description"), true);
   plan->addProcessor("LogAttribute", "log_attributes", core::Relationship("success", "description"), true);
@@ -71,6 +71,6 @@ TEST_CASE("AppendHostInfoTestCanFilterOutLoopbackInterfacesWithRegex", "[appendh
   test_controller.runSession(plan);
 
   using namespace std::literals;
-  REQUIRE(LogTestController::getInstance().contains("source.hostname", 0s, 0ms));
-  REQUIRE_FALSE(LogTestController::getInstance().contains("127.0.0.1", 0s, 0ms));
+  REQUIRE(test_controller.getLogTestController().contains("source.hostname", 0s, 0ms));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("127.0.0.1", 0s, 0ms));
 }

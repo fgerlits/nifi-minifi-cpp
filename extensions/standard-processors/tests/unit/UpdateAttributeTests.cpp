@@ -27,9 +27,9 @@
 TEST_CASE("UpdateAttributeTest", "[updateAttributeTest]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<minifi::processors::UpdateAttribute>();
-  LogTestController::getInstance().setDebug<TestPlan>();
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::UpdateAttribute>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
   plan->addProcessor("GenerateFlowFile", "generate");
@@ -43,8 +43,8 @@ TEST_CASE("UpdateAttributeTest", "[updateAttributeTest]") {
   test_controller.runSession(plan, false);  // update
   test_controller.runSession(plan, false);  // log
 
-  REQUIRE(LogTestController::getInstance().contains("key:test_attr_1 value:test_val_1"));
-  REQUIRE(LogTestController::getInstance().contains("key:test_attr_2 value:test_val_2"));
+  REQUIRE(test_controller.getLogTestController().contains("key:test_attr_1 value:test_val_1"));
+  REQUIRE(test_controller.getLogTestController().contains("key:test_attr_2 value:test_val_2"));
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }

@@ -29,13 +29,13 @@ namespace org::apache::nifi::minifi::test {
 TEST_CASE("GetFile PutFile dynamic attribute", "[expressionLanguageTestGetFilePutFileDynamicAttribute]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setTrace<TestPlan>();
-  LogTestController::getInstance().setTrace<minifi::processors::PutFile>();
-  LogTestController::getInstance().setTrace<minifi::processors::ExtractText>();
-  LogTestController::getInstance().setTrace<minifi::processors::GetFile>();
-  LogTestController::getInstance().setTrace<minifi::processors::PutFile>();
-  LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
-  LogTestController::getInstance().setTrace<minifi::processors::UpdateAttribute>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<minifi::processors::PutFile>();
+  test_controller.getLogTestController().setTrace<minifi::processors::ExtractText>();
+  test_controller.getLogTestController().setTrace<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setTrace<minifi::processors::PutFile>();
+  test_controller.getLogTestController().setTrace<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setTrace<minifi::processors::UpdateAttribute>();
 
   auto conf = std::make_shared<minifi::ConfigureImpl>();
 
@@ -88,7 +88,7 @@ TEST_CASE("GetFile PutFile dynamic attribute", "[expressionLanguageTestGetFilePu
     REQUIRE("extracted_attr" == output_str.str());
   }
 
-  REQUIRE(LogTestController::getInstance().contains("key:prop_attr value:custom_value_added"));
+  REQUIRE(test_controller.getLogTestController().contains("key:prop_attr value:custom_value_added"));
 }
 
 }  // namespace org::apache::nifi::minifi::test

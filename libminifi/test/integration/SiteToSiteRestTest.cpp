@@ -69,11 +69,11 @@ class SiteToSiteTestHarness : public HTTPIntegrationBase {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setTrace<minifi::RemoteProcessGroupPort>();
-    LogTestController::getInstance().setDebug<minifi::http::HTTPClient>();
-    LogTestController::getInstance().setTrace<minifi::controllers::SSLContextServiceInterface>();
-    LogTestController::getInstance().setInfo<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<core::ConfigurableComponent>();
+    test_controller.getLogTestController().setTrace<minifi::RemoteProcessGroupPort>();
+    test_controller.getLogTestController().setDebug<minifi::http::HTTPClient>();
+    test_controller.getLogTestController().setTrace<minifi::controllers::SSLContextServiceInterface>();
+    test_controller.getLogTestController().setInfo<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<core::ConfigurableComponent>();
 
     std::fstream file;
     test_file_ = dir_ / "tstFile.ext";

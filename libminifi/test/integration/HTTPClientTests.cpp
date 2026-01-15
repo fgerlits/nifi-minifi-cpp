@@ -32,7 +32,7 @@ using namespace std::literals::chrono_literals;
 namespace org::apache::nifi::minifi::http::test {
 
 TEST_CASE("HTTPClientTestChunkedResponse", "[basic]") {
-  LogTestController::getInstance().setDebug<HTTPClient>();
+  test_controller.getLogTestController().setDebug<HTTPClient>();
 
   class Responder : public CivetHandler {
    public:
@@ -92,7 +92,7 @@ TEST_CASE("HTTPClientTestChunkedResponse", "[basic]") {
   const std::vector<char>& response = client.getResponseBody();
   REQUIRE("foobar\r\nbuzz" == std::string(response.begin(), response.end()));
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("HTTPClient escape test") {
@@ -120,7 +120,7 @@ TEST_CASE("HTTPClient replaceInvalidCharactersInHttpHeaderFieldName test") {
 }
 
 TEST_CASE("HTTPClient should be reusable", "[basic]") {
-  LogTestController::getInstance().setDebug<HTTPClient>();
+  test_controller.getLogTestController().setDebug<HTTPClient>();
 
   minifi::test::ConnectionCountingServer keep_alive_server_;
 
@@ -156,7 +156,7 @@ TEST_CASE("HTTPClient should be reusable", "[basic]") {
   }
 
   CHECK(keep_alive_server_.getConnectionCounter() == 1);
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 #ifdef __linux__

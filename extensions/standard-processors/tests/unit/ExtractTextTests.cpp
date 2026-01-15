@@ -54,14 +54,14 @@ TEST_CASE("Test creation of ExtractText", "[extracttextCreate]") {
 
 TEST_CASE("Test usage of ExtractText", "[extracttextTest]") {
   TestController test_controller;
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::ExtractText>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::GetFile>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
-  LogTestController::getInstance().setTrace<core::ProcessSession>();
-  LogTestController::getInstance().setTrace<core::repository::VolatileContentRepository>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::Connection>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::core::Connectable>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::core::FlowFile>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::ExtractText>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::GetFile>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setTrace<core::ProcessSession>();
+  test_controller.getLogTestController().setTrace<core::repository::VolatileContentRepository>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::Connection>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::core::Connectable>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::core::FlowFile>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
@@ -93,14 +93,14 @@ TEST_CASE("Test usage of ExtractText", "[extracttextTest]") {
   ss2 << "key:" << TEST_ATTR << " value:" << TEST_TEXT;
   std::string log_check = ss2.str();
 
-  REQUIRE(LogTestController::getInstance().contains(log_check));
+  REQUIRE(test_controller.getLogTestController().contains(log_check));
 
   plan->reset();
 
   plan->setProperty(maprocessor, org::apache::nifi::minifi::processors::ExtractText::SizeLimit, "4");
 
-  LogTestController::getInstance().reset();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().reset();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
 
   std::ofstream test_file_2(test_file_path.string() + "2");
   if (test_file_2.is_open()) {
@@ -112,21 +112,21 @@ TEST_CASE("Test usage of ExtractText", "[extracttextTest]") {
   plan->runNextProcessor();  // ExtractText
   plan->runNextProcessor();  // LogAttribute
 
-  REQUIRE(LogTestController::getInstance().contains(log_check, std::chrono::seconds(0)) == false);
+  REQUIRE(test_controller.getLogTestController().contains(log_check, std::chrono::seconds(0)) == false);
 
   ss2.str("");
   ss2 << "key:" << TEST_ATTR << " value:" << "Test";
   log_check = ss2.str();
-  REQUIRE(LogTestController::getInstance().contains(log_check));
+  REQUIRE(test_controller.getLogTestController().contains(log_check));
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("Test usage of ExtractText in regex mode", "[extracttextRegexTest]") {
   TestController test_controller;
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::ExtractText>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::GetFile>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::ExtractText>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::GetFile>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
@@ -180,21 +180,21 @@ TEST_CASE("Test usage of ExtractText in regex mode", "[extracttextRegexTest]") {
   }
 
   for (const auto& log : expected_logs) {
-    REQUIRE(LogTestController::getInstance().contains(log));
+    REQUIRE(test_controller.getLogTestController().contains(log));
   }
 
   std::string error_str = "error encountered when trying to construct regular expression from property (key: InvalidRegex)";
 
-  REQUIRE(LogTestController::getInstance().contains(error_str));
+  REQUIRE(test_controller.getLogTestController().contains(error_str));
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("Test usage of ExtractText in regex mode with large regex matches", "[extracttextRegexTest]") {
   TestController test_controller;
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::ExtractText>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::GetFile>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::ExtractText>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::GetFile>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
@@ -217,6 +217,6 @@ TEST_CASE("Test usage of ExtractText in regex mode with large regex matches", "[
 
   test_controller.runSession(plan);
 
-  REQUIRE(LogTestController::getInstance().contains("key:RegexAttr.0 value:80"));
-  LogTestController::getInstance().reset();
+  REQUIRE(test_controller.getLogTestController().contains("key:RegexAttr.0 value:80"));
+  test_controller.getLogTestController().reset();
 }

@@ -31,12 +31,12 @@ const std::string CONNECTION_STRING = "test-connectionstring";
 class ListAzureDataLakeStorageTestsFixture {
  public:
   ListAzureDataLakeStorageTestsFixture() {
-    LogTestController::getInstance().setDebug<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setDebug<minifi::utils::ListingStateManager>();
-    LogTestController::getInstance().setTrace<minifi::azure::processors::ListAzureDataLakeStorage>();
+    test_controller.getLogTestController().setDebug<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setDebug<minifi::utils::ListingStateManager>();
+    test_controller.getLogTestController().setTrace<minifi::azure::processors::ListAzureDataLakeStorage>();
 
     // Build MiNiFi processing graph
     plan_ = test_controller_.createPlan();
@@ -71,7 +71,7 @@ class ListAzureDataLakeStorageTestsFixture {
   ListAzureDataLakeStorageTestsFixture& operator=(const ListAzureDataLakeStorageTestsFixture&) = delete;
 
   virtual ~ListAzureDataLakeStorageTestsFixture() {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
   }
 
  protected:
@@ -127,7 +127,7 @@ TEST_CASE_METHOD(ListAzureDataLakeStorageTestsFixture, "List all files every tim
   };
   run_assertions();
   plan_->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
   test_controller_.runSession(plan_, true);
   run_assertions();
 }
@@ -155,9 +155,9 @@ TEST_CASE_METHOD(ListAzureDataLakeStorageTestsFixture, "Do not list same files t
   CHECK(verifyLogLinePresenceInPollTime(1s, "key:azure.lastModified value:" + mock_data_lake_storage_client_ptr_->ITEM1_LAST_MODIFIED + "\n"));
   CHECK(verifyLogLinePresenceInPollTime(1s, "key:azure.lastModified value:" + mock_data_lake_storage_client_ptr_->ITEM2_LAST_MODIFIED + "\n"));
   plan_->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
   test_controller_.runSession(plan_, true);
-  REQUIRE_FALSE(LogTestController::getInstance().contains("key:azure", 0s, 0ms));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("key:azure", 0s, 0ms));
 }
 
 TEST_CASE_METHOD(ListAzureDataLakeStorageTestsFixture, "Do not list filtered files", "[listAzureDataLakeStorage]") {
@@ -176,11 +176,11 @@ TEST_CASE_METHOD(ListAzureDataLakeStorageTestsFixture, "Do not list filtered fil
   CHECK(verifyLogLinePresenceInPollTime(1s, "key:azure.length value:128"));
   CHECK(verifyLogLinePresenceInPollTime(1s, "key:azure.etag value:etag1"));
   CHECK(verifyLogLinePresenceInPollTime(1s, "key:azure.lastModified value:" + mock_data_lake_storage_client_ptr_->ITEM1_LAST_MODIFIED + "\n"));
-  CHECK_FALSE(LogTestController::getInstance().contains("key:azure.filePath value:testdir/sub/item2.log", 0s, 0ms));
-  CHECK_FALSE(LogTestController::getInstance().contains("key:azure.filename value:item2.log", 0s, 0ms));
-  CHECK_FALSE(LogTestController::getInstance().contains("key:azure.length value:256", 0s, 0ms));
-  CHECK_FALSE(LogTestController::getInstance().contains("key:azure.etag value:etag2", 0s, 0ms));
-  CHECK_FALSE(LogTestController::getInstance().contains("key:azure.lastModified value:" + mock_data_lake_storage_client_ptr_->ITEM2_LAST_MODIFIED, 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:azure.filePath value:testdir/sub/item2.log", 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:azure.filename value:item2.log", 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:azure.length value:256", 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:azure.etag value:etag2", 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:azure.lastModified value:" + mock_data_lake_storage_client_ptr_->ITEM2_LAST_MODIFIED, 0s, 0ms));
 }
 
 TEST_CASE_METHOD(ListAzureDataLakeStorageTestsFixture, "Do not list filtered paths", "[listAzureDataLakeStorage]") {
@@ -199,11 +199,11 @@ TEST_CASE_METHOD(ListAzureDataLakeStorageTestsFixture, "Do not list filtered pat
   CHECK(verifyLogLinePresenceInPollTime(1s, "key:azure.length value:256"));
   CHECK(verifyLogLinePresenceInPollTime(1s, "key:azure.etag value:etag2"));
   CHECK(verifyLogLinePresenceInPollTime(1s, "key:azure.lastModified value:" + mock_data_lake_storage_client_ptr_->ITEM2_LAST_MODIFIED + "\n"));
-  CHECK_FALSE(LogTestController::getInstance().contains("key:azure.filePath value:testdir/item1.log", 0s, 0ms));
-  CHECK_FALSE(LogTestController::getInstance().contains("key:azure.filename value:item1.log", 0s, 0ms));
-  CHECK_FALSE(LogTestController::getInstance().contains("key:azure.length value:128", 0s, 0ms));
-  CHECK_FALSE(LogTestController::getInstance().contains("key:azure.etag value:etag1", 0s, 0ms));
-  CHECK_FALSE(LogTestController::getInstance().contains("key:azure.lastModified value:" + mock_data_lake_storage_client_ptr_->ITEM1_LAST_MODIFIED, 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:azure.filePath value:testdir/item1.log", 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:azure.filename value:item1.log", 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:azure.length value:128", 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:azure.etag value:etag1", 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:azure.lastModified value:" + mock_data_lake_storage_client_ptr_->ITEM1_LAST_MODIFIED, 0s, 0ms));
 }
 
 TEST_CASE_METHOD(ListAzureDataLakeStorageTestsFixture, "Throw on invalid file filter", "[listAzureDataLakeStorage]") {

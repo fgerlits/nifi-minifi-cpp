@@ -26,10 +26,10 @@
 TEST_CASE("RouteOnAttributeMatchedTest", "[routeOnAttributeMatchedTest]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<minifi::processors::UpdateAttribute>();
-  LogTestController::getInstance().setDebug<minifi::processors::RouteOnAttribute>();
-  LogTestController::getInstance().setDebug<TestPlan>();
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::UpdateAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::RouteOnAttribute>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
@@ -53,18 +53,18 @@ TEST_CASE("RouteOnAttributeMatchedTest", "[routeOnAttributeMatchedTest]") {
   test_controller.runSession(plan, false);  // update_matched
   test_controller.runSession(plan, false);  // log
 
-  REQUIRE(LogTestController::getInstance().contains("key:route_check_attr value:good"));
+  REQUIRE(test_controller.getLogTestController().contains("key:route_check_attr value:good"));
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("RouteOnAttributeUnmatchedTest", "[routeOnAttributeUnmatchedTest]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<minifi::processors::UpdateAttribute>();
-  LogTestController::getInstance().setDebug<minifi::processors::RouteOnAttribute>();
-  LogTestController::getInstance().setDebug<TestPlan>();
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::UpdateAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::RouteOnAttribute>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
@@ -87,7 +87,7 @@ TEST_CASE("RouteOnAttributeUnmatchedTest", "[routeOnAttributeUnmatchedTest]") {
   test_controller.runSession(plan, false);  // update_matched
   test_controller.runSession(plan, false);  // log
 
-  REQUIRE(LogTestController::getInstance().contains("key:route_check_attr value:good"));
+  REQUIRE(test_controller.getLogTestController().contains("key:route_check_attr value:good"));
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }

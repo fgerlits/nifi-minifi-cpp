@@ -52,7 +52,7 @@ class LogPublisherTestFixture {
     publisher_.reset();  // explicit because LogTestController should outlive the thread in publisher_
     minifi::utils::file::delete_dir(provenance_repo_->getDirectory());
     minifi::utils::file::delete_dir(flow_file_repo_->getDirectory());
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
   }
 
  protected:
@@ -65,7 +65,7 @@ class LogPublisherTestFixture {
 };
 
 TEST_CASE_METHOD(LogPublisherTestFixture, "Logging interval property is mandatory", "[LogMetricsPublisher]") {
-  LogTestController::getInstance().setTrace<minifi::state::LogMetricsPublisher>();
+  test_controller.getLogTestController().setTrace<minifi::state::LogMetricsPublisher>();
   SECTION("No logging interval is set") {
     REQUIRE_THROWS_WITH(publisher_->initialize(configuration_, response_node_loader_), "General Operation: Metrics logging interval not configured for log metrics publisher!");
   }
@@ -78,7 +78,7 @@ TEST_CASE_METHOD(LogPublisherTestFixture, "Logging interval property is mandator
 }
 
 TEST_CASE_METHOD(LogPublisherTestFixture, "Verify empty metrics if no valid metrics are defined", "[LogMetricsPublisher]") {
-  LogTestController::getInstance().setTrace<minifi::state::LogMetricsPublisher>();
+  test_controller.getLogTestController().setTrace<minifi::state::LogMetricsPublisher>();
   configuration_->set(minifi::Configuration::nifi_metrics_publisher_log_metrics_logging_interval, "100ms");
   SECTION("No metrics are defined") {}
   SECTION("Only invalid metrics are defined") {
@@ -91,7 +91,7 @@ TEST_CASE_METHOD(LogPublisherTestFixture, "Verify empty metrics if no valid metr
 }
 
 TEST_CASE_METHOD(LogPublisherTestFixture, "Verify multiple metric nodes in logs", "[LogMetricsPublisher]") {
-  LogTestController::getInstance().setTrace<minifi::state::LogMetricsPublisher>();
+  test_controller.getLogTestController().setTrace<minifi::state::LogMetricsPublisher>();
   configuration_->set(minifi::Configuration::nifi_metrics_publisher_log_metrics_logging_interval, "100ms");
   configuration_->set(Configure::nifi_metrics_publisher_metrics, "RepositoryMetrics,DeviceInfoNode");
   publisher_->initialize(configuration_, response_node_loader_);
@@ -127,7 +127,7 @@ TEST_CASE_METHOD(LogPublisherTestFixture, "Verify multiple metric nodes in logs"
 }
 
 TEST_CASE_METHOD(LogPublisherTestFixture, "Verify reloading different metrics", "[LogMetricsPublisher]") {
-  LogTestController::getInstance().setTrace<minifi::state::LogMetricsPublisher>();
+  test_controller.getLogTestController().setTrace<minifi::state::LogMetricsPublisher>();
   configuration_->set(minifi::Configuration::nifi_metrics_publisher_log_metrics_logging_interval, "100ms");
   configuration_->set(Configure::nifi_metrics_publisher_metrics, "RepositoryMetrics");
   publisher_->initialize(configuration_, response_node_loader_);
@@ -159,8 +159,8 @@ TEST_CASE_METHOD(LogPublisherTestFixture, "Verify reloading different metrics", 
 })";
   REQUIRE(verifyLogLinePresenceInPollTime(5s, expected_log));
   publisher_->clearMetricNodes();
-  LogTestController::getInstance().reset();
-  LogTestController::getInstance().setTrace<minifi::state::LogMetricsPublisher>();
+  test_controller.getLogTestController().reset();
+  test_controller.getLogTestController().setTrace<minifi::state::LogMetricsPublisher>();
   configuration_->set(Configure::nifi_metrics_publisher_metrics, "DeviceInfoNode");
   publisher_->loadMetricNodes();
   expected_log = R"([info] {
@@ -171,7 +171,7 @@ TEST_CASE_METHOD(LogPublisherTestFixture, "Verify reloading different metrics", 
 }
 
 TEST_CASE_METHOD(LogPublisherTestFixture, "Verify generic and publisher specific metric properties", "[LogMetricsPublisher]") {
-  LogTestController::getInstance().setTrace<minifi::state::LogMetricsPublisher>();
+  test_controller.getLogTestController().setTrace<minifi::state::LogMetricsPublisher>();
   configuration_->set(minifi::Configuration::nifi_metrics_publisher_log_metrics_logging_interval, "100ms");
   SECTION("Only generic metrics are defined") {
     configuration_->set(Configure::nifi_metrics_publisher_metrics, "RepositoryMetrics");
@@ -214,7 +214,7 @@ TEST_CASE_METHOD(LogPublisherTestFixture, "Verify generic and publisher specific
 }
 
 TEST_CASE_METHOD(LogPublisherTestFixture, "Verify changing log level property for logging", "[LogMetricsPublisher]") {
-  LogTestController::getInstance().setTrace<minifi::state::LogMetricsPublisher>();
+  test_controller.getLogTestController().setTrace<minifi::state::LogMetricsPublisher>();
   configuration_->set(minifi::Configuration::nifi_metrics_publisher_log_metrics_logging_interval, "100ms");
   configuration_->set(minifi::Configuration::nifi_metrics_publisher_log_metrics_log_level, "dEbUg");
   configuration_->set(Configure::nifi_metrics_publisher_metrics, "RepositoryMetrics");

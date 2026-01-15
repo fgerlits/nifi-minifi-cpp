@@ -98,7 +98,7 @@ unique_evt_handle getFirstEventFromResults(const unique_evt_handle& results) {
 TEST_CASE("Bookmark constructor works", "[create]") {
   TestController test_controller;
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
-  LogTestController::getInstance().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
 
   reportEvent(APPLICATION_CHANNEL, "Publish an event to make sure the event log is not empty");
 
@@ -119,7 +119,7 @@ TEST_CASE("Bookmark constructor works for log file path", "[create]") {
   TestController test_controller;
   std::filesystem::path log_file = test_controller.createTempDirectory() / "events.evtx";
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
-  LogTestController::getInstance().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
 
   reportEvent(APPLICATION_CHANNEL, "Publish an event to make sure the event log is not empty");
   generateLogFile(APPLICATION_CHANNEL, log_file);
@@ -144,7 +144,7 @@ TEST_CASE("Bookmark constructor works for log file path", "[create]") {
 TEST_CASE("Bookmark is restored from the state", "[create][state]") {
   TestController test_controller;
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
-  LogTestController::getInstance().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
 
   utils::Identifier uuid = IdGenerator::getIdGenerator()->generate();
   auto state_manager = test_plan->getStateStorage()->getStateManager(uuid);
@@ -163,7 +163,7 @@ TEST_CASE("Bookmark is restored from the state", "[create][state]") {
 TEST_CASE("Bookmark created after a new event is different", "[create][state]") {
   TestController test_controller;
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
-  LogTestController::getInstance().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
 
   utils::Identifier uuid_one = IdGenerator::getIdGenerator()->generate();
   auto state_manager_one = test_plan->getStateStorage()->getStateManager(uuid_one);
@@ -182,7 +182,7 @@ TEST_CASE("Bookmark created after a new event is different", "[create][state]") 
 TEST_CASE("Bookmark::getBookmarkHandleFromXML() returns the same event from a copy", "[handle_from_xml]") {
   TestController test_controller;
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
-  LogTestController::getInstance().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
 
   utils::Identifier uuid = IdGenerator::getIdGenerator()->generate();
   auto state_manager = test_plan->getStateStorage()->getStateManager(uuid);
@@ -197,7 +197,7 @@ TEST_CASE("Bookmark::getBookmarkHandleFromXML() returns the same event from a co
 TEST_CASE("Bookmark::getBookmarkHandleFromXML() returns a different event after the XML is changed", "[handle_from_xml]") {
   TestController test_controller;
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
-  LogTestController::getInstance().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
 
   GIVEN("We have two different bookmarks") {
     const auto uuid = IdGenerator::getIdGenerator()->generate();
@@ -232,7 +232,7 @@ TEST_CASE("Bookmark::getBookmarkHandleFromXML() returns a different event after 
 TEST_CASE("Bookmark::getNewBookmarkXml() updates the bookmark", "[add_event]") {
   TestController test_controller;
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
-  LogTestController::getInstance().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
 
   const utils::Identifier uuid = IdGenerator::getIdGenerator()->generate();
   auto state_manager = test_plan->getStateStorage()->getStateManager(uuid);
@@ -253,7 +253,7 @@ TEST_CASE("Bookmark::getNewBookmarkXml() updates the bookmark", "[add_event]") {
 TEST_CASE("Bookmark::saveBookmarkXml() updates the bookmark and saves it to the state manager", "[save_bookmark][state]") {
   TestController test_controller;
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
-  LogTestController::getInstance().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
 
   GIVEN("We have two different bookmarks with two different state managers") {
     utils::Identifier uuid_one = IdGenerator::getIdGenerator()->generate();

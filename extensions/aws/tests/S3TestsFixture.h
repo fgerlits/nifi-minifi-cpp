@@ -47,14 +47,14 @@ class S3TestsFixture {
   const std::string S3_BUCKET = "testBucket";
 
   S3TestsFixture() {
-    LogTestController::getInstance().setDebug<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setTrace<T>();
-    LogTestController::getInstance().setDebug<minifi::aws::AWSCredentialsProvider>();
-    LogTestController::getInstance().setDebug<minifi::aws::s3::MultipartUploadStateStorage>();
-    LogTestController::getInstance().setDebug<minifi::aws::s3::S3Wrapper>();
+    test_controller.getLogTestController().setDebug<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setTrace<T>();
+    test_controller.getLogTestController().setDebug<minifi::aws::AWSCredentialsProvider>();
+    test_controller.getLogTestController().setDebug<minifi::aws::s3::MultipartUploadStateStorage>();
+    test_controller.getLogTestController().setDebug<minifi::aws::s3::S3Wrapper>();
 
     // Build MiNiFi processing graph
     plan = test_controller.createPlan();
@@ -111,7 +111,7 @@ class S3TestsFixture {
   }
 
   virtual ~S3TestsFixture() {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
   }
 
  protected:
@@ -130,8 +130,8 @@ class FlowProcessorS3TestsFixture : public S3TestsFixture<T> {
   const std::string INPUT_DATA = "This data is has a length of 37 bytes";
 
   FlowProcessorS3TestsFixture() {
-    LogTestController::getInstance().setTrace<minifi::processors::GetFile>();
-    LogTestController::getInstance().setDebug<minifi::processors::UpdateAttribute>();
+    test_controller.getLogTestController().setTrace<minifi::processors::GetFile>();
+    test_controller.getLogTestController().setDebug<minifi::processors::UpdateAttribute>();
 
     auto mock_s3_request_sender = std::make_unique<MockS3RequestSender>();
     this->mock_s3_request_sender_ptr = mock_s3_request_sender.get();

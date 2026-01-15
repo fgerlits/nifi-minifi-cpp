@@ -40,17 +40,17 @@ class HttpTestHarness : public HTTPIntegrationBase {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setDebug<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<core::ProcessGroup>();
-    LogTestController::getInstance().setDebug<minifi::SchedulingAgent>();
-    LogTestController::getInstance().setDebug<core::ProcessContext>();
-    LogTestController::getInstance().setTrace<minifi::processors::InvokeHTTP>();
-    LogTestController::getInstance().setDebug<minifi::http::HTTPClient>();
-    LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setDebug<core::Processor>();
-    LogTestController::getInstance().setDebug<minifi::ThreadedSchedulingAgent>();
-    LogTestController::getInstance().setDebug<minifi::TimerDrivenSchedulingAgent>();
-    LogTestController::getInstance().setDebug<minifi::core::ProcessSession>();
+    test_controller_.getLogTestController().setDebug<minifi::FlowController>();
+    test_controller_.getLogTestController().setDebug<core::ProcessGroup>();
+    test_controller_.getLogTestController().setDebug<minifi::SchedulingAgent>();
+    test_controller_.getLogTestController().setDebug<core::ProcessContext>();
+    test_controller_.getLogTestController().setTrace<minifi::processors::InvokeHTTP>();
+    test_controller_.getLogTestController().setDebug<minifi::http::HTTPClient>();
+    test_controller_.getLogTestController().setDebug<minifi::processors::LogAttribute>();
+    test_controller_.getLogTestController().setDebug<core::Processor>();
+    test_controller_.getLogTestController().setDebug<minifi::ThreadedSchedulingAgent>();
+    test_controller_.getLogTestController().setDebug<minifi::TimerDrivenSchedulingAgent>();
+    test_controller_.getLogTestController().setDebug<minifi::core::ProcessSession>();
     std::fstream file;
     test_file_ = dir_ / "tstFile.ext";
     file.open(test_file_, std::ios::out);

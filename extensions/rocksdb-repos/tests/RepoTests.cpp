@@ -69,9 +69,9 @@ TEST_CASE("Test Repo Names", "[TestFFR1]") {
 }
 
 TEST_CASE("Test Repo Empty Value Attribute", "[TestFFR1]") {
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FlowFileRepository>();
   TestController test_controller;
   const auto dir = test_controller.createTempDirectory();
   const auto repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir.string(), 0ms, 0, 1ms);
@@ -90,9 +90,9 @@ TEST_CASE("Test Repo Empty Value Attribute", "[TestFFR1]") {
 }
 
 TEST_CASE("Test Repo Empty Key Attribute ", "[TestFFR2]") {
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FlowFileRepository>();
   TestController test_controller;
   const auto dir = test_controller.createTempDirectory();
   const auto repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir.string(), 0ms, 0, 1ms);
@@ -112,9 +112,9 @@ TEST_CASE("Test Repo Empty Key Attribute ", "[TestFFR2]") {
 }
 
 TEST_CASE("Test Repo Key Attribute Verify ", "[TestFFR3]") {
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FlowFileRepository>();
   TestController test_controller;
   auto dir = test_controller.createTempDirectory();
   const auto repository = std::make_shared<core::repository::FlowFileRepository>("ff", dir.string(), 0ms, 0, 1ms);
@@ -160,9 +160,9 @@ TEST_CASE("Test Repo Key Attribute Verify ", "[TestFFR3]") {
 TEST_CASE("Test Delete Content ", "[TestFFR4]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FlowFileRepository>();
 
   auto dir = test_controller.createTempDirectory();
 
@@ -203,16 +203,16 @@ TEST_CASE("Test Delete Content ", "[TestFFR4]") {
   std::ifstream fileopen(dir / "tstFile.ext", std::ios::in);
   REQUIRE(!fileopen.good());
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("Test Validate Checkpoint ", "[TestFFR5]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setTrace<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setTrace<minifi::ResourceClaim>();
-  LogTestController::getInstance().setTrace<minifi::FlowFileRecord>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setTrace<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setTrace<minifi::ResourceClaim>();
+  test_controller.getLogTestController().setTrace<minifi::FlowFileRecord>();
 
   auto dir = test_controller.createTempDirectory();
 
@@ -263,16 +263,16 @@ TEST_CASE("Test Validate Checkpoint ", "[TestFFR5]") {
   std::ifstream fileopen(dir / "tstFile.ext", std::ios::in);
   REQUIRE(fileopen.fail());
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("Test FlowFile Restore", "[TestFFR6]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setTrace<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setTrace<minifi::ResourceClaim>();
-  LogTestController::getInstance().setTrace<minifi::FlowFileRecord>();
-  LogTestController::getInstance().setTrace<minifi::core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setTrace<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setTrace<minifi::ResourceClaim>();
+  test_controller.getLogTestController().setTrace<minifi::FlowFileRecord>();
+  test_controller.getLogTestController().setTrace<minifi::core::repository::FlowFileRepository>();
 
   auto dir = test_controller.createTempDirectory();
 
@@ -341,7 +341,7 @@ TEST_CASE("Test FlowFile Restore", "[TestFFR6]") {
   // this will first check the persisted repo and restore all FlowFiles
   // that still has an owner Connectable
   ff_repository->start();
-  CHECK(LogTestController::getInstance().contains("Found connection for"));
+  CHECK(test_controller.getLogTestController().contains("Found connection for"));
 
   // check if the @input Connection's FlowFile was restored
   // upon the FlowFileRepository's startup
@@ -354,7 +354,7 @@ TEST_CASE("Test FlowFile Restore", "[TestFFR6]") {
   REQUIRE(verifyEventHappenedInPollTime(std::chrono::seconds(10), flowFileArrivedInOutput, std::chrono::milliseconds(50)));
   REQUIRE(expiredFiles.empty());
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("Flush deleted flowfiles before shutdown", "[TestFFR7]") {
@@ -445,9 +445,9 @@ TEST_CASE("Flush deleted flowfiles before shutdown", "[TestFFR7]") {
 }
 
 TEST_CASE("FlowFileRepository triggers content repo orphan clear") {
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FlowFileRepository>();
   TestController test_controller;
   auto ff_dir = test_controller.createTempDirectory();
   auto content_dir = test_controller.createTempDirectory();
@@ -478,9 +478,9 @@ TEST_CASE("FlowFileRepository triggers content repo orphan clear") {
 }
 
 TEST_CASE("FlowFileRepository synchronously pushes existing flow files") {
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FlowFileRepository>();
   TestController test_controller;
   const auto ff_dir = test_controller.createTempDirectory();
   const auto content_dir = test_controller.createTempDirectory();
@@ -534,9 +534,9 @@ TEST_CASE("FlowFileRepository synchronously pushes existing flow files") {
 }
 
 TEST_CASE("Test getting flow file repository size properties", "[TestGettingRepositorySize]") {
-  LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
-  LogTestController::getInstance().setDebug<minifi::provenance::ProvenanceRepository>();
-  LogTestController::getInstance().setDebug<core::repository::VolatileProvenanceRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<minifi::provenance::ProvenanceRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::VolatileProvenanceRepository>();
   TestController test_controller;
   auto dir = test_controller.createTempDirectory();
 
@@ -623,10 +623,10 @@ TEST_CASE("Test getting noop repository size properties", "[TestGettingRepositor
 }
 
 TEST_CASE("Test getting content repository size properties", "[TestGettingRepositorySize]") {
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setDebug<core::repository::VolatileContentRepository>();
-  LogTestController::getInstance().setDebug<core::repository::DatabaseContentRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::VolatileContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::DatabaseContentRepository>();
   TestController test_controller;
   const auto dir = test_controller.createTempDirectory();
 
@@ -696,9 +696,9 @@ TEST_CASE("Test getting content repository size properties", "[TestGettingReposi
 }
 
 TEST_CASE("Flow file repositories can be stopped", "[TestRepoIsRunning]") {
-  LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
-  LogTestController::getInstance().setDebug<minifi::provenance::ProvenanceRepository>();
-  LogTestController::getInstance().setDebug<core::repository::VolatileProvenanceRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<minifi::provenance::ProvenanceRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::VolatileProvenanceRepository>();
   TestController test_controller;
   const auto dir = test_controller.createTempDirectory();
 
@@ -730,10 +730,10 @@ TEST_CASE("Flow file repositories can be stopped", "[TestRepoIsRunning]") {
 }
 
 TEST_CASE("Content repositories are always running", "[TestRepoIsRunning]") {
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setDebug<core::repository::VolatileContentRepository>();
-  LogTestController::getInstance().setDebug<core::repository::DatabaseContentRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::VolatileContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::DatabaseContentRepository>();
   TestController test_controller;
 
   std::shared_ptr<core::ContentRepository> content_repo;
@@ -772,9 +772,9 @@ void corruptFlowFile(core::FlowFile& ff) {
 }
 
 TEST_CASE("FlowFileRepository can filter out too small contents") {
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setDebug<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::FlowFileRepository>();
   TestController test_controller;
   const auto ff_dir = test_controller.createTempDirectory();
   const auto content_dir = test_controller.createTempDirectory();

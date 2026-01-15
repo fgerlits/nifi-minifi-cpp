@@ -38,19 +38,19 @@
 class FetchSFTPTestsFixture {
  public:
   FetchSFTPTestsFixture() {
-    LogTestController::getInstance().reset();
-    LogTestController::getInstance().setTrace<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<minifi::SchedulingAgent>();
-    LogTestController::getInstance().setDebug<minifi::core::ProcessGroup>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setDebug<minifi::processors::GenerateFlowFile>();
-    LogTestController::getInstance().setTrace<minifi::utils::SFTPClient>();
-    LogTestController::getInstance().setTrace<minifi::processors::FetchSFTP>();
-    LogTestController::getInstance().setTrace<minifi::processors::PutFile>();
-    LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setDebug<SFTPTestServer>();
+    test_controller.getLogTestController().reset();
+    test_controller.getLogTestController().setTrace<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<minifi::SchedulingAgent>();
+    test_controller.getLogTestController().setDebug<minifi::core::ProcessGroup>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<minifi::processors::GenerateFlowFile>();
+    test_controller.getLogTestController().setTrace<minifi::utils::SFTPClient>();
+    test_controller.getLogTestController().setTrace<minifi::processors::FetchSFTP>();
+    test_controller.getLogTestController().setTrace<minifi::processors::PutFile>();
+    test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setDebug<SFTPTestServer>();
 
     REQUIRE_FALSE(src_dir.empty());
     REQUIRE_FALSE(dst_dir.empty());
@@ -172,12 +172,12 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP fetch one file", "[FetchSFTP]
   testFile(IN_SOURCE, "nifi_test/tstFile.ext", "Test content 1");
   testFile(IN_DESTINATION, "nifi_test/tstFile.ext", "Test content 1");
 
-  REQUIRE(LogTestController::getInstance().contains("from FetchSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.host value:localhost"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
-  REQUIRE(LogTestController::getInstance().contains("key:path value:nifi_test/"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from FetchSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.host value:localhost"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
+  REQUIRE(test_controller.getLogTestController().contains("key:path value:nifi_test/"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
 }
 
 TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP public key authentication", "[FetchSFTP][basic]") {
@@ -192,14 +192,14 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP public key authentication", "
   testFile(IN_SOURCE, "nifi_test/tstFile.ext", "Test content 1");
   testFile(IN_DESTINATION, "nifi_test/tstFile.ext", "Test content 1");
 
-  REQUIRE(LogTestController::getInstance().contains("Successfully authenticated with publickey"));
+  REQUIRE(test_controller.getLogTestController().contains("Successfully authenticated with publickey"));
 
-  REQUIRE(LogTestController::getInstance().contains("from FetchSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.host value:localhost"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
-  REQUIRE(LogTestController::getInstance().contains("key:path value:nifi_test/"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from FetchSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.host value:localhost"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
+  REQUIRE(test_controller.getLogTestController().contains("key:path value:nifi_test/"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
 }
 
 TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP fetch non-existing file", "[FetchSFTP][basic]") {
@@ -207,8 +207,8 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP fetch non-existing file", "[F
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Failed to open remote file \"nifi_test/tstFile.ext\", error: LIBSSH2_FX_NO_SUCH_FILE"));
-  REQUIRE(LogTestController::getInstance().contains("from FetchSFTP to relationship not.found"));
+  REQUIRE(test_controller.getLogTestController().contains("Failed to open remote file \"nifi_test/tstFile.ext\", error: LIBSSH2_FX_NO_SUCH_FILE"));
+  REQUIRE(test_controller.getLogTestController().contains("from FetchSFTP to relationship not.found"));
 }
 
 #ifndef WIN32
@@ -225,8 +225,8 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP fetch non-readable file", "[F
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Failed to open remote file \"nifi_test/tstFile.ext\", error: LIBSSH2_FX_PERMISSION_DENIED"));
-  REQUIRE(LogTestController::getInstance().contains("from FetchSFTP to relationship permission.denied"));
+  REQUIRE(test_controller.getLogTestController().contains("Failed to open remote file \"nifi_test/tstFile.ext\", error: LIBSSH2_FX_PERMISSION_DENIED"));
+  REQUIRE(test_controller.getLogTestController().contains("from FetchSFTP to relationship permission.denied"));
 }
 #endif
 
@@ -243,8 +243,8 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP fetch connection error", "[Fe
   sftp_server.reset();
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Failed to open remote file \"nifi_test/tstFile.ext\" due to an underlying SSH error"));
-  REQUIRE(LogTestController::getInstance().contains("from FetchSFTP to relationship comms.failure"));
+  REQUIRE(test_controller.getLogTestController().contains("Failed to open remote file \"nifi_test/tstFile.ext\" due to an underlying SSH error"));
+  REQUIRE(test_controller.getLogTestController().contains("from FetchSFTP to relationship comms.failure"));
 }
 
 TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP Completion Strategy Delete File success", "[FetchSFTP][completion-strategy]") {
@@ -258,11 +258,11 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP Completion Strategy Delete Fi
   testFileNotExists(IN_SOURCE, "nifi_test/tstFile.ext");
   testFile(IN_DESTINATION, "nifi_test/tstFile.ext", "Test content 1");
 
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.host value:localhost"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
-  REQUIRE(LogTestController::getInstance().contains("key:path value:nifi_test/"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.host value:localhost"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
+  REQUIRE(test_controller.getLogTestController().contains("key:path value:nifi_test/"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
 }
 
 #ifndef WIN32
@@ -284,14 +284,14 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP Completion Strategy Delete Fi
   testFile(IN_SOURCE, "nifi_test/tstFile.ext", "Test content 1");
   testFile(IN_DESTINATION, "nifi_test/tstFile.ext", "Test content 1");
 
-  REQUIRE(LogTestController::getInstance().contains("Failed to remove remote file \"nifi_test/tstFile.ext\", error: LIBSSH2_FX_PERMISSION_DENIED"));
-  REQUIRE(LogTestController::getInstance().contains("Completion Strategy is Delete File, but failed to delete remote file \"nifi_test/tstFile.ext\""));
+  REQUIRE(test_controller.getLogTestController().contains("Failed to remove remote file \"nifi_test/tstFile.ext\", error: LIBSSH2_FX_PERMISSION_DENIED"));
+  REQUIRE(test_controller.getLogTestController().contains("Completion Strategy is Delete File, but failed to delete remote file \"nifi_test/tstFile.ext\""));
 
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.host value:localhost"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
-  REQUIRE(LogTestController::getInstance().contains("key:path value:nifi_test/"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.host value:localhost"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
+  REQUIRE(test_controller.getLogTestController().contains("key:path value:nifi_test/"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
   std::filesystem::permissions(src_dir / "vfs" / "nifi_test", static_cast<std::filesystem::perms>(0755));
 }
 #endif
@@ -310,11 +310,11 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP Completion Strategy Move File
   testFile(IN_SOURCE, "nifi_done/tstFile.ext", "Test content 1");
   testFile(IN_DESTINATION, "nifi_test/tstFile.ext", "Test content 1");
 
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.host value:localhost"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
-  REQUIRE(LogTestController::getInstance().contains("key:path value:nifi_test/"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.host value:localhost"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
+  REQUIRE(test_controller.getLogTestController().contains("key:path value:nifi_test/"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
 }
 
 TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP Completion Strategy Move File fail", "[FetchSFTP][completion-strategy]") {
@@ -334,14 +334,14 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP Completion Strategy Move File
   testFile(IN_SOURCE, "nifi_test/tstFile.ext", "Test content 1");
   testFile(IN_DESTINATION, "nifi_test/tstFile.ext", "Test content 1");
 
-  REQUIRE(LogTestController::getInstance().contains("Failed to rename remote file \"nifi_test/tstFile.ext\" to \"nifi_done/tstFile.ext\", error: LIBSSH2_FX_NO_SUCH_FILE"));
-  REQUIRE(LogTestController::getInstance().contains("Completion Strategy is Move File, but failed to move file \"nifi_test/tstFile.ext\" to \"nifi_done/tstFile.ext\""));
+  REQUIRE(test_controller.getLogTestController().contains("Failed to rename remote file \"nifi_test/tstFile.ext\" to \"nifi_done/tstFile.ext\", error: LIBSSH2_FX_NO_SUCH_FILE"));
+  REQUIRE(test_controller.getLogTestController().contains("Completion Strategy is Move File, but failed to move file \"nifi_test/tstFile.ext\" to \"nifi_done/tstFile.ext\""));
 
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.host value:localhost"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
-  REQUIRE(LogTestController::getInstance().contains("key:path value:nifi_test/"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.host value:localhost"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
+  REQUIRE(test_controller.getLogTestController().contains("key:path value:nifi_test/"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
 }
 
 TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP expression language test", "[FetchSFTP]") {
@@ -374,11 +374,11 @@ TEST_CASE_METHOD(FetchSFTPTestsFixture, "FetchSFTP expression language test", "[
   testFile(IN_SOURCE, "nifi_done/tstFile.ext", "Test content 1");
   testFile(IN_DESTINATION, "nifi_test/tstFile.ext", "Test content 1");
 
-  REQUIRE(LogTestController::getInstance().contains("Successfully authenticated with publickey"));
-  REQUIRE(LogTestController::getInstance().contains("from FetchSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.host value:localhost"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
-  REQUIRE(LogTestController::getInstance().contains("key:path value:nifi_test/"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Successfully authenticated with publickey"));
+  REQUIRE(test_controller.getLogTestController().contains("from FetchSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.filename value:nifi_test/tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.host value:localhost"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
+  REQUIRE(test_controller.getLogTestController().contains("key:path value:nifi_test/"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
 }

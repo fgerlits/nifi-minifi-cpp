@@ -29,7 +29,7 @@ class SplitJsonTestFixture {
       controller_(utils::make_processor<processors::SplitJson>("SplitJson")),
       split_json_processor_(controller_.getProcessor()) {
     REQUIRE(split_json_processor_);
-    LogTestController::getInstance().setTrace<processors::SplitJson>();
+    test_controller.getLogTestController().setTrace<processors::SplitJson>();
   }
 
  protected:

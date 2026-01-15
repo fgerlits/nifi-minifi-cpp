@@ -35,11 +35,11 @@ const std::string PREFIX = "test_prefix";
 class ListAzureBlobStorageTestsFixture {
  public:
   ListAzureBlobStorageTestsFixture() {
-    LogTestController::getInstance().setDebug<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setTrace<minifi::azure::processors::ListAzureBlobStorage>();
+    test_controller.getLogTestController().setDebug<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setTrace<minifi::azure::processors::ListAzureBlobStorage>();
 
     // Build MiNiFi processing graph
     plan_ = test_controller_.createPlan();
@@ -71,7 +71,7 @@ class ListAzureBlobStorageTestsFixture {
   ListAzureBlobStorageTestsFixture& operator=(const ListAzureBlobStorageTestsFixture&) = delete;
 
   virtual ~ListAzureBlobStorageTestsFixture() {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
   }
 
  protected:
@@ -312,7 +312,7 @@ TEST_CASE_METHOD(ListAzureBlobStorageTestsFixture, "List all files every time", 
   };
   run_assertions();
   plan_->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
   test_controller_.runSession(plan_, true);
   run_assertions();
 }
@@ -344,9 +344,9 @@ TEST_CASE_METHOD(ListAzureBlobStorageTestsFixture, "Do not list same files the s
   CHECK(verifyLogLinePresenceInPollTime(1s, "key:lang value:en-US"));
   CHECK(verifyLogLinePresenceInPollTime(1s, "key:lang value:de-DE"));
   plan_->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
   test_controller_.runSession(plan_, true);
-  REQUIRE_FALSE(LogTestController::getInstance().contains("key:azure", 0s, 0ms));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("key:azure", 0s, 0ms));
 }
 
 }  // namespace

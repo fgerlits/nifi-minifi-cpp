@@ -33,7 +33,7 @@ TEST_CASE("Limiting resource queue to a maximum of 2 resources", "[utils::Resour
 
   std::shared_ptr<core::logging::Logger> logger{core::logging::LoggerFactory<ResourceQueue<steady_clock::time_point>>::getLogger()};
 
-  LogTestController::getInstance().setTrace<ResourceQueue<steady_clock::time_point>>();
+  test_controller.getLogTestController().setTrace<ResourceQueue<steady_clock::time_point>>();
 
   std::mutex resources_created_mutex;
   std::set<steady_clock::time_point> resources_created;
@@ -62,8 +62,8 @@ TEST_CASE("Resource limitation is not set to the resource queue", "[utils::Resou
   using std::chrono::steady_clock;
 
   std::shared_ptr<core::logging::Logger> logger{core::logging::LoggerFactory<ResourceQueue<steady_clock::time_point>>::getLogger()};
-  LogTestController::getInstance().setTrace<ResourceQueue<steady_clock::time_point>>();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().setTrace<ResourceQueue<steady_clock::time_point>>();
+  test_controller.getLogTestController().clear();
   auto resource_queue = utils::ResourceQueue<steady_clock::time_point>::create([]{ return std::make_unique<steady_clock::time_point>(steady_clock::now()); }, std::nullopt, std::nullopt, logger);
   std::set<steady_clock::time_point> resources_created;
 
@@ -75,8 +75,8 @@ TEST_CASE("Resource limitation is not set to the resource queue", "[utils::Resou
   resources_created.emplace(*resource_wrapper_two);
   resources_created.emplace(*resource_wrapper_three);
 
-  CHECK(!LogTestController::getInstance().contains("Waiting for resource", 0ms));
-  CHECK(LogTestController::getInstance().contains("Number of instances: 3", 0ms));
+  CHECK(!test_controller.getLogTestController().contains("Waiting for resource", 0ms));
+  CHECK(test_controller.getLogTestController().contains("Number of instances: 3", 0ms));
   CHECK(resources_created.size() == 3);
 }
 
@@ -97,8 +97,8 @@ TEST_CASE("resource returns when it goes out of scope", "[utils::ResourceQueue]"
 TEST_CASE("resource resets when it goes out of scope", "[utils::ResourceQueue]") {
   using std::chrono::steady_clock;
   std::shared_ptr<core::logging::Logger> logger{core::logging::LoggerFactory<ResourceQueue<steady_clock::time_point>>::getLogger()};
-  LogTestController::getInstance().setTrace<ResourceQueue<steady_clock::time_point>>();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().setTrace<ResourceQueue<steady_clock::time_point>>();
+  test_controller.getLogTestController().clear();
   auto queue = utils::ResourceQueue<steady_clock::time_point>::create([]{ return std::make_unique<steady_clock::time_point>(steady_clock::time_point::min()); },
                                                                       std::nullopt,
                                                                       [](steady_clock::time_point& resource){ resource = steady_clock::time_point::min();},
@@ -109,10 +109,10 @@ TEST_CASE("resource resets when it goes out of scope", "[utils::ResourceQueue]")
     *resource = steady_clock::now();
   }
   {
-    CHECK(LogTestController::getInstance().matchesRegex("Returning .* resource", 0ms));
+    CHECK(test_controller.getLogTestController().matchesRegex("Returning .* resource", 0ms));
     auto resource = queue->getResource();
     CHECK(*resource == steady_clock::time_point::min());
-    CHECK(LogTestController::getInstance().matchesRegex("Using available .* resource instance", 0ms));
+    CHECK(test_controller.getLogTestController().matchesRegex("Using available .* resource instance", 0ms));
   }
 }
 

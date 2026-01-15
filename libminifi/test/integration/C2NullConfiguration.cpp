@@ -39,11 +39,11 @@ class VerifyC2Server : public HTTPIntegrationBase {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setDebug<minifi::http::HTTPClient>();
-    LogTestController::getInstance().setDebug<processors::InvokeHTTP>();
-    LogTestController::getInstance().setDebug<c2::C2Agent>();
-    LogTestController::getInstance().setDebug<processors::LogAttribute>();
-    LogTestController::getInstance().setDebug<core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<minifi::http::HTTPClient>();
+    test_controller.getLogTestController().setDebug<processors::InvokeHTTP>();
+    test_controller.getLogTestController().setDebug<c2::C2Agent>();
+    test_controller.getLogTestController().setDebug<processors::LogAttribute>();
+    test_controller.getLogTestController().setDebug<core::ProcessSession>();
     std::fstream file;
     auto path = dir / "tstFile.ext";
     file.open(path, std::ios::out);

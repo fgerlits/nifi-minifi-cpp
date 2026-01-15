@@ -45,11 +45,11 @@ class PutCouchbaseKeyTestController : public TestController {
   PutCouchbaseKeyTestController()
       : controller_(minifi::test::utils::make_processor<processors::PutCouchbaseKey>("PutCouchbaseKey")),
         proc_(controller_.getProcessor()) {
-    LogTestController::getInstance().setDebug<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setDebug<controllers::CouchbaseClusterService>();
-    LogTestController::getInstance().setDebug<processors::PutCouchbaseKey>();
+    test_controller.getLogTestController().setDebug<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<controllers::CouchbaseClusterService>();
+    test_controller.getLogTestController().setDebug<processors::PutCouchbaseKey>();
     auto controller_service_node = controller_.plan->addController("MockCouchbaseClusterService", "MockCouchbaseClusterService");
     mock_couchbase_cluster_service_ = std::dynamic_pointer_cast<MockCouchbaseClusterService>(controller_service_node->getControllerServiceImplementation());
     gsl_Assert(mock_couchbase_cluster_service_);
@@ -78,7 +78,7 @@ class PutCouchbaseKeyTestController : public TestController {
       REQUIRE(results.at(processors::PutCouchbaseKey::Failure).size() == 1);
       REQUIRE(results.at(processors::PutCouchbaseKey::Retry).empty());
       flow_file = results.at(processors::PutCouchbaseKey::Failure)[0];
-      REQUIRE(LogTestController::getInstance().contains("Failed to upsert document", 1s));
+      REQUIRE(test_controller.getLogTestController().contains("Failed to upsert document", 1s));
     } else {
       REQUIRE(results.at(processors::PutCouchbaseKey::Success).empty());
       REQUIRE(results.at(processors::PutCouchbaseKey::Failure).empty());
@@ -132,7 +132,7 @@ TEST_CASE_METHOD(PutCouchbaseKeyTestController, "Empty evaluated bucket name", "
   CHECK(proc_->setProperty(processors::PutCouchbaseKey::BucketName.name, "${bucket_name}"));
   auto results = controller_.trigger({minifi::test::InputFlowFileData{"couchbase_id"}});
   REQUIRE(results[processors::PutCouchbaseKey::Failure].size() == 1);
-  REQUIRE(LogTestController::getInstance().contains("Bucket '' is invalid or empty!", 1s));
+  REQUIRE(test_controller.getLogTestController().contains("Bucket '' is invalid or empty!", 1s));
 }
 
 TEST_CASE_METHOD(PutCouchbaseKeyTestController, "Put succeeeds with default properties", "[putcouchbasekey]") {

@@ -33,10 +33,10 @@ class TestHarness : public IntegrationBase {
   using IntegrationBase::IntegrationBase;
 
   void testSetup() override {
-    LogTestController::getInstance().setTrace<minifi::FlowController>();
-    LogTestController::getInstance().setTrace<core::ProcessSession>();
-    LogTestController::getInstance().setTrace<core::ProcessContextImpl>();
-    LogTestController::getInstance().setInfo<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setTrace<minifi::FlowController>();
+    test_controller.getLogTestController().setTrace<core::ProcessSession>();
+    test_controller.getLogTestController().setTrace<core::ProcessContextImpl>();
+    test_controller.getLogTestController().setInfo<minifi::processors::LogAttribute>();
   }
 
   void runAssertions() override {

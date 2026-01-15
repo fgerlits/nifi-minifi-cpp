@@ -44,14 +44,14 @@ class SiteToSiteTestHarness : public HTTPIntegrationBase {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setTrace<minifi::RemoteProcessGroupPort>();
-    LogTestController::getInstance().setTrace<minifi::sitetosite::HttpSiteToSiteClient>();
-    LogTestController::getInstance().setTrace<minifi::sitetosite::SiteToSiteClient>();
-    LogTestController::getInstance().setTrace<minifi::http::HTTPClient>();
-    LogTestController::getInstance().setTrace<minifi::controllers::SSLContextServiceInterface>();
-    LogTestController::getInstance().setInfo<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<core::ConfigurableComponent>();
-    LogTestController::getInstance().setTrace<minifi::http::HttpStreamingCallback>();
+    test_controller.getLogTestController().setTrace<minifi::RemoteProcessGroupPort>();
+    test_controller.getLogTestController().setTrace<minifi::sitetosite::HttpSiteToSiteClient>();
+    test_controller.getLogTestController().setTrace<minifi::sitetosite::SiteToSiteClient>();
+    test_controller.getLogTestController().setTrace<minifi::http::HTTPClient>();
+    test_controller.getLogTestController().setTrace<minifi::controllers::SSLContextServiceInterface>();
+    test_controller.getLogTestController().setInfo<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<core::ConfigurableComponent>();
+    test_controller.getLogTestController().setTrace<minifi::http::HttpStreamingCallback>();
 
     std::fstream file;
     file.open(dir / "tstFile.ext", std::ios::out);
@@ -159,25 +159,25 @@ void run_variance(const std::filesystem::path& test_file_location, const std::st
   std::stringstream assertStr;
   if (profile.allFalse()) {
     assertStr << "Site2Site transaction " << transaction_id << " peer finished transaction";
-    REQUIRE(LogTestController::getInstance().contains(assertStr.str()));
+    REQUIRE(test_controller.getLogTestController().contains(assertStr.str()));
   } else if (profile.empty_transaction_url) {
-    REQUIRE(LogTestController::getInstance().contains("Location is empty"));
+    REQUIRE(test_controller.getLogTestController().contains("Location is empty"));
   } else if (profile.transaction_url_broken) {
-    REQUIRE(LogTestController::getInstance().contains("Could not create transaction, intent is ohstuff"));
+    REQUIRE(test_controller.getLogTestController().contains("Could not create transaction, intent is ohstuff"));
   } else if (profile.invalid_checksum) {
     assertStr << "Site2Site transaction " << transaction_id << " peer confirm transaction with CRC Imawrongchecksumshortandstout";
-    REQUIRE(LogTestController::getInstance().contains(assertStr.str()));
+    REQUIRE(test_controller.getLogTestController().contains(assertStr.str()));
     assertStr.str(std::string());
     assertStr << "Site2Site transaction " << transaction_id << " CRC not matched";
-    REQUIRE(LogTestController::getInstance().contains(assertStr.str()));
+    REQUIRE(test_controller.getLogTestController().contains(assertStr.str()));
     assertStr.str(std::string());
     assertStr << "Site2Site delete transaction " << transaction_id;
-    REQUIRE(LogTestController::getInstance().contains(assertStr.str()));
+    REQUIRE(test_controller.getLogTestController().contains(assertStr.str()));
   } else {
     assertStr << "Site2Site transaction " << transaction_id << " peer unknown response code 254";
-    REQUIRE(LogTestController::getInstance().contains(assertStr.str()));
+    REQUIRE(test_controller.getLogTestController().contains(assertStr.str()));
   }
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("Test site to site with HTTP", "[s2s]") {

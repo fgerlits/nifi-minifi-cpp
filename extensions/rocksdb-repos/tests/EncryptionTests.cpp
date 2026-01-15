@@ -30,9 +30,9 @@ using core::repository::FlowFileRepository;
 class FFRepoFixture : public TestController {
  public:
   FFRepoFixture() {
-    LogTestController::getInstance().setDebug<minifi::FlowFileRecord>();
-    LogTestController::getInstance().setDebug<minifi::Connection>();
-    LogTestController::getInstance().setTrace<FlowFileRepository>();
+    test_controller.getLogTestController().setDebug<minifi::FlowFileRecord>();
+    test_controller.getLogTestController().setDebug<minifi::Connection>();
+    test_controller.getLogTestController().setTrace<FlowFileRepository>();
     home_ = createTempDirectory();
     repo_dir_ = home_ / "flowfile_repo";
     config_ = std::make_shared<minifi::ConfigureImpl>();

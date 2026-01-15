@@ -41,11 +41,11 @@ class GetCouchbaseKeyTestController : public TestController {
   GetCouchbaseKeyTestController()
       : controller_(minifi::test::utils::make_processor<processors::GetCouchbaseKey>("GetCouchbaseKey")),
         proc_(controller_.getProcessor()) {
-    LogTestController::getInstance().setDebug<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setDebug<controllers::CouchbaseClusterService>();
-    LogTestController::getInstance().setDebug<processors::GetCouchbaseKey>();
+    test_controller.getLogTestController().setDebug<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<controllers::CouchbaseClusterService>();
+    test_controller.getLogTestController().setDebug<processors::GetCouchbaseKey>();
     auto controller_service_node = controller_.plan->addController("MockCouchbaseClusterService", "MockCouchbaseClusterService");
     mock_couchbase_cluster_service_ = std::dynamic_pointer_cast<MockCouchbaseClusterService>(controller_service_node->getControllerServiceImplementation());
     gsl_Assert(mock_couchbase_cluster_service_);
@@ -65,7 +65,7 @@ class GetCouchbaseKeyTestController : public TestController {
       REQUIRE(results.at(processors::GetCouchbaseKey::Failure).size() == 1);
       REQUIRE(results.at(processors::GetCouchbaseKey::Retry).empty());
       flow_file = results.at(processors::GetCouchbaseKey::Failure)[0];
-      REQUIRE(LogTestController::getInstance().contains("Failed to get document", 1s));
+      REQUIRE(test_controller.getLogTestController().contains("Failed to get document", 1s));
     } else {
       REQUIRE(results.at(processors::GetCouchbaseKey::Success).empty());
       REQUIRE(results.at(processors::GetCouchbaseKey::Failure).empty());
@@ -118,7 +118,7 @@ TEST_CASE_METHOD(GetCouchbaseKeyTestController, "Empty evaluated bucket name", "
   CHECK(proc_->setProperty(processors::GetCouchbaseKey::BucketName.name, "${missing_attr}"));
   auto results = controller_.trigger({minifi::test::InputFlowFileData{"couchbase_id"}});
   REQUIRE(results[processors::GetCouchbaseKey::Failure].size() == 1);
-  REQUIRE(LogTestController::getInstance().contains("Bucket '' is invalid or empty!", 1s));
+  REQUIRE(test_controller.getLogTestController().contains("Bucket '' is invalid or empty!", 1s));
 }
 
 TEST_CASE_METHOD(GetCouchbaseKeyTestController, "Document ID is empty and no content is present to use", "[getcouchbasekey]") {
@@ -127,7 +127,7 @@ TEST_CASE_METHOD(GetCouchbaseKeyTestController, "Document ID is empty and no con
   REQUIRE(results.at(processors::GetCouchbaseKey::Success).empty());
   REQUIRE(results.at(processors::GetCouchbaseKey::Failure).size() == 1);
   REQUIRE(results.at(processors::GetCouchbaseKey::Retry).empty());
-  REQUIRE(LogTestController::getInstance().contains("Document ID is empty, transferring FlowFile to failure relationship", 1s));
+  REQUIRE(test_controller.getLogTestController().contains("Document ID is empty, transferring FlowFile to failure relationship", 1s));
 }
 
 TEST_CASE_METHOD(GetCouchbaseKeyTestController, "Document ID evaluates to be empty", "[getcouchbasekey]") {

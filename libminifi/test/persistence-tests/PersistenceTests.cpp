@@ -166,11 +166,11 @@ std::unique_ptr<core::Processor> setupMergeProcessor(const utils::Identifier& id
 
 TEST_CASE("Processors Can Store FlowFiles", "[TestP1]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setTrace<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setTrace<minifi::ResourceClaim>();
-  LogTestController::getInstance().setTrace<minifi::FlowFileRecord>();
-  LogTestController::getInstance().setTrace<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setTrace<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setTrace<minifi::ResourceClaim>();
+  test_controller.getLogTestController().setTrace<minifi::FlowFileRecord>();
+  test_controller.getLogTestController().setTrace<core::repository::FlowFileRepository>();
 
   auto dir = test_controller.createTempDirectory();
 
@@ -229,7 +229,7 @@ TEST_CASE("Processors Can Store FlowFiles", "[TestP1]") {
     flowController->load(std::move(flow.root_));
     ff_repository->start();
     REQUIRE(verifyEventHappenedInPollTime(std::chrono::seconds(1), [&ff_repository]{ return ff_repository->isRunning(); }));
-    REQUIRE(verifyEventHappenedInPollTime(std::chrono::seconds(1), []{ return LogTestController::getInstance().countOccurrences("Found connection for") == 2; }));
+    REQUIRE(verifyEventHappenedInPollTime(std::chrono::seconds(1), []{ return test_controller.getLogTestController().countOccurrences("Found connection for") == 2; }));
 
     // write the third file into the input
     flow.write("three");
@@ -277,13 +277,13 @@ std::unique_ptr<core::Processor> setupContentUpdaterProcessor(const utils::Ident
 
 TEST_CASE("Persisted flowFiles are updated on modification", "[TestP1]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setTrace<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setTrace<core::repository::VolatileContentRepository>();
-  LogTestController::getInstance().setTrace<minifi::ResourceClaim>();
-  LogTestController::getInstance().setTrace<minifi::FlowFileRecord>();
-  LogTestController::getInstance().setTrace<core::repository::FlowFileRepository>();
-  LogTestController::getInstance().setTrace<core::repository::DatabaseContentRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setTrace<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setTrace<core::repository::VolatileContentRepository>();
+  test_controller.getLogTestController().setTrace<minifi::ResourceClaim>();
+  test_controller.getLogTestController().setTrace<minifi::FlowFileRecord>();
+  test_controller.getLogTestController().setTrace<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setTrace<core::repository::DatabaseContentRepository>();
 
   auto dir = test_controller.createTempDirectory();
 
@@ -349,8 +349,8 @@ TEST_CASE("Persisted flowFiles are updated on modification", "[TestP1]") {
       // one from the FlowFile and one from the persisted instance
       REQUIRE(newClaim->getFlowFileRecordOwnedCount() == 2);
     }
-    REQUIRE(LogTestController::getInstance().countOccurrences("Deleting resource " + removedResource) == 1);
-    REQUIRE(LogTestController::getInstance().countOccurrences("Deleting resource") == 1);
+    REQUIRE(test_controller.getLogTestController().countOccurrences("Deleting resource " + removedResource) == 1);
+    REQUIRE(test_controller.getLogTestController().countOccurrences("Deleting resource") == 1);
 
     ff_repository->stop();
     flowController->stop();

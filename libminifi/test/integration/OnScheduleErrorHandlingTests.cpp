@@ -35,7 +35,7 @@ class KamikazeErrorHandlingTests : public IntegrationBase {
   void runAssertions() override {
     using minifi::test::utils::verifyEventHappenedInPollTime;
     REQUIRE(verifyEventHappenedInPollTime(wait_time_, [&] {
-      const std::string logs = LogTestController::getInstance().getLogs();
+      const std::string logs = test_controller.getLogTestController().getLogs();
       const auto result = minifi::utils::string::countOccurrences(logs, minifi::processors::KamikazeProcessor::OnScheduleExceptionStr);
       const auto occurrences = result.second;
       return 1 < occurrences;
@@ -48,7 +48,7 @@ class KamikazeErrorHandlingTests : public IntegrationBase {
                                                  "[warning] ProcessSession rollback for kamikaze executed"};
 
     const bool test_success = verifyEventHappenedInPollTime(std::chrono::milliseconds(wait_time_), [&] {
-      const std::string logs = LogTestController::getInstance().getLogs();
+      const std::string logs = test_controller.getLogTestController().getLogs();
       const auto result = minifi::utils::string::countOccurrences(logs, minifi::processors::KamikazeProcessor::OnScheduleExceptionStr);
       size_t last_pos = result.first;
       for (const std::string& msg : must_appear_byorder_msgs) {
@@ -61,14 +61,14 @@ class KamikazeErrorHandlingTests : public IntegrationBase {
     });
     REQUIRE(test_success);
 
-    REQUIRE(LogTestController::getInstance().getLogs().find(minifi::processors::KamikazeProcessor::OnTriggerLogStr) == std::string::npos);
+    REQUIRE(test_controller.getLogTestController().getLogs().find(minifi::processors::KamikazeProcessor::OnTriggerLogStr) == std::string::npos);
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setDebug<core::ProcessGroup>();
-    LogTestController::getInstance().setDebug<core::Processor>();
-    LogTestController::getInstance().setDebug<core::ProcessSession>();
-    LogTestController::getInstance().setDebug<minifi::processors::KamikazeProcessor>();
+    test_controller.getLogTestController().setDebug<core::ProcessGroup>();
+    test_controller.getLogTestController().setDebug<core::Processor>();
+    test_controller.getLogTestController().setDebug<core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<minifi::processors::KamikazeProcessor>();
     configuration->set(minifi::Configure::nifi_administrative_yield_duration, "100 ms");
   }
 };
@@ -106,12 +106,12 @@ class EventDriverScheduleErrorHandlingTests: public IntegrationBase {
   }
 
   void runAssertions() override {
-    std::string logs = LogTestController::getInstance().getLogs();
+    std::string logs = test_controller.getLogTestController().getLogs();
     REQUIRE(logs.find("EventDrivenSchedulingAgent cannot schedule processor without incoming connection!") != std::string::npos);
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setDebug<core::ProcessGroup>();
+    test_controller.getLogTestController().setDebug<core::ProcessGroup>();
     configuration->set(minifi::Configure::nifi_administrative_yield_duration, "100 ms");
   }
 };

@@ -36,11 +36,11 @@ class VerifyC2PauseResume : public VerifyC2Base {
   explicit VerifyC2PauseResume(const std::filesystem::path& test_file_path, const std::atomic_bool& flow_resumed_successfully)
       : VerifyC2Base(test_file_path),
         flow_resumed_successfully_(flow_resumed_successfully) {
-    LogTestController::getInstance().setTrace<minifi::c2::C2Agent>();
-    LogTestController::getInstance().setDebug<minifi::c2::RESTSender>();
-    LogTestController::getInstance().setDebug<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<minifi::core::ProcessContext>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setTrace<minifi::c2::C2Agent>();
+    test_controller.getLogTestController().setDebug<minifi::c2::RESTSender>();
+    test_controller.getLogTestController().setDebug<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<minifi::core::ProcessContext>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
   }
 
   void configureC2() override {

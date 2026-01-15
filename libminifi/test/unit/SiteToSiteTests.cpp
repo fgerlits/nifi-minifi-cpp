@@ -61,8 +61,8 @@ class SiteToSiteClientTestAccessor {
 };
 
 void initializeLogging() {
-  LogTestController::getInstance().setTrace<sitetosite::RawSiteToSiteClient>();
-  LogTestController::getInstance().setTrace<sitetosite::SiteToSitePeer>();
+  test_controller.getLogTestController().setTrace<sitetosite::RawSiteToSiteClient>();
+  test_controller.getLogTestController().setTrace<sitetosite::SiteToSitePeer>();
 }
 
 void initializeMockBootstrapResponses(SiteToSiteResponder& collector) {

@@ -151,15 +151,15 @@ class MergeTestController : public TestController {
  public:
   MergeTestController() {
     init_file_paths();
-    LogTestController::getInstance().setTrace<minifi::processors::MergeContent>();
-    LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setTrace<core::ProcessSession>();
-    LogTestController::getInstance().setTrace<core::repository::VolatileContentRepository>();
-    LogTestController::getInstance().setTrace<minifi::processors::BinFiles>();
-    LogTestController::getInstance().setTrace<minifi::processors::Bin>();
-    LogTestController::getInstance().setTrace<minifi::processors::BinManager>();
-    LogTestController::getInstance().setTrace<minifi::Connection>();
-    LogTestController::getInstance().setTrace<minifi::core::Connectable>();
+    test_controller.getLogTestController().setTrace<minifi::processors::MergeContent>();
+    test_controller.getLogTestController().setTrace<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setTrace<core::ProcessSession>();
+    test_controller.getLogTestController().setTrace<core::repository::VolatileContentRepository>();
+    test_controller.getLogTestController().setTrace<minifi::processors::BinFiles>();
+    test_controller.getLogTestController().setTrace<minifi::processors::Bin>();
+    test_controller.getLogTestController().setTrace<minifi::processors::BinManager>();
+    test_controller.getLogTestController().setTrace<minifi::Connection>();
+    test_controller.getLogTestController().setTrace<minifi::core::Connectable>();
 
     std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
     auto content_repo = std::make_shared<core::repository::VolatileContentRepository>();
@@ -207,7 +207,7 @@ class MergeTestController : public TestController {
   MergeTestController& operator=(const MergeTestController&) = delete;
 
   ~MergeTestController() {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
   }
 
   std::array<std::string, 6> flowFileContents_;
@@ -787,7 +787,7 @@ TEST_CASE("FlowFile serialization", "[testFlowFileSerialization]") {
     REQUIRE(callback.to_string() == expected);
   }
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE_METHOD(MergeTestController, "Batch Size", "[testMergeFileBatchSize]") {

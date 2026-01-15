@@ -106,14 +106,14 @@ class CompressDecompressionTestController : public TestController {
   }
 
   void setupFlow() {
-    LogTestController::getInstance().setTrace<minifi::processors::CompressContent>();
-    LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setTrace<core::ProcessSession>();
-    LogTestController::getInstance().setTrace<core::ProcessContext>();
-    LogTestController::getInstance().setTrace<core::repository::VolatileContentRepository>();
-    LogTestController::getInstance().setTrace<minifi::Connection>();
-    LogTestController::getInstance().setTrace<minifi::core::Connectable>();
-    LogTestController::getInstance().setTrace<minifi::io::FileStream>();
+    test_controller.getLogTestController().setTrace<minifi::processors::CompressContent>();
+    test_controller.getLogTestController().setTrace<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setTrace<core::ProcessSession>();
+    test_controller.getLogTestController().setTrace<core::ProcessContext>();
+    test_controller.getLogTestController().setTrace<core::repository::VolatileContentRepository>();
+    test_controller.getLogTestController().setTrace<minifi::Connection>();
+    test_controller.getLogTestController().setTrace<minifi::core::Connectable>();
+    test_controller.getLogTestController().setTrace<minifi::io::FileStream>();
 
     std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
 
@@ -215,7 +215,7 @@ class CompressDecompressionTestController : public TestController {
 };
 
 CompressDecompressionTestController::~CompressDecompressionTestController() {
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 std::filesystem::path CompressDecompressionTestController::tempDir_;
@@ -532,8 +532,8 @@ TEST_CASE_METHOD(CompressTestController, "CompressFileXYLZMA", "[compressfiletes
 }
 
 TEST_CASE_METHOD(TestController, "RawGzipCompressionDecompression", "[compressfiletest8]") {
-  LogTestController::getInstance().setTrace<minifi::processors::CompressContent>();
-  LogTestController::getInstance().setTrace<minifi::processors::PutFile>();
+  test_controller.getLogTestController().setTrace<minifi::processors::CompressContent>();
+  test_controller.getLogTestController().setTrace<minifi::processors::PutFile>();
 
   // Create temporary directories
   auto src_dir = createTempDirectory();
@@ -616,7 +616,7 @@ TEST_CASE_METHOD(TestController, "RawGzipCompressionDecompression", "[compressfi
   std::string decompressed_content((std::istreambuf_iterator<char>(decompressed)), std::istreambuf_iterator<char>());
   REQUIRE(content == decompressed_content);
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE_METHOD(CompressTestController, "Batch CompressFileGZip", "[compressFileBatchTest]") {

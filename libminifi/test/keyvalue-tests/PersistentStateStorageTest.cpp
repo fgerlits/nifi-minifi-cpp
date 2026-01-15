@@ -59,9 +59,9 @@ int main(int argc, char* argv[]) {
 class PersistentStateStorageTestsFixture {
  public:
   PersistentStateStorageTestsFixture() {
-    LogTestController::getInstance().setTrace<TestPlan>();
-    LogTestController::getInstance().setTrace<minifi::controllers::KeyValueStateStorage>();
-    LogTestController::getInstance().setTrace<minifi::controllers::AutoPersistor>();
+    test_controller.getLogTestController().setTrace<TestPlan>();
+    test_controller.getLogTestController().setTrace<minifi::controllers::KeyValueStateStorage>();
+    test_controller.getLogTestController().setTrace<minifi::controllers::AutoPersistor>();
 
     std::filesystem::current_path(test_controller.createTempDirectory());
     loadYaml();
@@ -73,7 +73,7 @@ class PersistentStateStorageTestsFixture {
   PersistentStateStorageTestsFixture& operator=(const PersistentStateStorageTestsFixture&) = delete;
 
   virtual ~PersistentStateStorageTestsFixture() {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
     std::filesystem::current_path(minifi::utils::file::get_executable_dir());
   }
 

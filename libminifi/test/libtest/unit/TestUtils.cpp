@@ -163,7 +163,7 @@ bool countLogOccurrencesUntil(const std::string& pattern,
                               const std::chrono::milliseconds wait_time) {
   auto start_time = std::chrono::steady_clock::now();
   while (std::chrono::steady_clock::now() < start_time + max_duration) {
-    if (LogTestController::getInstance().countOccurrences(pattern) == occurrences)
+    if (test_controller.getLogTestController().countOccurrences(pattern) == occurrences)
       return true;
     std::this_thread::sleep_for(wait_time);
   }

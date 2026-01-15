@@ -75,14 +75,14 @@ class OutputProcessor : public core::ProcessorImpl {
 
 TEST_CASE("Connection will on-demand swap flow files") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<core::ContentRepository>();
-  LogTestController::getInstance().setTrace<core::repository::FileSystemRepository>();
-  LogTestController::getInstance().setTrace<core::repository::VolatileContentRepository>();
-  LogTestController::getInstance().setTrace<minifi::ResourceClaim>();
-  LogTestController::getInstance().setTrace<minifi::FlowFileRecord>();
-  LogTestController::getInstance().setTrace<minifi::utils::FlowFileQueue>();
-  LogTestController::getInstance().setTrace<minifi::FlowFileLoader>();
-  LogTestController::getInstance().setTrace<core::repository::FlowFileRepository>();
+  test_controller.getLogTestController().setDebug<core::ContentRepository>();
+  test_controller.getLogTestController().setTrace<core::repository::FileSystemRepository>();
+  test_controller.getLogTestController().setTrace<core::repository::VolatileContentRepository>();
+  test_controller.getLogTestController().setTrace<minifi::ResourceClaim>();
+  test_controller.getLogTestController().setTrace<minifi::FlowFileRecord>();
+  test_controller.getLogTestController().setTrace<minifi::utils::FlowFileQueue>();
+  test_controller.getLogTestController().setTrace<minifi::FlowFileLoader>();
+  test_controller.getLogTestController().setTrace<core::repository::FlowFileRepository>();
 
   auto dir = test_controller.createTempDirectory();
 

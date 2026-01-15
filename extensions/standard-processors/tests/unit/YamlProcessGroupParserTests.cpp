@@ -79,7 +79,7 @@ TEST_CASE("Nested process group is correctly parsed", "[YamlProcessGroupParser]"
 
 TEST_CASE("Cannot connect processors from different groups", "[YamlProcessGroupParser]") {
   TestController controller;
-  LogTestController::getInstance().setTrace<core::YamlConfiguration>();
+  test_controller.getLogTestController().setTrace<core::YamlConfiguration>();
   Proc Proc1{"00000000-0000-0000-0000-000000000001", "Proc1"};
   Proc Port1{"00000000-0000-0000-0000-000000000002", "Port1"};
   Proc Child1_Proc1{"00000000-0000-0000-0000-000000000011", "Child1_Proc1"};

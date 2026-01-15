@@ -279,7 +279,7 @@ TEST_CASE_METHOD(FetchAzureBlobStorageTestsFixture, "Test Azure blob fetch failu
   plan_->setDynamicProperty(update_attribute_processor_, "filename", "");
   setDefaultCredentials();
   test_controller_.runSession(plan_, true);
-  REQUIRE(LogTestController::getInstance().contains("Blob is not set and default 'filename' attribute could not be found!"));
+  REQUIRE(test_controller.getLogTestController().contains("Blob is not set and default 'filename' attribute could not be found!"));
 }
 
 TEST_CASE_METHOD(FetchAzureBlobStorageTestsFixture, "Fetch full blob succeeds", "[azureBlobStorageFetch]") {

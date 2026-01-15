@@ -27,8 +27,8 @@ namespace org::apache::nifi::minifi::standard::test {
 class XMLReaderTestFixture {
  public:
   XMLReaderTestFixture() : xml_reader_("XMLReader") {
-    LogTestController::getInstance().clear();
-    LogTestController::getInstance().setTrace<XMLReader>();
+    test_controller.getLogTestController().clear();
+    test_controller.getLogTestController().setTrace<XMLReader>();
   }
 
   auto readRecordsFromXml(const std::string& xml_input, const std::unordered_map<std::string_view, std::string_view>& properties = {}) {
@@ -54,14 +54,14 @@ TEST_CASE_METHOD(XMLReaderTestFixture, "Invalid XML input or empty input results
   const std::string xml_input = GENERATE("", "<invalid_xml>");
   auto record_set = readRecordsFromXml(xml_input);
   REQUIRE_FALSE(record_set);
-  REQUIRE(LogTestController::getInstance().contains("Failed to parse XML content: " + xml_input));
+  REQUIRE(test_controller.getLogTestController().contains("Failed to parse XML content: " + xml_input));
 }
 
 TEST_CASE_METHOD(XMLReaderTestFixture, "XML with only root node results in empty record set", "[XMLReader]") {
   auto record_set = readRecordsFromXml("<root></root>");
   REQUIRE(record_set);
   REQUIRE(record_set->empty());
-  REQUIRE(LogTestController::getInstance().contains("XML content does not contain any records: <root></root>"));
+  REQUIRE(test_controller.getLogTestController().contains("XML content does not contain any records: <root></root>"));
 }
 
 TEST_CASE_METHOD(XMLReaderTestFixture, "XML contains a single data node results in a single record with default content field name key", "[XMLReader]") {

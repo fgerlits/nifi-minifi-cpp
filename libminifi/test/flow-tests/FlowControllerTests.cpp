@@ -279,19 +279,19 @@ Controller Services: []
 
   controller.startFlow();
 
-  REQUIRE(LogTestController::getInstance().countOccurrences("Creating scheduling agent") == 3);
-  LogTestController::getInstance().clear();
+  REQUIRE(test_controller.getLogTestController().countOccurrences("Creating scheduling agent") == 3);
+  test_controller.getLogTestController().clear();
 
   bool update_successful = controller.controller_->applyConfiguration("/flows/1", empty_flow).has_value();
   REQUIRE(update_successful);
 
-  REQUIRE(LogTestController::getInstance().countOccurrences("Creating scheduling agent") == 3);
-  REQUIRE(LogTestController::getInstance().countOccurrences("Destroying scheduling agent") == 3);
-  LogTestController::getInstance().clear();
+  REQUIRE(test_controller.getLogTestController().countOccurrences("Creating scheduling agent") == 3);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("Destroying scheduling agent") == 3);
+  test_controller.getLogTestController().clear();
 
   // manually destroy the controller
   controller.controller_.reset();
 
   REQUIRE(minifi::test::utils::verifyLogLinePresenceInPollTime(0s, "Destroying FlowController"));
-  REQUIRE(LogTestController::getInstance().countOccurrences("Destroying scheduling agent") == 3);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("Destroying scheduling agent") == 3);
 }

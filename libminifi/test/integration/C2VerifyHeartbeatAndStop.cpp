@@ -31,10 +31,10 @@ class VerifyC2Heartbeat : public VerifyC2Base {
  public:
   using VerifyC2Base::VerifyC2Base;
   void testSetup() override {
-    LogTestController::getInstance().setTrace<minifi::c2::C2Agent>();
-    LogTestController::getInstance().setDebug<minifi::c2::RESTSender>();
-    LogTestController::getInstance().setDebug<minifi::c2::RESTProtocol>();
-    LogTestController::getInstance().setDebug<minifi::FlowController>();
+    test_controller.getLogTestController().setTrace<minifi::c2::C2Agent>();
+    test_controller.getLogTestController().setDebug<minifi::c2::RESTSender>();
+    test_controller.getLogTestController().setDebug<minifi::c2::RESTProtocol>();
+    test_controller.getLogTestController().setDebug<minifi::FlowController>();
     VerifyC2Base::testSetup();
   }
 

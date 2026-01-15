@@ -63,9 +63,9 @@ class ListFileTestFixture {
 ListFileTestFixture::ListFileTestFixture()
   : plan_(test_controller_.createPlan()),
     input_dir_(test_controller_.createTempDirectory()) {
-  LogTestController::getInstance().setTrace<TestPlan>();
-  LogTestController::getInstance().setTrace<minifi::processors::ListFile>();
-  LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<minifi::processors::ListFile>();
+  test_controller.getLogTestController().setTrace<minifi::processors::LogAttribute>();
 
   REQUIRE(!input_dir_.empty());
 
@@ -118,30 +118,30 @@ TEST_CASE_METHOD(ListFileTestFixture, "Test listing files only once with default
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:absolute.path value:" + (first_sub_file_abs_path_.parent_path() / "").string() + "\n"));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:absolute.path value:" + (second_sub_file_abs_path_.parent_path() / "").string() + "\n"));
 
-  REQUIRE(LogTestController::getInstance().countOccurrences(std::string("key:path value:.") + get_separator() + "\n") == 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences(std::string("key:path value:.") + get_separator() + "\n") == 2);
   REQUIRE(verifyLogLinePresenceInPollTime(3s, std::string("key:path value:first_subdir") + get_separator()));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, std::string("key:path value:second_subdir") + get_separator()));
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:filename value:.hidden_file.txt") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:filename value:.hidden_file.txt") == 0);
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:file.size value:0"));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:file.size value:4"));
 #ifndef WIN32
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:file.permissions value:rwxr-xr-x"));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:file.permissions value:rw-r--r--"));
   if (auto group = utils::file::FileUtils::get_file_group(standard_file_abs_path_)) {
-    REQUIRE(LogTestController::getInstance().countOccurrences("key:file.group value:" + *group) == 4);
+    REQUIRE(test_controller.getLogTestController().countOccurrences("key:file.group value:" + *group) == 4);
   }
 #endif
   if (auto owner = utils::file::FileUtils::get_file_owner(standard_file_abs_path_)) {
-    REQUIRE(LogTestController::getInstance().countOccurrences("key:file.owner value:" + *owner) == 4);
+    REQUIRE(test_controller.getLogTestController().countOccurrences("key:file.owner value:" + *owner) == 4);
   }
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:file.lastModifiedTime value:" + get_last_modified_time_formatted_string(empty_file_abs_path_)));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:file.lastModifiedTime value:" + get_last_modified_time_formatted_string(standard_file_abs_path_)));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:file.lastModifiedTime value:" + get_last_modified_time_formatted_string(first_sub_file_abs_path_)));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:file.lastModifiedTime value:" + get_last_modified_time_formatted_string(second_sub_file_abs_path_)));
   plan_->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
   TestController::runSession(plan_, true);
-  REQUIRE_FALSE(LogTestController::getInstance().contains("key:file.size", 0s, 0ms));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("key:file.size", 0s, 0ms));
 }
 
 TEST_CASE_METHOD(ListFileTestFixture, "Test turning off recursive file listing", "[testListFile]") {
@@ -149,24 +149,24 @@ TEST_CASE_METHOD(ListFileTestFixture, "Test turning off recursive file listing",
   TestController::runSession(plan_);
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:standard_file.log"));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:empty_file.txt"));
-  REQUIRE_FALSE(LogTestController::getInstance().contains("key:filename value:sub_file_one.txt", 0s, 0ms));
-  REQUIRE_FALSE(LogTestController::getInstance().contains("key:filename value:sub_file_two.txt", 0s, 0ms));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("key:filename value:sub_file_one.txt", 0s, 0ms));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("key:filename value:sub_file_two.txt", 0s, 0ms));
 }
 
 TEST_CASE_METHOD(ListFileTestFixture, "Test listing files matching the File Filter pattern", "[testListFile]") {
   plan_->setProperty(list_file_processor_, minifi::processors::ListFile::FileFilter, "stand\\w+\\.log");
   TestController::runSession(plan_);
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:standard_file.log"));
-  REQUIRE_FALSE(LogTestController::getInstance().contains("key:filename value:empty_file.txt", 0s, 0ms));
-  REQUIRE_FALSE(LogTestController::getInstance().contains("key:filename value:sub_file_one.txt", 0s, 0ms));
-  REQUIRE_FALSE(LogTestController::getInstance().contains("key:filename value:sub_file_two.txt", 0s, 0ms));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("key:filename value:empty_file.txt", 0s, 0ms));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("key:filename value:sub_file_one.txt", 0s, 0ms));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("key:filename value:sub_file_two.txt", 0s, 0ms));
 }
 
 TEST_CASE_METHOD(ListFileTestFixture, "Test listing files matching the Path Filter pattern", "[testListFile]") {
   plan_->setProperty(list_file_processor_, minifi::processors::ListFile::PathFilter, "first.*");
   TestController::runSession(plan_);
   CHECK(verifyLogLinePresenceInPollTime(3s, "key:filename value:sub_file_one.txt"));
-  CHECK(LogTestController::getInstance().countOccurrences("key:filename value:") == 1);
+  CHECK(test_controller.getLogTestController().countOccurrences("key:filename value:") == 1);
 }
 
 TEST_CASE_METHOD(ListFileTestFixture, "Test listing files matching the Path Filter pattern when the pattern also matches .", "[testListFile]") {
@@ -175,7 +175,7 @@ TEST_CASE_METHOD(ListFileTestFixture, "Test listing files matching the Path Filt
   CHECK(verifyLogLinePresenceInPollTime(3s, "key:filename value:standard_file.log"));
   CHECK(verifyLogLinePresenceInPollTime(3s, "key:filename value:empty_file.txt"));
   CHECK(verifyLogLinePresenceInPollTime(3s, "key:filename value:sub_file_two.txt"));
-  CHECK(LogTestController::getInstance().countOccurrences("key:filename value:") == 3);
+  CHECK(test_controller.getLogTestController().countOccurrences("key:filename value:") == 3);
 }
 
 TEST_CASE_METHOD(ListFileTestFixture, "Test listing files with restriction on the minimum file age", "[testListFile]") {
@@ -183,8 +183,8 @@ TEST_CASE_METHOD(ListFileTestFixture, "Test listing files with restriction on th
   TestController::runSession(plan_);
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:sub_file_one.txt"));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:sub_file_two.txt"));
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:filename value:empty_file.txt") == 0);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:filename value:standard_file.log") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:filename value:empty_file.txt") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:filename value:standard_file.log") == 0);
 }
 
 TEST_CASE_METHOD(ListFileTestFixture, "Test listing files with restriction on the maximum file age", "[testListFile]") {
@@ -192,8 +192,8 @@ TEST_CASE_METHOD(ListFileTestFixture, "Test listing files with restriction on th
   TestController::runSession(plan_);
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:empty_file.txt"));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:standard_file.log"));
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:filename value:sub_file_one.txt") == 0);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:filename value:sub_file_two.txt") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:filename value:sub_file_one.txt") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:filename value:sub_file_two.txt") == 0);
 }
 
 TEST_CASE_METHOD(ListFileTestFixture, "Test listing files with restriction on the minimum file size", "[testListFile]") {
@@ -201,8 +201,8 @@ TEST_CASE_METHOD(ListFileTestFixture, "Test listing files with restriction on th
   TestController::runSession(plan_);
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:standard_file.log"));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:sub_file_two.txt"));
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:filename value:empty_file.txt") == 0);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:filename value:sub_file_one.txt") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:filename value:empty_file.txt") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:filename value:sub_file_one.txt") == 0);
 }
 
 TEST_CASE_METHOD(ListFileTestFixture, "Test listing files with restriction on the maximum file size", "[testListFile]") {
@@ -211,7 +211,7 @@ TEST_CASE_METHOD(ListFileTestFixture, "Test listing files with restriction on th
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:standard_file.log"));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:empty_file.txt"));
   REQUIRE(verifyLogLinePresenceInPollTime(3s, "key:filename value:sub_file_one.txt"));
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:filename value:sub_file_two.txt") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:filename value:sub_file_two.txt") == 0);
 }
 
 TEST_CASE_METHOD(ListFileTestFixture, "Test listing hidden files", "[testListFile]") {
@@ -227,7 +227,7 @@ TEST_CASE_METHOD(ListFileTestFixture, "Test listing hidden files", "[testListFil
 TEST_CASE("ListFile sets attributes correctly") {
   using minifi::processors::ListFile;
 
-  LogTestController::getInstance().setTrace<ListFile>();
+  test_controller.getLogTestController().setTrace<ListFile>();
   minifi::test::SingleProcessorTestController test_controller(minifi::test::utils::make_processor<ListFile>("ListFile"));
   const auto list_file = test_controller.getProcessor();
   std::filesystem::path dir = test_controller.createTempDirectory();

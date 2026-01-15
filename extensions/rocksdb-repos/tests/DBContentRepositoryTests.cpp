@@ -85,7 +85,7 @@ TEST_CASE("Write Claim", "[TestDBCR1]") {
 
 TEST_CASE("Delete Claim", "[TestDBCR2]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<core::repository::DatabaseContentRepository>();
+  test_controller.getLogTestController().setDebug<core::repository::DatabaseContentRepository>();
   auto dir = test_controller.createTempDirectory();
   auto content_repo = std::make_shared<TestDatabaseContentRepository>();
 

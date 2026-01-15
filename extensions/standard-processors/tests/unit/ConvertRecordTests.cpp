@@ -28,7 +28,7 @@
 namespace org::apache::nifi::minifi::test {
 
 TEST_CASE("ConvertRecord scheduling fails with invalid reader and writer", "[ConvertRecord]") {
-  LogTestController::getInstance().setTrace<processors::ConvertRecord>();
+  test_controller.getLogTestController().setTrace<processors::ConvertRecord>();
   SingleProcessorTestController controller(utils::make_processor<processors::ConvertRecord>("ConvertRecord"));
   controller.plan->addController("XMLReader", "XMLReader");
 
@@ -41,7 +41,7 @@ TEST_CASE("ConvertRecord scheduling fails with invalid reader and writer", "[Con
 }
 
 TEST_CASE("Record conversion fails with read failure", "[ConvertRecord]") {
-  LogTestController::getInstance().setTrace<processors::ConvertRecord>();
+  test_controller.getLogTestController().setTrace<processors::ConvertRecord>();
   SingleProcessorTestController controller(utils::make_processor<processors::ConvertRecord>("ConvertRecord"));
   controller.plan->addController("XMLReader", "XMLReader");
   controller.plan->addController("JsonRecordSetWriter", "JsonRecordSetWriter");
@@ -54,7 +54,7 @@ TEST_CASE("Record conversion fails with read failure", "[ConvertRecord]") {
   CHECK(controller.plan->getContent(output_flow_file) == "<invalidxml>");
   auto error_message_attribute = minifi::utils::string::toLower(*output_flow_file->getAttribute(processors::ConvertRecord::RecordErrorMessageOutputAttribute.name));
   CHECK(error_message_attribute == "invalid argument");
-  CHECK(LogTestController::getInstance().contains("Failed to read record set from flow file"));
+  CHECK(test_controller.getLogTestController().contains("Failed to read record set from flow file"));
 }
 
 TEST_CASE("Record conversion succeeds with a single record", "[ConvertRecord]") {

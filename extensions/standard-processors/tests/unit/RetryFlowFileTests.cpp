@@ -46,7 +46,7 @@ class RetryFlowFileTest {
   using PutFile = org::apache::nifi::minifi::processors::PutFile;
   using LogAttribute = org::apache::nifi::minifi::processors::LogAttribute;
   RetryFlowFileTest() :
-    logTestController_(LogTestController::getInstance()),
+    logTestController_(test_controller.getLogTestController()),
     logger_(logging::LoggerFactory<org::apache::nifi::minifi::processors::RetryFlowFile>::getLogger()) {
     reInitialize();
   }
@@ -167,13 +167,13 @@ class RetryFlowFileTest {
   }
 
   static bool logContainsText(const std::string& pattern) {
-    const std::string logs = LogTestController::getInstance().getLogs();
+    const std::string logs = test_controller.getLogTestController().getLogs();
     return logs.find(pattern) != std::string::npos;
   }
 
   static bool flowfileWasPenalizedARetryflowfile() {
     std::regex re(R"(\[org::apache::nifi::minifi::core::ProcessSession\] \[info\] Penalizing [0-9a-z\-]+ for [0-9]*ms at retryflowfile)");
-    return std::regex_search(LogTestController::getInstance().getLogs(), re);
+    return std::regex_search(test_controller.getLogTestController().getLogs(), re);
   }
 
   static bool retryFlowfileWarnedForReuse() {

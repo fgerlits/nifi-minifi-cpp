@@ -55,18 +55,18 @@ using namespace std::literals::chrono_literals;
 class ListSFTPTestsFixture {
  public:
   explicit ListSFTPTestsFixture(const std::shared_ptr<minifi::Configure>& configuration = nullptr) {
-    LogTestController::getInstance().reset();
-    LogTestController::getInstance().setTrace<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<minifi::SchedulingAgent>();
-    LogTestController::getInstance().setDebug<minifi::core::ProcessGroup>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setDebug<minifi::processors::GenerateFlowFile>();
-    LogTestController::getInstance().setTrace<minifi::utils::SFTPClient>();
-    LogTestController::getInstance().setTrace<minifi::processors::ListSFTP>();
-    LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setDebug<SFTPTestServer>();
+    test_controller.getLogTestController().reset();
+    test_controller.getLogTestController().setTrace<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<minifi::SchedulingAgent>();
+    test_controller.getLogTestController().setDebug<minifi::core::ProcessGroup>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<minifi::processors::GenerateFlowFile>();
+    test_controller.getLogTestController().setTrace<minifi::utils::SFTPClient>();
+    test_controller.getLogTestController().setTrace<minifi::processors::ListSFTP>();
+    test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setDebug<SFTPTestServer>();
 
     REQUIRE_FALSE(working_directory.empty());
 
@@ -170,8 +170,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP list one file", "[ListSFTP][bas
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP public key authentication", "[ListSFTP][basic]") {
@@ -183,10 +183,10 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP public key authentication", "[L
 
   TestController::runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Successfully authenticated with publickey"));
+  REQUIRE(test_controller.getLogTestController().contains("Successfully authenticated with publickey"));
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP list non-existing dir", "[ListSFTP][basic]") {
@@ -194,9 +194,9 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP list non-existing dir", "[ListS
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("Failed to open remote directory \"nifi_test2\", error: LIBSSH2_FX_NO_SUCH_FILE"));
-  REQUIRE(LogTestController::getInstance().contains("There are no files to list. Yielding."));
+  REQUIRE(false == test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("Failed to open remote directory \"nifi_test2\", error: LIBSSH2_FX_NO_SUCH_FILE"));
+  REQUIRE(test_controller.getLogTestController().contains("There are no files to list. Yielding."));
 }
 
 #ifndef WIN32
@@ -210,9 +210,9 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP list non-readable dir", "[ListS
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("Failed to open remote directory \"nifi_test\", error: LIBSSH2_FX_PERMISSION_DENIED"));
-  REQUIRE(LogTestController::getInstance().contains("There are no files to list. Yielding."));
+  REQUIRE(false == test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("Failed to open remote directory \"nifi_test\", error: LIBSSH2_FX_PERMISSION_DENIED"));
+  REQUIRE(test_controller.getLogTestController().contains("There are no files to list. Yielding."));
   std::filesystem::permissions(working_directory / "vfs" / "nifi_test", static_cast<std::filesystem::perms>(0755));
 }
 #endif
@@ -232,16 +232,16 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP list one file writes attributes
   std::stringstream permissions_ss;
   permissions_ss << std::setfill('0') << std::setw(4) << std::oct << permissions;
 
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.host value:localhost"));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
-  REQUIRE(LogTestController::getInstance().contains("key:sftp.listing.user value:nifiuser"));
-  REQUIRE(LogTestController::getInstance().contains("key:file.owner value:" + std::to_string(uid)));
-  REQUIRE(LogTestController::getInstance().contains("key:file.group value:" + std::to_string(gid)));
-  REQUIRE(LogTestController::getInstance().contains("key:file.permissions value:" + permissions_ss.str()));
-  REQUIRE(LogTestController::getInstance().contains("key:file.size value:14"));
-  REQUIRE(LogTestController::getInstance().contains("key:file.lastModifiedTime value:" + mtime_str));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:path value:nifi_test"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.host value:localhost"));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.remote.port value:" + std::to_string(sftp_server->getPort())));
+  REQUIRE(test_controller.getLogTestController().contains("key:sftp.listing.user value:nifiuser"));
+  REQUIRE(test_controller.getLogTestController().contains("key:file.owner value:" + std::to_string(uid)));
+  REQUIRE(test_controller.getLogTestController().contains("key:file.group value:" + std::to_string(gid)));
+  REQUIRE(test_controller.getLogTestController().contains("key:file.permissions value:" + permissions_ss.str()));
+  REQUIRE(test_controller.getLogTestController().contains("key:file.size value:14"));
+  REQUIRE(test_controller.getLogTestController().contains("key:file.lastModifiedTime value:" + mtime_str));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:path value:nifi_test"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP list two files", "[ListSFTP][basic]") {
@@ -250,8 +250,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP list two files", "[ListSFTP][ba
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP list two files one in a subdir no recursion", "[ListSFTP][basic]") {
@@ -260,8 +260,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP list two files one in a subdir 
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(false == LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(false == test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP list two files one in a subdir with recursion", "[ListSFTP][basic]") {
@@ -272,8 +272,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP list two files one in a subdir 
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Minimum File Age too young", "[ListSFTP][file-age]") {
@@ -283,8 +283,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Minimum File Age too young", "[
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("Ignoring \"nifi_test/tstFile.ext\" because it is younger than the Minimum File Age"));
+  REQUIRE(false == test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Ignoring \"nifi_test/tstFile.ext\" because it is younger than the Minimum File Age"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Maximum File Age too old", "[ListSFTP][file-age]") {
@@ -294,8 +294,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Maximum File Age too old", "[Li
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("Ignoring \"nifi_test/tstFile.ext\" because it is older than the Maximum File Age"));
+  REQUIRE(false == test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Ignoring \"nifi_test/tstFile.ext\" because it is older than the Maximum File Age"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Minimum File Size too small", "[ListSFTP][file-size]") {
@@ -304,8 +304,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Minimum File Size too small", "
   createFileWithModificationTimeDiff("nifi_test/tstFile.ext", "Test content 1");
 
   test_controller.runSession(plan, true);
-  REQUIRE(false == LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("Ignoring \"nifi_test/tstFile.ext\" because it is smaller than the Minimum File Size: 14 B < 1048576 B"));
+  REQUIRE(false == test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Ignoring \"nifi_test/tstFile.ext\" because it is smaller than the Minimum File Size: 14 B < 1048576 B"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Maximum File Size too large", "[ListSFTP][file-size]") {
@@ -314,8 +314,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Maximum File Size too large", "
   createFileWithModificationTimeDiff("nifi_test/tstFile.ext", "Test content 1");
 
   test_controller.runSession(plan, true);
-  REQUIRE(false == LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
-  REQUIRE(LogTestController::getInstance().contains("Ignoring \"nifi_test/tstFile.ext\" because it is larger than the Maximum File Size: 14 B > 4 B"));
+  REQUIRE(false == test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Ignoring \"nifi_test/tstFile.ext\" because it is larger than the Maximum File Size: 14 B > 4 B"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP File Filter Regex", "[ListSFTP][file-filter-regex]") {
@@ -326,8 +326,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP File Filter Regex", "[ListSFTP]
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Ignoring \"nifi_test/file1.ext\" because it did not match the File Filter Regex \"^.*2.*$\""));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Ignoring \"nifi_test/file1.ext\" because it did not match the File Filter Regex \"^.*2.*$\""));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Path Filter Regex", "[ListSFTP][path-filter-regex]") {
@@ -341,12 +341,12 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Path Filter Regex", "[ListSFTP]
   test_controller.runSession(plan, true);
 
   /* file1.ext is in the root */
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
   /* file2.ext is in a matching subdirectory */
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
   /* file3.ext is in a non-matching subdirectory */
-  REQUIRE(LogTestController::getInstance().contains("Not recursing into \"nifi_test/notbar\" because it did not match the Path Filter Regex \"^.*foobar.*$\""));
-  REQUIRE(false == LogTestController::getInstance().contains("key:filename value:file3.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Not recursing into \"nifi_test/notbar\" because it did not match the Path Filter Regex \"^.*foobar.*$\""));
+  REQUIRE(false == test_controller.getLogTestController().contains("key:filename value:file3.ext"));
 }
 
 #ifndef WIN32
@@ -356,8 +356,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Follow symlink false file symli
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("Skipping non-regular, non-directory file \"nifi_test/file2.ext\""));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Skipping non-regular, non-directory file \"nifi_test/file2.ext\""));
 }
 #endif
 
@@ -370,8 +370,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Follow symlink true file symlin
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 #endif
 
@@ -384,8 +384,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Follow symlink false directory 
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("Skipping non-regular, non-directory file \"nifi_test/dir2\""));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Skipping non-regular, non-directory file \"nifi_test/dir2\""));
 }
 #endif
 
@@ -399,9 +399,9 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Follow symlink true directory s
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:path value:nifi_test/dir1"));
-  REQUIRE(LogTestController::getInstance().contains("key:path value:nifi_test/dir2"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:path value:nifi_test/dir1"));
+  REQUIRE(test_controller.getLogTestController().contains("key:path value:nifi_test/dir2"));
 }
 #endif
 
@@ -412,16 +412,16 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps one file", 
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("The latest listed entry timestamp is the same as the last listed entry timestamp"));
+  REQUIRE(false == test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("The latest listed entry timestamp is the same as the last listed entry timestamp"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps one file one new file", "[ListSFTP][tracking-timestamps]") {
@@ -431,18 +431,18 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps one file on
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   createFileWithModificationTimeDiff("nifi_test/file2.ext", "Test content 2", -4min);
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps one file one older file", "[ListSFTP][tracking-timestamps]") {
@@ -452,19 +452,19 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps one file on
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   createFileWithModificationTimeDiff("nifi_test/file2.ext", "Test content 2", -6min);
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("Skipping \"nifi_test/file2.ext\", because it is not new."));
-  REQUIRE(LogTestController::getInstance().contains("The latest listed entry timestamp is the same as the last listed entry timestamp"));
+  REQUIRE(false == test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("Skipping \"nifi_test/file2.ext\", because it is not new."));
+  REQUIRE(test_controller.getLogTestController().contains("The latest listed entry timestamp is the same as the last listed entry timestamp"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps one file another file with the same timestamp", "[ListSFTP][tracking-timestamps]") {
@@ -475,11 +475,11 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps one file an
   auto mtime = utils::file::last_write_time(working_directory / "vfs" / "nifi_test" / "file1.ext").value();
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   /* We must sleep to avoid triggering the listing lag. */
   std::this_thread::sleep_for(std::chrono::milliseconds(1500));
@@ -488,9 +488,9 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps one file an
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(false == test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps one file timestamp updated", "[ListSFTP][tracking-timestamps]") {
@@ -502,29 +502,29 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps one file ti
   auto mtime = utils::file::last_write_time(file).value();
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   REQUIRE(utils::file::set_last_write_time(file, mtime + 1s));
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   /* We must sleep to avoid triggering the listing lag. */
   std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("and all files for that timestamp has been processed. Yielding."));
+  REQUIRE(false == test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("and all files for that timestamp has been processed. Yielding."));
 }
 
 TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Timestamps restore state", "[ListSFTP][tracking-timestamps]") {
@@ -544,14 +544,14 @@ TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Timestamps r
   REQUIRE(!state.at("listing.timestamp").empty());
   REQUIRE(!state.at("processed.timestamp").empty());
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   utils::Identifier list_sftp_uuid = list_sftp->getUUID();
   REQUIRE(list_sftp_uuid);
   createPlan(&list_sftp_uuid, std::make_shared<minifi::ConfigureImpl>());
   plan->setProperty(list_sftp, "Listing Strategy", "Tracking Timestamps");
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   createFileWithModificationTimeDiff("nifi_test/file2.ext", "Test content 2", -4min);
 
@@ -566,10 +566,10 @@ TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Timestamps r
   REQUIRE(!state.at("listing.timestamp").empty());
   REQUIRE(!state.at("processed.timestamp").empty());
 
-  REQUIRE(LogTestController::getInstance().contains("Successfully loaded state"));
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
-  REQUIRE(!LogTestController::getInstance().contains("key:filename value:file1.ext", std::chrono::seconds(0)));
+  REQUIRE(test_controller.getLogTestController().contains("Successfully loaded state"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
+  REQUIRE(!test_controller.getLogTestController().contains("key:filename value:file1.ext", std::chrono::seconds(0)));
 }
 
 TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Timestamps restore state changed configuration", "[ListSFTP][tracking-timestamps]") {
@@ -579,8 +579,8 @@ TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Timestamps r
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   std::unordered_map<std::string, std::string> state;
   REQUIRE(plan->getProcessContextForProcessor(list_sftp)->getStateManager()->get(state));
@@ -594,7 +594,7 @@ TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Timestamps r
   createPlan(&list_sftp_uuid, std::make_shared<minifi::ConfigureImpl>());
   plan->setProperty(list_sftp, "Listing Strategy", "Tracking Timestamps");
   plan->setProperty(list_sftp, "Remote Path", "/nifi_test");
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   createFileWithModificationTimeDiff("nifi_test/file2.ext", "Test content 2", -4min);
 
@@ -606,14 +606,14 @@ TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Timestamps r
   REQUIRE("/nifi_test" == state.at("remote_path"));
   REQUIRE("Tracking Timestamps" == state.at("listing_strategy"));
 
-  REQUIRE(LogTestController::getInstance().contains("Processor state was persisted with different settings than the current ones, ignoring. "
+  REQUIRE(test_controller.getLogTestController().contains("Processor state was persisted with different settings than the current ones, ignoring. "
                                                     "Listing Strategy: \"Tracking Timestamps\" vs. \"Tracking Timestamps\", "
                                                     "Hostname: \"localhost\" vs. \"localhost\", "
                                                     "Username: \"nifiuser\" vs. \"nifiuser\", "
                                                     "Remote Path: \"nifi_test\" vs. \"/nifi_test\""));
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps changed configuration", "[ListSFTP][tracking-timestamps]") {
@@ -623,25 +623,25 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Timestamps changed con
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
   plan->setProperty(list_sftp, "Remote Path", "/nifi_test");
 
   createFileWithModificationTimeDiff("nifi_test/file2.ext", "Test content 2", -4min);
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Processor state was persisted with different settings than the current ones, ignoring. "
+  REQUIRE(test_controller.getLogTestController().contains("Processor state was persisted with different settings than the current ones, ignoring. "
                                                     "Listing Strategy: \"Tracking Timestamps\" vs. \"Tracking Timestamps\", "
                                                     "Hostname: \"localhost\" vs. \"localhost\", "
                                                     "Username: \"nifiuser\" vs. \"nifiuser\", "
                                                     "Remote Path: \"nifi_test\" vs. \"/nifi_test\""));
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file", "[ListSFTP][tracking-entities]") {
@@ -651,16 +651,16 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file", "[
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:tstFile.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:tstFile.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("Skipping file \"nifi_test/tstFile.ext\" because it has not changed"));
+  REQUIRE(false == test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("Skipping file \"nifi_test/tstFile.ext\" because it has not changed"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file one new file", "[ListSFTP][tracking-entities]") {
@@ -670,18 +670,18 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file one 
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   createFileWithModificationTimeDiff("nifi_test/file2.ext", "Test content 2", -4min);
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file one older file in tracking window", "[ListSFTP][tracking-entities]") {
@@ -691,20 +691,20 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file one 
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   createFileWithModificationTimeDiff("nifi_test/file2.ext", "Test content 2", -6min);
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("Skipping file \"nifi_test/file1.ext\" because it has not changed"));
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(false == test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Skipping file \"nifi_test/file1.ext\" because it has not changed"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file one older file outside tracking window", "[ListSFTP][tracking-entities]") {
@@ -714,19 +714,19 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file one 
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   createFileWithModificationTimeDiff("nifi_test/file2.ext", "Test content 2", -6h);
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("Skipping file \"nifi_test/file1.ext\" because it has not changed"));
-  REQUIRE(LogTestController::getInstance().contains("Skipping \"nifi_test/file2.ext\" because it has an older timestamp than the minimum timestamp to list"));
+  REQUIRE(false == test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("Skipping file \"nifi_test/file1.ext\" because it has not changed"));
+  REQUIRE(test_controller.getLogTestController().contains("Skipping \"nifi_test/file2.ext\" because it has an older timestamp than the minimum timestamp to list"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file another file with the same timestamp", "[ListSFTP][tracking-entities]") {
@@ -737,20 +737,20 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file anot
   auto mtime = utils::file::last_write_time(working_directory / "vfs" / "nifi_test" / "file1.ext").value();
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   createFile("nifi_test/file2.ext", "Test content 2", mtime);
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("Skipping file \"nifi_test/file1.ext\" because it has not changed"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(false == test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("Skipping file \"nifi_test/file1.ext\" because it has not changed"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file timestamp updated", "[ListSFTP][tracking-entities]") {
@@ -763,27 +763,27 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file time
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   REQUIRE(utils::file::set_last_write_time(file, mtime + 1s));
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Found file \"nifi_test/file1.ext\" with newer timestamp"));
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Found file \"nifi_test/file1.ext\" with newer timestamp"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("Skipping file \"nifi_test/file1.ext\" because it has not changed"));
+  REQUIRE(false == test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("Skipping file \"nifi_test/file1.ext\" because it has not changed"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file size changes", "[ListSFTP][tracking-entities]") {
@@ -795,27 +795,27 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities one file size
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   createFile("nifi_test/file1.ext", "Longer test content 1", mtime);
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Found file \"nifi_test/file1.ext\" with different size: 14 -> 21"));
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("Found file \"nifi_test/file1.ext\" with different size: 14 -> 21"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("Skipping file \"nifi_test/file1.ext\" because it has not changed"));
+  REQUIRE(false == test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("Skipping file \"nifi_test/file1.ext\" because it has not changed"));
 }
 
 TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Entities restore state", "[ListSFTP][tracking-entities]") {
@@ -825,14 +825,14 @@ TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Entities res
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   utils::Identifier list_sftp_uuid = list_sftp->getUUID();
   REQUIRE(list_sftp_uuid);
   createPlan(&list_sftp_uuid, std::make_shared<minifi::ConfigureImpl>());
   plan->setProperty(list_sftp, "Listing Strategy", "Tracking Entities");
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   std::unordered_map<std::string, std::string> state;
   REQUIRE(plan->getProcessContextForProcessor(list_sftp)->getStateManager()->get(state));
@@ -865,10 +865,10 @@ TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Entities res
   REQUIRE("14" == state.at("entity.1.size"));
   REQUIRE(!state.at("entity.1.timestamp").empty());
 
-  REQUIRE(LogTestController::getInstance().contains("Successfully loaded state"));
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
-  REQUIRE(!LogTestController::getInstance().contains("key:filename value:file1.ext", std::chrono::seconds(0)));
+  REQUIRE(test_controller.getLogTestController().contains("Successfully loaded state"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
+  REQUIRE(!test_controller.getLogTestController().contains("key:filename value:file1.ext", std::chrono::seconds(0)));
 }
 
 TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Entities restore state changed configuration", "[ListSFTP][tracking-entities]") {
@@ -878,8 +878,8 @@ TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Entities res
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   std::unordered_map<std::string, std::string> state;
   REQUIRE(plan->getProcessContextForProcessor(list_sftp)->getStateManager()->get(state));
@@ -893,7 +893,7 @@ TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Entities res
   createPlan(&list_sftp_uuid, std::make_shared<minifi::ConfigureImpl>());
   plan->setProperty(list_sftp, "Listing Strategy", "Tracking Entities");
   plan->setProperty(list_sftp, "Remote Path", "/nifi_test");
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   createFileWithModificationTimeDiff("nifi_test/file2.ext", "Test content 2", -4min);
 
@@ -905,14 +905,14 @@ TEST_CASE_METHOD(PersistentListSFTPTestsFixture, "ListSFTP Tracking Entities res
   REQUIRE("/nifi_test" == state.at("remote_path"));
   REQUIRE("Tracking Entities" == state.at("listing_strategy"));
 
-  REQUIRE(LogTestController::getInstance().contains("Processor state was persisted with different settings than the current ones, ignoring. "
+  REQUIRE(test_controller.getLogTestController().contains("Processor state was persisted with different settings than the current ones, ignoring. "
                                                     "Listing Strategy: \"Tracking Entities\" vs. \"Tracking Entities\", "
                                                     "Hostname: \"localhost\" vs. \"localhost\", "
                                                     "Username: \"nifiuser\" vs. \"nifiuser\", "
                                                     "Remote Path: \"nifi_test\" vs. \"/nifi_test\""));
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities changed configuration", "[ListSFTP][tracking-entities]") {
@@ -922,25 +922,25 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities changed confi
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 
   plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
   plan->setProperty(list_sftp, "Remote Path", "/nifi_test");
 
   createFileWithModificationTimeDiff("nifi_test/file2.ext", "Test content 2", -4min);
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Processor state was persisted with different settings than the current ones, ignoring. "
+  REQUIRE(test_controller.getLogTestController().contains("Processor state was persisted with different settings than the current ones, ignoring. "
                                                     "Listing Strategy: \"Tracking Entities\" vs. \"Tracking Entities\", "
                                                     "Hostname: \"localhost\" vs. \"localhost\", "
                                                     "Username: \"nifiuser\" vs. \"nifiuser\", "
                                                     "Remote Path: \"nifi_test\" vs. \"/nifi_test\""));
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file2.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file2.ext"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities Initial Listing Target Tracking Time Window entity outside window", "[ListSFTP][tracking-entities]") {
@@ -952,8 +952,8 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities Initial Listi
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Skipping \"nifi_test/file1.ext\" because it has an older timestamp than the minimum timestamp to list"));
-  REQUIRE(false == LogTestController::getInstance().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("Skipping \"nifi_test/file1.ext\" because it has an older timestamp than the minimum timestamp to list"));
+  REQUIRE(false == test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
 }
 
 TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities Initial Listing Target Tracking Time Window entity inside window", "[ListSFTP][tracking-entities]") {
@@ -965,6 +965,6 @@ TEST_CASE_METHOD(ListSFTPTestsFixture, "ListSFTP Tracking Entities Initial Listi
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from ListSFTP to relationship success"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:file1.ext"));
+  REQUIRE(test_controller.getLogTestController().contains("from ListSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:file1.ext"));
 }

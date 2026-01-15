@@ -68,8 +68,8 @@ class VerifyC2Base : public HTTPIntegrationBase {
  public:
   using HTTPIntegrationBase::HTTPIntegrationBase;
   void testSetup() override {
-    LogTestController::getInstance().setDebug<minifi::http::HTTPClient>();
-    LogTestController::getInstance().setDebug<LogTestController>();
+    test_controller.getLogTestController().setDebug<minifi::http::HTTPClient>();
+    test_controller.getLogTestController().setDebug<LogTestController>();
   }
 
   void configureC2() override {
@@ -80,7 +80,7 @@ class VerifyC2Base : public HTTPIntegrationBase {
   }
 
   void cleanup() override {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
     HTTPIntegrationBase::cleanup();
   }
 };
@@ -92,9 +92,9 @@ class VerifyC2Describe : public VerifyC2Base {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setTrace<minifi::c2::C2Agent>();
-    LogTestController::getInstance().setDebug<minifi::c2::RESTSender>();
-    LogTestController::getInstance().setInfo<minifi::FlowController>();
+    test_controller.getLogTestController().setTrace<minifi::c2::C2Agent>();
+    test_controller.getLogTestController().setDebug<minifi::c2::RESTSender>();
+    test_controller.getLogTestController().setInfo<minifi::FlowController>();
     VerifyC2Base::testSetup();
   }
 
@@ -118,10 +118,10 @@ class VerifyC2Update : public HTTPIntegrationBase {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setInfo<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<minifi::http::HTTPClient>();
-    LogTestController::getInstance().setDebug<minifi::c2::RESTSender>();
-    LogTestController::getInstance().setDebug<minifi::c2::C2Agent>();
+    test_controller.getLogTestController().setInfo<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<minifi::http::HTTPClient>();
+    test_controller.getLogTestController().setDebug<minifi::c2::RESTSender>();
+    test_controller.getLogTestController().setDebug<minifi::c2::C2Agent>();
   }
 
   void configureC2() override {
@@ -131,7 +131,7 @@ class VerifyC2Update : public HTTPIntegrationBase {
   }
 
   void cleanup() override {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
     HTTPIntegrationBase::cleanup();
   }
 
@@ -145,10 +145,10 @@ class VerifyFlowFetched : public HTTPIntegrationBase {
   using HTTPIntegrationBase::HTTPIntegrationBase;
 
   void testSetup() override {
-    LogTestController::getInstance().setInfo<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<minifi::http::HTTPClient>();
-    LogTestController::getInstance().setDebug<minifi::c2::RESTSender>();
-    LogTestController::getInstance().setDebug<minifi::c2::C2Agent>();
+    test_controller.getLogTestController().setInfo<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<minifi::http::HTTPClient>();
+    test_controller.getLogTestController().setDebug<minifi::c2::RESTSender>();
+    test_controller.getLogTestController().setDebug<minifi::c2::C2Agent>();
   }
 
   void configureC2() override {
@@ -162,7 +162,7 @@ class VerifyFlowFetched : public HTTPIntegrationBase {
   }
 
   void cleanup() override {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
     HTTPIntegrationBase::cleanup();
   }
 
@@ -178,8 +178,8 @@ class VerifyC2FailedUpdate : public VerifyC2Update {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setInfo<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<minifi::c2::C2Agent>();
+    test_controller.getLogTestController().setInfo<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<minifi::c2::C2Agent>();
     minifi::utils::file::create_dir("content_repository");
   }
 

@@ -45,7 +45,7 @@ TEST_CASE("TestAbsoluteTimeout", "[httptest]") {
 
   plan->runNextProcessor();
 
-  REQUIRE(LogTestController::getInstance().contains("HTTP operation timed out, with absolute timeout 3000ms"));
+  REQUIRE(test_controller.getLogTestController().contains("HTTP operation timed out, with absolute timeout 3000ms"));
 }
 
 }  // namespace org::apache::nifi::minifi::test

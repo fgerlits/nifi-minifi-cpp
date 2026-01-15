@@ -101,9 +101,9 @@ class VerifyC2MultipleCommands : public VerifyC2Base {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setTrace<minifi::c2::C2Agent>();
-    LogTestController::getInstance().setDebug<minifi::c2::RESTSender>();
-    LogTestController::getInstance().setInfo<minifi::FlowController>();
+    test_controller.getLogTestController().setTrace<minifi::c2::C2Agent>();
+    test_controller.getLogTestController().setDebug<minifi::c2::RESTSender>();
+    test_controller.getLogTestController().setInfo<minifi::FlowController>();
     VerifyC2Base::testSetup();
   }
 

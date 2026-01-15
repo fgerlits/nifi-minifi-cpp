@@ -105,14 +105,14 @@ TEST_CASE("ConsumeWindowsEventLog constructor works", "[create]") {
 
 TEST_CASE("ConsumeWindowsEventLog properties work with default values", "[create][properties]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<ConfigurableComponent>();
-  LogTestController::getInstance().setTrace<ConsumeWindowsEventLog>();
+  test_controller.getLogTestController().setDebug<ConfigurableComponent>();
+  test_controller.getLogTestController().setTrace<ConsumeWindowsEventLog>();
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
   TestController::runSession(test_plan);
 
-  CHECK(LogTestController::getInstance().contains("Successfully configured CWEL"));
+  CHECK(test_controller.getLogTestController().contains("Successfully configured CWEL"));
 }
 
 TEST_CASE("ConsumeWindowsEventLog onSchedule throws if it cannot create the bookmark", "[create][bookmark]") {
@@ -127,8 +127,8 @@ TEST_CASE("ConsumeWindowsEventLog onSchedule throws if it cannot create the book
 
 TEST_CASE("ConsumeWindowsEventLog can consume new events", "[onTrigger]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<ConsumeWindowsEventLog>();
-  LogTestController::getInstance().setDebug<LogAttribute>();
+  test_controller.getLogTestController().setDebug<ConsumeWindowsEventLog>();
+  test_controller.getLogTestController().setDebug<LogAttribute>();
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
@@ -143,24 +143,24 @@ TEST_CASE("ConsumeWindowsEventLog can consume new events", "[onTrigger]") {
   reportEvent(APPLICATION_CHANNEL, "Event zero");
 
   TestController::runSession(test_plan);
-  CHECK(LogTestController::getInstance().contains("processed 0 Events"));
+  CHECK(test_controller.getLogTestController().contains("processed 0 Events"));
   // event zero is not reported as the bookmark is created on the first run
   // and we use the default config setting ProcessOldEvents = false
   // later runs will start with a bookmark saved in the state manager
 
   test_plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   SECTION("Read one event") {
     reportEvent(APPLICATION_CHANNEL, "Event one");
 
     TestController::runSession(test_plan);
-    CHECK(LogTestController::getInstance().contains("processed 1 Events"));
-    CHECK(LogTestController::getInstance().contains("<EventData><Data>Event one</Data></EventData>"));
+    CHECK(test_controller.getLogTestController().contains("processed 1 Events"));
+    CHECK(test_controller.getLogTestController().contains("<EventData><Data>Event one</Data></EventData>"));
 
     // make sure timezone attributes are present
-    CHECK(LogTestController::getInstance().contains("key:timezone.offset value:"));
-    CHECK(LogTestController::getInstance().contains("key:timezone.name value:"));
+    CHECK(test_controller.getLogTestController().contains("key:timezone.offset value:"));
+    CHECK(test_controller.getLogTestController().contains("key:timezone.name value:"));
   }
 
   SECTION("Read three events") {
@@ -169,17 +169,17 @@ TEST_CASE("ConsumeWindowsEventLog can consume new events", "[onTrigger]") {
     reportEvent(APPLICATION_CHANNEL, "%%1844");  // %%1844 expands to System
 
     TestController::runSession(test_plan);
-    CHECK(LogTestController::getInstance().contains("processed 3 Events"));
-    CHECK(LogTestController::getInstance().contains("<EventData><Data>Event two</Data></EventData>"));
-    CHECK(LogTestController::getInstance().contains("<EventData><Data>Event three</Data></EventData>"));
-    CHECK(LogTestController::getInstance().contains("<EventData><Data>System</Data></EventData>"));
+    CHECK(test_controller.getLogTestController().contains("processed 3 Events"));
+    CHECK(test_controller.getLogTestController().contains("<EventData><Data>Event two</Data></EventData>"));
+    CHECK(test_controller.getLogTestController().contains("<EventData><Data>Event three</Data></EventData>"));
+    CHECK(test_controller.getLogTestController().contains("<EventData><Data>System</Data></EventData>"));
   }
 }
 
 TEST_CASE("ConsumeWindowsEventLog bookmarking works", "[onTrigger]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<ConsumeWindowsEventLog>();
-  LogTestController::getInstance().setDebug<LogAttribute>();
+  test_controller.getLogTestController().setDebug<ConsumeWindowsEventLog>();
+  test_controller.getLogTestController().setDebug<LogAttribute>();
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
@@ -192,10 +192,10 @@ TEST_CASE("ConsumeWindowsEventLog bookmarking works", "[onTrigger]") {
   reportEvent(APPLICATION_CHANNEL, "Event zero");
 
   TestController::runSession(test_plan);
-  CHECK(LogTestController::getInstance().contains("processed 0 Events"));
+  CHECK(test_controller.getLogTestController().contains("processed 0 Events"));
 
   test_plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   SECTION("Read in one go") {
     reportEvent(APPLICATION_CHANNEL, "Event one");
@@ -203,30 +203,30 @@ TEST_CASE("ConsumeWindowsEventLog bookmarking works", "[onTrigger]") {
     reportEvent(APPLICATION_CHANNEL, "Event three");
 
     TestController::runSession(test_plan);
-    CHECK(LogTestController::getInstance().contains("processed 3 Events"));
+    CHECK(test_controller.getLogTestController().contains("processed 3 Events"));
   }
 
   SECTION("Read in two batches") {
     reportEvent(APPLICATION_CHANNEL, "Event one");
 
     TestController::runSession(test_plan);
-    CHECK(LogTestController::getInstance().contains("processed 1 Events"));
+    CHECK(test_controller.getLogTestController().contains("processed 1 Events"));
 
     reportEvent(APPLICATION_CHANNEL, "Event two");
     reportEvent(APPLICATION_CHANNEL, "Event three");
 
     test_plan->reset();
-    LogTestController::getInstance().clear();
+    test_controller.getLogTestController().clear();
 
     TestController::runSession(test_plan);
-    CHECK(LogTestController::getInstance().contains("processed 2 Events"));
+    CHECK(test_controller.getLogTestController().contains("processed 2 Events"));
   }
 }
 
 TEST_CASE("ConsumeWindowsEventLog extracts some attributes by default", "[onTrigger]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<ConsumeWindowsEventLog>();
-  LogTestController::getInstance().setDebug<LogAttribute>();
+  test_controller.getLogTestController().setDebug<ConsumeWindowsEventLog>();
+  test_controller.getLogTestController().setDebug<LogAttribute>();
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
@@ -256,7 +256,7 @@ TEST_CASE("ConsumeWindowsEventLog extracts some attributes by default", "[onTrig
   }
 
   test_plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   // 1st event, on Info level
   {
@@ -264,12 +264,12 @@ TEST_CASE("ConsumeWindowsEventLog extracts some attributes by default", "[onTrig
 
     TestController::runSession(test_plan);
 
-    CHECK(LogTestController::getInstance().contains("key:Keywords value:Classic"));
-    CHECK(LogTestController::getInstance().contains("key:Level value:Information"));
+    CHECK(test_controller.getLogTestController().contains("key:Keywords value:Classic"));
+    CHECK(test_controller.getLogTestController().contains("key:Level value:Information"));
   }
 
   test_plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   // 2st event, on Warning level
   {
@@ -277,8 +277,8 @@ TEST_CASE("ConsumeWindowsEventLog extracts some attributes by default", "[onTrig
 
     TestController::runSession(test_plan);
 
-    CHECK(LogTestController::getInstance().contains("key:Keywords value:Classic"));
-    CHECK(LogTestController::getInstance().contains("key:Level value:Warning"));
+    CHECK(test_controller.getLogTestController().contains("key:Keywords value:Classic"));
+    CHECK(test_controller.getLogTestController().contains("key:Level value:Warning"));
   }
 }
 
@@ -286,8 +286,8 @@ namespace {
 
 void outputFormatSetterTestHelper(const std::string &output_format, int expected_num_flow_files) {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<ConsumeWindowsEventLog>();
-  LogTestController::getInstance().setDebug<LogAttribute>();
+  test_controller.getLogTestController().setDebug<ConsumeWindowsEventLog>();
+  test_controller.getLogTestController().setDebug<LogAttribute>();
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
@@ -305,14 +305,14 @@ void outputFormatSetterTestHelper(const std::string &output_format, int expected
   }
 
   test_plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   {
     reportEvent(APPLICATION_CHANNEL, "Event one");
 
     TestController::runSession(test_plan);
 
-    CHECK(LogTestController::getInstance().contains("Logged " + std::to_string(expected_num_flow_files) + " flow files"));
+    CHECK(test_controller.getLogTestController().contains("Logged " + std::to_string(expected_num_flow_files) + " flow files"));
   }
 }
 
@@ -414,8 +414,8 @@ TEST_CASE("ConsumeWindowsEventLog prints events in JSON::Raw correctly", "[onTri
 namespace {
 void batchCommitSizeTestHelper(std::size_t num_events_read, std::size_t batch_commit_size, std::size_t expected_event_count) {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<ConsumeWindowsEventLog>();
-  LogTestController::getInstance().setDebug<LogAttribute>();
+  test_controller.getLogTestController().setDebug<ConsumeWindowsEventLog>();
+  test_controller.getLogTestController().setDebug<LogAttribute>();
   std::shared_ptr<TestPlan> test_plan = test_controller.createPlan();
 
   auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
@@ -431,7 +431,7 @@ void batchCommitSizeTestHelper(std::size_t num_events_read, std::size_t batch_co
   }
 
   test_plan->reset();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().clear();
 
   auto generate_events = [](const std::size_t event_count) {
     std::vector<std::string> events;
@@ -445,7 +445,7 @@ void batchCommitSizeTestHelper(std::size_t num_events_read, std::size_t batch_co
     reportEvent(APPLICATION_CHANNEL, event.c_str());
 
   TestController::runSession(test_plan);
-  CHECK(LogTestController::getInstance().contains("processed " + std::to_string(expected_event_count) + " Events"));
+  CHECK(test_controller.getLogTestController().contains("processed " + std::to_string(expected_event_count) + " Events"));
 }
 
 }  // namespace

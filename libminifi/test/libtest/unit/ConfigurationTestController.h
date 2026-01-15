@@ -33,10 +33,10 @@ class ConfigurationTestController : public TestController {
     configuration_ = std::make_shared<minifi::ConfigureImpl>();
     content_repo_ = std::make_shared<core::repository::VolatileContentRepository>();
 
-    LogTestController::getInstance().setDebug<TestPlan>();
-    LogTestController::getInstance().setTrace<core::YamlConfiguration>();
-    LogTestController::getInstance().setDebug<core::Processor>();
-    LogTestController::getInstance().setTrace<core::flow::AdaptiveConfiguration>();
+    test_controller.getLogTestController().setDebug<TestPlan>();
+    test_controller.getLogTestController().setTrace<core::YamlConfiguration>();
+    test_controller.getLogTestController().setDebug<core::Processor>();
+    test_controller.getLogTestController().setTrace<core::flow::AdaptiveConfiguration>();
   }
 
   [[nodiscard]] core::ConfigurationContext getContext() const {

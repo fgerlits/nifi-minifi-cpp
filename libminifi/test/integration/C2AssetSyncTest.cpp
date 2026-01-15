@@ -156,7 +156,7 @@ class VerifyC2AssetSync : public VerifyC2Base {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setTrace<minifi::utils::file::AssetManager>();
+    test_controller.getLogTestController().setTrace<minifi::utils::file::AssetManager>();
     VerifyC2Base::testSetup();
   }
 

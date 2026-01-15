@@ -81,7 +81,7 @@ TEST_CASE("TestFileUtils::list_dir", "[TestListDir]") {
 
   struct ListDirLogger {};
   const std::shared_ptr<logging::Logger> logger_{logging::LoggerFactory<ListDirLogger>::getLogger()};
-  LogTestController::getInstance().setDebug<ListDirLogger>();
+  test_controller.getLogTestController().setDebug<ListDirLogger>();
 
   // Callback, called for each file entry in the listed directory
   // Return value is used to break (false) or continue (true) listing
@@ -95,8 +95,8 @@ TEST_CASE("TestFileUtils::list_dir", "[TestListDir]") {
 
   FileUtils::list_dir(dir, lambda, logger_, false);
 
-  REQUIRE(LogTestController::getInstance().contains(dir.string()));
-  REQUIRE_FALSE(LogTestController::getInstance().contains(foo.string()));
+  REQUIRE(test_controller.getLogTestController().contains(dir.string()));
+  REQUIRE_FALSE(test_controller.getLogTestController().contains(foo.string()));
 }
 
 TEST_CASE("TestFileUtils::list_dir recursively", "[TestListDir]") {
@@ -104,7 +104,7 @@ TEST_CASE("TestFileUtils::list_dir recursively", "[TestListDir]") {
 
   struct ListDirLogger {};
   const std::shared_ptr<logging::Logger> logger_{logging::LoggerFactory<ListDirLogger>::getLogger()};
-  LogTestController::getInstance().setDebug<ListDirLogger>();
+  test_controller.getLogTestController().setDebug<ListDirLogger>();
 
   // Callback, called for each file entry in the listed directory
   // Return value is used to break (false) or continue (true) listing
@@ -123,10 +123,10 @@ TEST_CASE("TestFileUtils::list_dir recursively", "[TestListDir]") {
 
   FileUtils::list_dir(dir, lambda, logger_, true);
 
-  REQUIRE(LogTestController::getInstance().contains(dir.string()));
-  REQUIRE(LogTestController::getInstance().contains(foo.string()));
-  REQUIRE(LogTestController::getInstance().contains(bar.string()));
-  REQUIRE(LogTestController::getInstance().contains(fooBaz.string()));
+  REQUIRE(test_controller.getLogTestController().contains(dir.string()));
+  REQUIRE(test_controller.getLogTestController().contains(foo.string()));
+  REQUIRE(test_controller.getLogTestController().contains(bar.string()));
+  REQUIRE(test_controller.getLogTestController().contains(fooBaz.string()));
 }
 
 TEST_CASE("TestFileUtils::addFilesMatchingExtension", "[TestAddFilesMatchingExtension]") {
@@ -134,7 +134,7 @@ TEST_CASE("TestFileUtils::addFilesMatchingExtension", "[TestAddFilesMatchingExte
 
   struct addFilesMatchingExtension {};
   const std::shared_ptr<logging::Logger> logger_{logging::LoggerFactory<addFilesMatchingExtension>::getLogger()};
-  LogTestController::getInstance().setInfo<addFilesMatchingExtension>();
+  test_controller.getLogTestController().setInfo<addFilesMatchingExtension>();
 
   /*dir/
    * |
@@ -181,7 +181,7 @@ TEST_CASE("TestFileUtils::addFilesMatchingExtension", "[TestAddFilesMatchingExte
 
   auto fakeDir = dir / "fake";
   FileUtils::addFilesMatchingExtension(logger_, fakeDir, ".ext", accruedFiles);
-  REQUIRE(LogTestController::getInstance().contains("Failed to open directory: " + fakeDir.string()));
+  REQUIRE(test_controller.getLogTestController().contains("Failed to open directory: " + fakeDir.string()));
 }
 
 TEST_CASE("FileUtils::last_write_time and last_write_time_point work", "[last_write_time][last_write_time_point]") {

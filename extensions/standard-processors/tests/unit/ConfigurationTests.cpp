@@ -55,8 +55,8 @@ TEST_CASE("Configuration can validate values to be assigned to specific properti
 }
 
 TEST_CASE("Configuration can fix misconfigured timeperiod<->integer validated properties") {
-  LogTestController::getInstance().setInfo<minifi::Configure>();
-  LogTestController::getInstance().setInfo<minifi::Properties>();
+  test_controller.getLogTestController().setInfo<minifi::Configure>();
+  test_controller.getLogTestController().setInfo<minifi::Properties>();
 
   TestController test_controller;
   auto properties_path = test_controller.createTempDirectory() /  "test.properties";
@@ -97,8 +97,8 @@ TEST_CASE("Configuration can fix misconfigured timeperiod<->integer validated pr
 }
 
 TEST_CASE("Configuration can fix misconfigured datasize<->integer validated properties") {
-  LogTestController::getInstance().setInfo<minifi::Configure>();
-  LogTestController::getInstance().setInfo<minifi::Properties>();
+  test_controller.getLogTestController().setInfo<minifi::Configure>();
+  test_controller.getLogTestController().setInfo<minifi::Properties>();
 
   TestController test_controller;
   auto properties_path = test_controller.createTempDirectory() /  "test.properties";
@@ -135,8 +135,8 @@ TEST_CASE("Configuration can fix misconfigured datasize<->integer validated prop
 
 
 TEST_CASE("Configuration can fix misconfigured validated properties within environmental variables") {
-  LogTestController::getInstance().setInfo<minifi::Configure>();
-  LogTestController::getInstance().setInfo<minifi::Properties>();
+  test_controller.getLogTestController().setInfo<minifi::Configure>();
+  test_controller.getLogTestController().setInfo<minifi::Properties>();
   TestController test_controller;
   auto properties_path = test_controller.createTempDirectory() /  "test.properties";
 

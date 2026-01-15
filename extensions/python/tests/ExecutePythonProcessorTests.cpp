@@ -38,7 +38,7 @@ using org::apache::nifi::minifi::utils::file::resolve;
 class ExecutePythonProcessorTestBase {
  public:
   ExecutePythonProcessorTestBase() :
-      logTestController_(LogTestController::getInstance()),
+      logTestController_(test_controller.getLogTestController()),
       logger_(logging::LoggerFactory<ExecutePythonProcessorTestBase>::getLogger()) {
     SCRIPT_FILES_DIRECTORY = minifi::utils::file::FileUtils::get_executable_dir() / "resources" / "test_python_scripts";
     reInitialize();

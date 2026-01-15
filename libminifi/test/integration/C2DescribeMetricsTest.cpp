@@ -39,10 +39,10 @@ class VerifyEmptyC2Metric : public VerifyC2Base {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setTrace<c2::C2Agent>();
-    LogTestController::getInstance().setDebug<c2::RESTSender>();
-    LogTestController::getInstance().setDebug<FlowController>();
-    LogTestController::getInstance().setOff<processors::GetTCP>();
+    test_controller.getLogTestController().setTrace<c2::C2Agent>();
+    test_controller.getLogTestController().setDebug<c2::RESTSender>();
+    test_controller.getLogTestController().setDebug<FlowController>();
+    test_controller.getLogTestController().setOff<processors::GetTCP>();
     VerifyC2Base::testSetup();
   }
 

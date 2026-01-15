@@ -33,7 +33,7 @@ namespace org::apache::nifi::minifi::test {
 class HttpStreamingCallbackTestsFixture {
  public:
   HttpStreamingCallbackTestsFixture() {
-    LogTestController::getInstance().setTrace<http::HttpStreamingCallback>();
+    test_controller.getLogTestController().setTrace<http::HttpStreamingCallback>();
   }
 
   HttpStreamingCallbackTestsFixture(HttpStreamingCallbackTestsFixture&&) = delete;
@@ -45,7 +45,7 @@ class HttpStreamingCallbackTestsFixture {
     if (consumer_thread_.joinable()) {
       consumer_thread_.join();
     }
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
   }
 
   void startConsumerThread() {

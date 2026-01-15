@@ -112,7 +112,7 @@ TEST_CASE("HTTPTestsPenalizeNoRetry", "[httptest1]") {
   TestController test_controller;
   TestHTTPServer http_server;
 
-  LogTestController::getInstance().setInfo<minifi::core::ProcessSession>();
+  test_controller.getLogTestController().setInfo<minifi::core::ProcessSession>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   plan->addProcessor("GenerateFlowFile", "genfile");
@@ -127,13 +127,13 @@ TEST_CASE("HTTPTestsPenalizeNoRetry", "[httptest1]") {
   SECTION("with penalize on no retry set to true") {
     REQUIRE(plan->setProperty(invokehttp, InvokeHTTP::PenalizeOnNoRetry, "true"));
     test_controller.runSession(plan);
-    REQUIRE(LogTestController::getInstance().matchesRegex(PENALIZE_LOG_PATTERN));
+    REQUIRE(test_controller.getLogTestController().matchesRegex(PENALIZE_LOG_PATTERN));
   }
 
   SECTION("with penalize on no retry set to false") {
     REQUIRE(plan->setProperty(invokehttp, InvokeHTTP::PenalizeOnNoRetry, "false"));
     test_controller.runSession(plan);
-    REQUIRE_FALSE(LogTestController::getInstance().matchesRegex(PENALIZE_LOG_PATTERN));
+    REQUIRE_FALSE(test_controller.getLogTestController().matchesRegex(PENALIZE_LOG_PATTERN));
   }
 }
 
@@ -144,7 +144,7 @@ TEST_CASE("InvokeHTTP fails with when flow contains invalid attribute names in H
   auto invokehttp = test_controller.getProcessor();
   TestHTTPServer http_server;
 
-  LogTestController::getInstance().setDebug<InvokeHTTP>();
+  test_controller.getLogTestController().setDebug<InvokeHTTP>();
 
   REQUIRE(invokehttp->setProperty(InvokeHTTP::Method.name, "GET"));
   REQUIRE(invokehttp->setProperty(InvokeHTTP::URL.name, TestHTTPServer::URL));
@@ -166,7 +166,7 @@ TEST_CASE("InvokeHTTP succeeds when the flow file contains an attribute that wou
   auto invokehttp = test_controller.getProcessor();
   TestHTTPServer http_server;
 
-  LogTestController::getInstance().setDebug<InvokeHTTP>();
+  test_controller.getLogTestController().setDebug<InvokeHTTP>();
 
   REQUIRE(invokehttp->setProperty(InvokeHTTP::Method.name, "GET"));
   REQUIRE(invokehttp->setProperty(InvokeHTTP::URL.name, TestHTTPServer::URL));
@@ -188,7 +188,7 @@ TEST_CASE("InvokeHTTP replaces invalid characters of attributes", "[httptest1]")
   auto invokehttp = test_controller.getProcessor();
   TestHTTPServer http_server;
 
-  LogTestController::getInstance().setTrace<InvokeHTTP>();
+  test_controller.getLogTestController().setTrace<InvokeHTTP>();
 
   REQUIRE(invokehttp->setProperty(InvokeHTTP::Method.name, "GET"));
   REQUIRE(invokehttp->setProperty(InvokeHTTP::URL.name, TestHTTPServer::URL));
@@ -209,7 +209,7 @@ TEST_CASE("InvokeHTTP drops invalid attributes from HTTP headers", "[httptest1]"
   auto invokehttp = test_controller.getProcessor();
   TestHTTPServer http_server;
 
-  LogTestController::getInstance().setTrace<InvokeHTTP>();
+  test_controller.getLogTestController().setTrace<InvokeHTTP>();
 
   REQUIRE(invokehttp->setProperty(InvokeHTTP::Method.name, "GET"));
   REQUIRE(invokehttp->setProperty(InvokeHTTP::URL.name, TestHTTPServer::URL));
@@ -231,7 +231,7 @@ TEST_CASE("InvokeHTTP empty Attributes to Send means no attributes are sent", "[
   auto invokehttp = test_controller.getProcessor();
   TestHTTPServer http_server;
 
-  LogTestController::getInstance().setTrace<InvokeHTTP>();
+  test_controller.getLogTestController().setTrace<InvokeHTTP>();
 
   REQUIRE(invokehttp->setProperty(InvokeHTTP::Method.name, "GET"));
   REQUIRE(invokehttp->setProperty(InvokeHTTP::URL.name, TestHTTPServer::URL));
@@ -254,7 +254,7 @@ TEST_CASE("InvokeHTTP DateHeader", "[InvokeHTTP]") {
   auto invoke_http = test_controller.getProcessor();
   TestHTTPServer http_server;
 
-  LogTestController::getInstance().setTrace<InvokeHTTP>();
+  test_controller.getLogTestController().setTrace<InvokeHTTP>();
 
   REQUIRE(invoke_http->setProperty(InvokeHTTP::Method.name, "GET"));
   REQUIRE(invoke_http->setProperty(InvokeHTTP::URL.name, TestHTTPServer::URL));
@@ -288,7 +288,7 @@ TEST_CASE("InvokeHTTP Attributes to Send uses full string matching, not substrin
   auto invokehttp = test_controller.getProcessor();
   TestHTTPServer http_server;
 
-  LogTestController::getInstance().setTrace<InvokeHTTP>();
+  test_controller.getLogTestController().setTrace<InvokeHTTP>();
 
   REQUIRE(invokehttp->setProperty(InvokeHTTP::Method.name, "GET"));
   REQUIRE(invokehttp->setProperty(InvokeHTTP::URL.name, TestHTTPServer::URL));

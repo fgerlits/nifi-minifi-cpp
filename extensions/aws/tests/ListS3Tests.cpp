@@ -87,18 +87,18 @@ TEST_CASE_METHOD(ListS3TestsFixture, "Test listing without versioning", "[awsS3L
   test_controller.runSession(plan, true);
 
   for (std::size_t i = 0; i < S3_OBJECT_COUNT; ++i) {
-    REQUIRE(LogTestController::getInstance().contains("key:filename value:" + S3_KEY_PREFIX + std::to_string(i)));
-    REQUIRE(LogTestController::getInstance().contains("key:s3.etag value:" + S3_ETAG_PREFIX + std::to_string(i)));
+    REQUIRE(test_controller.getLogTestController().contains("key:filename value:" + S3_KEY_PREFIX + std::to_string(i)));
+    REQUIRE(test_controller.getLogTestController().contains("key:s3.etag value:" + S3_ETAG_PREFIX + std::to_string(i)));
   }
 
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.bucket value:" + S3_BUCKET) == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.isLatest value:true") == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.lastModified value:" + std::to_string(S3_OBJECT_OLD_AGE_MILLISECONDS) + "\n") == S3_OBJECT_COUNT / 2);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.length value:" + std::to_string(S3_OBJECT_SIZE)) == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.version") == 0);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.storeClass value:" + S3_STORAGE_CLASS_STR) == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.tag") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.bucket value:" + S3_BUCKET) == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.isLatest value:true") == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.lastModified value:" + std::to_string(S3_OBJECT_OLD_AGE_MILLISECONDS) + "\n") == S3_OBJECT_COUNT / 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.length value:" + std::to_string(S3_OBJECT_SIZE)) == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.version") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.storeClass value:" + S3_STORAGE_CLASS_STR) == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.tag") == 0);
   REQUIRE(!mock_s3_request_sender_ptr->list_object_request.ContinuationTokenHasBeenSet());
   REQUIRE(mock_s3_request_sender_ptr->getClientConfig().region == minifi::aws::processors::region::US_EAST_1);
   REQUIRE(mock_s3_request_sender_ptr->getClientConfig().connectTimeoutMs == 10000);
@@ -112,21 +112,21 @@ TEST_CASE_METHOD(ListS3TestsFixture, "Test listing with versioning", "[awsS3List
 
   for (std::size_t i = 0; i < S3_OBJECT_COUNT; ++i) {
     // 2 versions of every object
-    REQUIRE(LogTestController::getInstance().countOccurrences("key:filename value:" + S3_KEY_PREFIX + std::to_string(i)) == 2);
-    REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.etag value:" + S3_ETAG_PREFIX + std::to_string(i)) == 2);
+    REQUIRE(test_controller.getLogTestController().countOccurrences("key:filename value:" + S3_KEY_PREFIX + std::to_string(i)) == 2);
+    REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.etag value:" + S3_ETAG_PREFIX + std::to_string(i)) == 2);
   }
 
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.version value:" + S3_VERSION_1) == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.version value:" + S3_VERSION_2) == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.bucket value:" + S3_BUCKET) == S3_OBJECT_COUNT * 2);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.isLatest value:true") == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.isLatest value:false") == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT * 2);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.lastModified value:" + std::to_string(S3_OBJECT_OLD_AGE_MILLISECONDS) + "\n") == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.length value:" + std::to_string(S3_OBJECT_SIZE)) == S3_OBJECT_COUNT * 2);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.storeClass value:" + S3_STORAGE_CLASS_STR) == S3_OBJECT_COUNT * 2);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.tag") == 0);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.user.metadata") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.version value:" + S3_VERSION_1) == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.version value:" + S3_VERSION_2) == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.bucket value:" + S3_BUCKET) == S3_OBJECT_COUNT * 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.isLatest value:true") == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.isLatest value:false") == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT * 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.lastModified value:" + std::to_string(S3_OBJECT_OLD_AGE_MILLISECONDS) + "\n") == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.length value:" + std::to_string(S3_OBJECT_SIZE)) == S3_OBJECT_COUNT * 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.storeClass value:" + S3_STORAGE_CLASS_STR) == S3_OBJECT_COUNT * 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.tag") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.user.metadata") == 0);
   REQUIRE(!mock_s3_request_sender_ptr->list_version_request.KeyMarkerHasBeenSet());
   REQUIRE(!mock_s3_request_sender_ptr->list_version_request.VersionIdMarkerHasBeenSet());
 }
@@ -154,7 +154,7 @@ TEST_CASE_METHOD(ListS3TestsFixture, "Test minimum age property handling with no
   setRequiredProperties();
   plan->setProperty(s3_processor, "Minimum Object Age", "120 days");
   test_controller.runSession(plan, true);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT / 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT / 2);
 }
 
 TEST_CASE_METHOD(ListS3TestsFixture, "Test minimum age property handling with versioned objects", "[awsS3ListMinAge]") {
@@ -162,9 +162,9 @@ TEST_CASE_METHOD(ListS3TestsFixture, "Test minimum age property handling with ve
   plan->setProperty(s3_processor, "Minimum Object Age", "120 days");
   plan->setProperty(s3_processor, "Use Versions", "true");
   test_controller.runSession(plan, true);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.version value:" + S3_VERSION_1) == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.version value:" + S3_VERSION_2) == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.version value:" + S3_VERSION_1) == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.version value:" + S3_VERSION_2) == 0);
 }
 
 TEST_CASE_METHOD(ListS3TestsFixture, "Test write object tags", "[awsS3ListTags]") {
@@ -175,7 +175,7 @@ TEST_CASE_METHOD(ListS3TestsFixture, "Test write object tags", "[awsS3ListTags]"
   plan->setProperty(s3_processor, "Write Object Tags", "true");
   test_controller.runSession(plan, true);
   for (const auto& tag : S3_OBJECT_TAGS) {
-    REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.tag." + tag.first + " value:" + tag.second) == S3_OBJECT_COUNT);
+    REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.tag." + tag.first + " value:" + tag.second) == S3_OBJECT_COUNT);
   }
   REQUIRE(mock_s3_request_sender_ptr->getCredentials().GetAWSAccessKeyId() == "key");
   REQUIRE(mock_s3_request_sender_ptr->getCredentials().GetAWSSecretKey() == "secret");
@@ -193,7 +193,7 @@ TEST_CASE_METHOD(ListS3TestsFixture, "Test write user metadata", "[awsS3ListMeta
   plan->setProperty(s3_processor, "Requester Pays", "true");
   test_controller.runSession(plan, true);
   for (const auto& metadata : S3_OBJECT_USER_METADATA) {
-    REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.user.metadata." + metadata.first + " value:" + metadata.second) == S3_OBJECT_COUNT);
+    REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.user.metadata." + metadata.first + " value:" + metadata.second) == S3_OBJECT_COUNT);
   }
   REQUIRE(mock_s3_request_sender_ptr->head_object_request.GetRequestPayer() == Aws::S3::Model::RequestPayer::requester);
   REQUIRE(mock_s3_request_sender_ptr->getCredentials().GetAWSAccessKeyId() == "key");
@@ -208,18 +208,18 @@ TEST_CASE_METHOD(ListS3TestsFixture, "Test truncated listing without versioning"
   mock_s3_request_sender_ptr->setListingTruncated(true);
   test_controller.runSession(plan, true);
   for (std::size_t i = 0; i < S3_OBJECT_COUNT; ++i) {
-    REQUIRE(LogTestController::getInstance().contains("key:filename value:" + S3_KEY_PREFIX + std::to_string(i)));
-    REQUIRE(LogTestController::getInstance().contains("key:s3.etag value:" + S3_ETAG_PREFIX + std::to_string(i)));
+    REQUIRE(test_controller.getLogTestController().contains("key:filename value:" + S3_KEY_PREFIX + std::to_string(i)));
+    REQUIRE(test_controller.getLogTestController().contains("key:s3.etag value:" + S3_ETAG_PREFIX + std::to_string(i)));
   }
 
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.bucket value:" + S3_BUCKET) == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.isLatest value:true") == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.lastModified value:" + std::to_string(S3_OBJECT_OLD_AGE_MILLISECONDS) + "\n") == S3_OBJECT_COUNT / 2);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.length value:" + std::to_string(S3_OBJECT_SIZE)) == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.version") == 0);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.storeClass value:" + S3_STORAGE_CLASS_STR) == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.tag") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.bucket value:" + S3_BUCKET) == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.isLatest value:true") == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.lastModified value:" + std::to_string(S3_OBJECT_OLD_AGE_MILLISECONDS) + "\n") == S3_OBJECT_COUNT / 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.length value:" + std::to_string(S3_OBJECT_SIZE)) == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.version") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.storeClass value:" + S3_STORAGE_CLASS_STR) == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.tag") == 0);
   REQUIRE(mock_s3_request_sender_ptr->list_object_request.ContinuationTokenHasBeenSet());
   REQUIRE(mock_s3_request_sender_ptr->list_object_request.GetContinuationToken() == S3_CONTINUATION_TOKEN);
 }
@@ -231,21 +231,21 @@ TEST_CASE_METHOD(ListS3TestsFixture, "Test truncated listing with versioning", "
   test_controller.runSession(plan, true);
   for (std::size_t i = 0; i < S3_OBJECT_COUNT; ++i) {
     // 2 versions of every object
-    REQUIRE(LogTestController::getInstance().countOccurrences("key:filename value:" + S3_KEY_PREFIX + std::to_string(i)) == 2);
-    REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.etag value:" + S3_ETAG_PREFIX + std::to_string(i)) == 2);
+    REQUIRE(test_controller.getLogTestController().countOccurrences("key:filename value:" + S3_KEY_PREFIX + std::to_string(i)) == 2);
+    REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.etag value:" + S3_ETAG_PREFIX + std::to_string(i)) == 2);
   }
 
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.version value:" + S3_VERSION_1) == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.version value:" + S3_VERSION_2) == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.bucket value:" + S3_BUCKET) == S3_OBJECT_COUNT * 2);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.isLatest value:true") == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.isLatest value:false") == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT * 2);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.lastModified value:" + std::to_string(S3_OBJECT_OLD_AGE_MILLISECONDS) + "\n") == S3_OBJECT_COUNT);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.length value:" + std::to_string(S3_OBJECT_SIZE)) == S3_OBJECT_COUNT * 2);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.storeClass value:" + S3_STORAGE_CLASS_STR) == S3_OBJECT_COUNT * 2);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.tag") == 0);
-  REQUIRE(LogTestController::getInstance().countOccurrences("key:s3.user.metadata") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.version value:" + S3_VERSION_1) == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.version value:" + S3_VERSION_2) == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.bucket value:" + S3_BUCKET) == S3_OBJECT_COUNT * 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.isLatest value:true") == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.isLatest value:false") == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.lastModified value:") == S3_OBJECT_COUNT * 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.lastModified value:" + std::to_string(S3_OBJECT_OLD_AGE_MILLISECONDS) + "\n") == S3_OBJECT_COUNT);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.length value:" + std::to_string(S3_OBJECT_SIZE)) == S3_OBJECT_COUNT * 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.storeClass value:" + S3_STORAGE_CLASS_STR) == S3_OBJECT_COUNT * 2);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.tag") == 0);
+  REQUIRE(test_controller.getLogTestController().countOccurrences("key:s3.user.metadata") == 0);
   REQUIRE(mock_s3_request_sender_ptr->list_version_request.KeyMarkerHasBeenSet());
   REQUIRE(mock_s3_request_sender_ptr->list_version_request.GetKeyMarker() == S3_KEY_MARKER);
   REQUIRE(mock_s3_request_sender_ptr->list_version_request.VersionIdMarkerHasBeenSet());

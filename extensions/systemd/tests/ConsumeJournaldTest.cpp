@@ -149,7 +149,7 @@ using org::apache::nifi::minifi::extensions::systemd::ConsumeJournaldTestAccesso
 
 TEST_CASE("ConsumeJournald", "[consumejournald]") {
   TestController test_controller;
-  LogTestController::getInstance().setTrace<ConsumeJournald>();
+  test_controller.getLogTestController().setTrace<ConsumeJournald>();
   const auto plan = test_controller.createPlan();
   auto libwrapper = std::make_unique<TestLibWrapper>(TestLibWrapper{{
       {"kernel", "Linux version 5.10.12-gentoo-x86_64 (root@test-pc.test.local) (x86_64-pc-linux-gnu-gcc (Gentoo 10.2.0-r5 p6) 10.2.0, GNU ld (Gentoo 2.35.2 p1) 2.35.2) #1 SMP Sat Feb 20 03:13:45 CET 2021"},  // NOLINT

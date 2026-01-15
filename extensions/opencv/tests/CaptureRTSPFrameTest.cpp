@@ -39,8 +39,8 @@
 TEST_CASE("CaptureRTSPFrame::ValidCapture", "[!mayfail]") {
     TestController test_controller;
 
-    LogTestController::getInstance().setTrace<minifi::processors::CaptureRTSPFrame>();
-    LogTestController::getInstance().setDebug<core::ProcessSession>();
+    test_controller.getLogTestController().setTrace<minifi::processors::CaptureRTSPFrame>();
+    test_controller.getLogTestController().setDebug<core::ProcessSession>();
 
     std::shared_ptr<TestPlan> plan = test_controller.createPlan();
     auto captureRTSP = plan->addProcessor("CaptureRTSPFrame", "CaptureRTSPFrame");
@@ -56,14 +56,14 @@ TEST_CASE("CaptureRTSPFrame::ValidCapture", "[!mayfail]") {
     test_controller.runSession(plan, true);
     std::shared_ptr<core::FlowFile> record = plan->getCurrentFlowFile();
     REQUIRE(record);
-    REQUIRE(LogTestController::getInstance().contains("A frame is captured"));
+    REQUIRE(test_controller.getLogTestController().contains("A frame is captured"));
 }
 
 TEST_CASE("CaptureRTSPFrame::InvalidURI", "[opencvtest2]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setTrace<minifi::processors::CaptureRTSPFrame>();
-  LogTestController::getInstance().setDebug<core::ProcessSession>();
+  test_controller.getLogTestController().setTrace<minifi::processors::CaptureRTSPFrame>();
+  test_controller.getLogTestController().setDebug<core::ProcessSession>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   auto captureRTSP = plan->addProcessor("CaptureRTSPFrame", "CaptureRTSPFrame");
@@ -80,5 +80,5 @@ TEST_CASE("CaptureRTSPFrame::InvalidURI", "[opencvtest2]") {
           true);
 
   test_controller.runSession(plan, true);
-  REQUIRE(LogTestController::getInstance().contains("Unable to open RTSP stream"));
+  REQUIRE(test_controller.getLogTestController().contains("Unable to open RTSP stream"));
 }

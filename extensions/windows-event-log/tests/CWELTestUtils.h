@@ -48,8 +48,8 @@ class OutputFormatTestController : public TestController {
       json_format_(std::move(json_format)) {}
 
   std::string run() {
-    LogTestController::getInstance().setTrace<ConsumeWindowsEventLog>();
-    LogTestController::getInstance().setDebug<PutFile>();
+    test_controller.getLogTestController().setTrace<ConsumeWindowsEventLog>();
+    test_controller.getLogTestController().setDebug<PutFile>();
     std::shared_ptr<TestPlan> test_plan = createPlan();
 
     auto cwel_processor = test_plan->addProcessor("ConsumeWindowsEventLog", "cwel");
@@ -72,7 +72,7 @@ class OutputFormatTestController : public TestController {
     }
 
     test_plan->reset();
-    LogTestController::getInstance().clear();
+    test_controller.getLogTestController().clear();
 
 
     {
@@ -80,7 +80,7 @@ class OutputFormatTestController : public TestController {
 
       runSession(test_plan);
 
-      auto files = utils::file::list_dir_all(dir, LogTestController::getInstance().getLogger<LogTestController>(), false);
+      auto files = utils::file::list_dir_all(dir, test_controller.getLogTestController().getLogger<LogTestController>(), false);
       REQUIRE(files.size() == 1);
 
       std::ifstream file{files[0].first / files[0].second};

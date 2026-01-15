@@ -45,11 +45,11 @@ class StatefulIntegrationTest : public IntegrationBase {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().reset();
-    LogTestController::getInstance().setDebug<core::ProcessGroup>();
-    LogTestController::getInstance().setDebug<core::Processor>();
-    LogTestController::getInstance().setDebug<core::ProcessSession>();
-    LogTestController::getInstance().setDebug<StatefulIntegrationTest>();
+    test_controller.getLogTestController().reset();
+    test_controller.getLogTestController().setDebug<core::ProcessGroup>();
+    test_controller.getLogTestController().setDebug<core::Processor>();
+    test_controller.getLogTestController().setDebug<core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<StatefulIntegrationTest>();
     logger_->log_info("Running test case \"{}\"", test_case_);
   }
 
@@ -101,14 +101,14 @@ const std::unordered_map<std::string, std::string> exampleState{{"key1", "value1
 const std::unordered_map<std::string, std::string> exampleState2{{"key3", "value3"}, {"key4", "value4"}};
 
 auto standardLogChecker = [] {
-  const std::string logs = LogTestController::getInstance().getLogs();
+  const std::string logs = test_controller.getLogTestController().getLogs();
   const auto errorResult = minifi::utils::string::countOccurrences(logs, "[error]");
   const auto warningResult = minifi::utils::string::countOccurrences(logs, "[warning]");
   return errorResult.second == 0 && warningResult.second == 0;
 };
 
 auto exceptionRollbackWarnings = [] {
-  const std::string logs = LogTestController::getInstance().getLogs();
+  const std::string logs = test_controller.getLogTestController().getLogs();
   const auto errorResult = minifi::utils::string::countOccurrences(logs, "[error]");
   const auto exceptionWarningResult = minifi::utils::string::countOccurrences(logs, "[warning] Caught \"Triggering rollback\"");
   const auto rollbackWarningResult = minifi::utils::string::countOccurrences(logs, "[warning] ProcessSession rollback for statefulProcessor executed");

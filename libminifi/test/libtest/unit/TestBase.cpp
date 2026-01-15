@@ -709,10 +709,8 @@ std::string TestPlan::getContent(const minifi::core::FlowFile& file) const {
   return utils::span_to<std::string>(minifi::utils::as_span<const char>(output_stream->getBuffer()));
 }
 
-TestController::TestController()
-    : log(LogTestController::getInstance()) {
+TestController::TestController() {
   minifi::setDefaultDirectory("./");
-  log.reset();
   minifi::utils::IdGenerator::getIdGenerator()->initialize(minifi::Properties::create());
   flow_version_ = std::make_shared<minifi::state::response::FlowVersion>("test", "test", "test");
 }

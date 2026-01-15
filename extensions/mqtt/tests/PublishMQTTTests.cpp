@@ -55,7 +55,7 @@ struct PublishMQTTTestFixture {
       : test_controller_(utils::make_processor<TestPublishMQTTProcessor>("TestPublishMQTTProcessor")),
         publish_mqtt_processor_(test_controller_.getProcessor()) {
     REQUIRE(publish_mqtt_processor_ != nullptr);
-    LogTestController::getInstance().setDebug<TestPublishMQTTProcessor>();
+    test_controller.getLogTestController().setDebug<TestPublishMQTTProcessor>();
   }
 
   PublishMQTTTestFixture(PublishMQTTTestFixture&&) = delete;
@@ -64,7 +64,7 @@ struct PublishMQTTTestFixture {
   PublishMQTTTestFixture& operator=(const PublishMQTTTestFixture&) = delete;
 
   ~PublishMQTTTestFixture() {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
   }
 
   SingleProcessorTestController test_controller_;
@@ -88,7 +88,7 @@ TEST_CASE_METHOD(PublishMQTTTestFixture, "PublishMQTTTest_EmptyClientID_V_3", "[
   REQUIRE(test_controller_.plan->setProperty(publish_mqtt_processor_, minifi::processors::AbstractMQTTProcessor::BrokerURI.name, "127.0.0.1:1883"));
   REQUIRE(test_controller_.plan->setProperty(publish_mqtt_processor_, minifi::processors::PublishMQTT::MessageExpiryInterval.name, "60 sec"));
   REQUIRE_NOTHROW(test_controller_.plan->scheduleProcessor(publish_mqtt_processor_));
-  REQUIRE(LogTestController::getInstance().contains("[warning] MQTT 3.x specification does not support Message Expiry Intervals. Property is not used.", 1s));
+  REQUIRE(test_controller.getLogTestController().contains("[warning] MQTT 3.x specification does not support Message Expiry Intervals. Property is not used.", 1s));
 }
 
 TEST_CASE_METHOD(PublishMQTTTestFixture, "PublishMQTTTest_ContentType_V_3", "[publishMQTTTest]") {
@@ -96,7 +96,7 @@ TEST_CASE_METHOD(PublishMQTTTestFixture, "PublishMQTTTest_ContentType_V_3", "[pu
   REQUIRE(test_controller_.plan->setProperty(publish_mqtt_processor_, minifi::processors::AbstractMQTTProcessor::BrokerURI.name, "127.0.0.1:1883"));
   REQUIRE(test_controller_.plan->setProperty(publish_mqtt_processor_, minifi::processors::PublishMQTT::ContentType.name, "text/plain"));
   REQUIRE_NOTHROW(test_controller_.plan->scheduleProcessor(publish_mqtt_processor_));
-  REQUIRE(LogTestController::getInstance().contains("[warning] MQTT 3.x specification does not support Content Types. Property is not used.", 1s));
+  REQUIRE(test_controller.getLogTestController().contains("[warning] MQTT 3.x specification does not support Content Types. Property is not used.", 1s));
 }
 
 TEST_CASE_METHOD(PublishMQTTTestFixture, "PublishMQTT can publish the number of in-flight messages as a metric") {

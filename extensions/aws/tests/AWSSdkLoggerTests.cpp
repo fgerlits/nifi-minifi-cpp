@@ -27,8 +27,8 @@ using AwsLogLevel = Aws::Utils::Logging::LogLevel;
 
 TEST_CASE("We can log to the MiNiFi log via the AWS SDK logger") {
   AWSSdkLogger sdk_logger;
-  LogTestController::getInstance().setInfo<AWSSdkLogger>();
-  LogTestController::getInstance().clear();
+  test_controller.getLogTestController().setInfo<AWSSdkLogger>();
+  test_controller.getLogTestController().clear();
 
   SECTION("using the Log() function") {
     static constexpr const char* format_string = "On the %s day of Christmas my true love gave to me %d %s";
@@ -58,7 +58,7 @@ TEST_CASE("We can log to the MiNiFi log via the AWS SDK logger") {
     sdk_logger.LogStream(AwsLogLevel::Error, "test", Aws::OStringStream{fmt::format(format_string, "third", 4, "German shepherds")});
   }
 
-  CHECK_FALSE(LogTestController::getInstance().contains("partridge in a pear tree"));
-  CHECK(LogTestController::getInstance().contains("[org::apache::nifi::minifi::aws::utils::AWSSdkLogger] [info] [test] On the second day of Christmas my true love gave to me 2 turtle doves"));
-  CHECK(LogTestController::getInstance().contains("[org::apache::nifi::minifi::aws::utils::AWSSdkLogger] [error] [test] On the third day of Christmas my true love gave to me 4 German shepherds"));
+  CHECK_FALSE(test_controller.getLogTestController().contains("partridge in a pear tree"));
+  CHECK(test_controller.getLogTestController().contains("[org::apache::nifi::minifi::aws::utils::AWSSdkLogger] [info] [test] On the second day of Christmas my true love gave to me 2 turtle doves"));
+  CHECK(test_controller.getLogTestController().contains("[org::apache::nifi::minifi::aws::utils::AWSSdkLogger] [error] [test] On the third day of Christmas my true love gave to me 4 German shepherds"));
 }

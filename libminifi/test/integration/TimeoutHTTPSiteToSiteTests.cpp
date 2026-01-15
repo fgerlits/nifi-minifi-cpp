@@ -45,14 +45,14 @@ class SiteToSiteTestHarness : public HTTPIntegrationBase {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setTrace<minifi::RemoteProcessGroupPort>();
-    LogTestController::getInstance().setTrace<minifi::sitetosite::HttpSiteToSiteClient>();
-    LogTestController::getInstance().setTrace<minifi::sitetosite::SiteToSiteClient>();
-    LogTestController::getInstance().setTrace<minifi::http::HTTPClient>();
-    LogTestController::getInstance().setTrace<minifi::controllers::SSLContextServiceInterface>();
-    LogTestController::getInstance().setInfo<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<core::ConfigurableComponent>();
-    LogTestController::getInstance().setTrace<minifi::http::HttpStreamingCallback>();
+    test_controller.getLogTestController().setTrace<minifi::RemoteProcessGroupPort>();
+    test_controller.getLogTestController().setTrace<minifi::sitetosite::HttpSiteToSiteClient>();
+    test_controller.getLogTestController().setTrace<minifi::sitetosite::SiteToSiteClient>();
+    test_controller.getLogTestController().setTrace<minifi::http::HTTPClient>();
+    test_controller.getLogTestController().setTrace<minifi::controllers::SSLContextServiceInterface>();
+    test_controller.getLogTestController().setInfo<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<core::ConfigurableComponent>();
+    test_controller.getLogTestController().setTrace<minifi::http::HttpStreamingCallback>();
 
     std::fstream file;
     file.open(dir / "tstFile.ext", std::ios::out);
@@ -137,9 +137,9 @@ void run_timeout_variance(const std::filesystem::path& test_file_location, bool 
 
   harness.run();
 
-  REQUIRE(LogTestController::getInstance().contains("limit (200ms) reached, terminating connection"));
+  REQUIRE(test_controller.getLogTestController().contains("limit (200ms) reached, terminating connection"));
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("Test timeout handling in HTTP site to site", "[s2s]") {

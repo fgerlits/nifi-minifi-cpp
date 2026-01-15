@@ -132,7 +132,7 @@ TEST_CASE_METHOD(DeleteAzureDataLakeStorageTestsFixture, "Delete file fails", "[
   CHECK(passed_params.file_system_name == FILESYSTEM_NAME);
   CHECK(passed_params.directory_name == DIRECTORY_NAME);
   CHECK(passed_params.filename == GETFILE_FILE_NAME);
-  CHECK_FALSE(LogTestController::getInstance().contains("key:filename value:", 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:filename value:", 0s, 0ms));
   auto failed_flowfiles = getFailedFlowFileContents();
   REQUIRE(failed_flowfiles.size() == 1);
   REQUIRE(failed_flowfiles[0] == TEST_DATA);
@@ -147,7 +147,7 @@ TEST_CASE_METHOD(DeleteAzureDataLakeStorageTestsFixture, "Delete result is false
   CHECK(passed_params.file_system_name == FILESYSTEM_NAME);
   CHECK(passed_params.directory_name == DIRECTORY_NAME);
   CHECK(passed_params.filename == GETFILE_FILE_NAME);
-  CHECK_FALSE(LogTestController::getInstance().contains("key:filename value:", 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:filename value:", 0s, 0ms));
   auto failed_flowfiles = getFailedFlowFileContents();
   REQUIRE(failed_flowfiles.size() == 1);
   REQUIRE(failed_flowfiles[0] == TEST_DATA);

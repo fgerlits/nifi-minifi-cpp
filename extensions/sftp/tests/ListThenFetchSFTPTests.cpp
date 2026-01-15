@@ -51,20 +51,20 @@ using namespace std::literals::chrono_literals;
 class ListThenFetchSFTPTestsFixture {
  public:
   ListThenFetchSFTPTestsFixture() {
-    LogTestController::getInstance().reset();
-    LogTestController::getInstance().setTrace<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<minifi::SchedulingAgent>();
-    LogTestController::getInstance().setDebug<minifi::core::ProcessGroup>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setDebug<minifi::processors::GenerateFlowFile>();
-    LogTestController::getInstance().setTrace<minifi::utils::SFTPClient>();
-    LogTestController::getInstance().setTrace<minifi::processors::ListSFTP>();
-    LogTestController::getInstance().setTrace<minifi::processors::FetchSFTP>();
-    LogTestController::getInstance().setTrace<minifi::processors::PutFile>();
-    LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setDebug<SFTPTestServer>();
+    test_controller.getLogTestController().reset();
+    test_controller.getLogTestController().setTrace<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<minifi::SchedulingAgent>();
+    test_controller.getLogTestController().setDebug<minifi::core::ProcessGroup>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<minifi::processors::GenerateFlowFile>();
+    test_controller.getLogTestController().setTrace<minifi::utils::SFTPClient>();
+    test_controller.getLogTestController().setTrace<minifi::processors::ListSFTP>();
+    test_controller.getLogTestController().setTrace<minifi::processors::FetchSFTP>();
+    test_controller.getLogTestController().setTrace<minifi::processors::PutFile>();
+    test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setDebug<SFTPTestServer>();
 
     REQUIRE_FALSE(src_dir.empty());
     REQUIRE_FALSE(dst_dir.empty());

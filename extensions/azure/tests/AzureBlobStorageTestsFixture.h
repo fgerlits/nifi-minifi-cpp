@@ -48,14 +48,14 @@ template<typename ProcessorType>
 class AzureBlobStorageTestsFixture {
  public:
   AzureBlobStorageTestsFixture() {
-    LogTestController::getInstance().setDebug<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setTrace<minifi::processors::GetFile>();
-    LogTestController::getInstance().setTrace<minifi::processors::PutFile>();
-    LogTestController::getInstance().setDebug<minifi::processors::UpdateAttribute>();
-    LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setTrace<ProcessorType>();
+    test_controller.getLogTestController().setDebug<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setTrace<minifi::processors::GetFile>();
+    test_controller.getLogTestController().setTrace<minifi::processors::PutFile>();
+    test_controller.getLogTestController().setDebug<minifi::processors::UpdateAttribute>();
+    test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setTrace<ProcessorType>();
 
     // Build MiNiFi processing graph
     plan_ = test_controller_.createPlan();
@@ -118,7 +118,7 @@ class AzureBlobStorageTestsFixture {
   }
 
   virtual ~AzureBlobStorageTestsFixture() {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
   }
 
  protected:

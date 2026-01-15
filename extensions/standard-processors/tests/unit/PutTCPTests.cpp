@@ -100,9 +100,9 @@ class PutTCPTestFixture {
   PutTCPTestFixture() :
       controller_(minifi::test::utils::make_processor<PutTCP>("PutTCP")),
       put_tcp_(controller_.getProcessor()) {
-    LogTestController::getInstance().setTrace<PutTCP>();
-    LogTestController::getInstance().setInfo<core::ProcessSession>();
-    LogTestController::getInstance().setTrace<utils::net::Server>();
+    test_controller.getLogTestController().setTrace<PutTCP>();
+    test_controller.getLogTestController().setInfo<core::ProcessSession>();
+    test_controller.getLogTestController().setTrace<utils::net::Server>();
     REQUIRE(put_tcp_->setProperty(PutTCP::Hostname.name, "${literal('localhost')}"));
     REQUIRE(put_tcp_->setProperty(PutTCP::Timeout.name, "200 ms"));
     REQUIRE(put_tcp_->setProperty(PutTCP::OutgoingMessageDelimiter.name, "\n"));
@@ -315,7 +315,7 @@ TEST_CASE("Server closes in-use socket", "[PutTCP]") {
 
   test_fixture.tryDequeueReceivedMessage();
 
-  CHECK(LogTestController::getInstance().matchesRegex("warning.*with reused connection, retrying"));
+  CHECK(test_controller.getLogTestController().matchesRegex("warning.*with reused connection, retrying"));
   CHECK(2 == test_fixture.getNumberOfActiveSessions());
 }
 
@@ -399,7 +399,7 @@ TEST_CASE("PutTCP test invalid server cert", "[PutTCP]") {
 
   trigger_expect_failure(test_fixture, "message for invalid-cert server");
 
-  CHECK(LogTestController::getInstance().matchesRegex("Handshake with .* failed", 0ms));
+  CHECK(test_controller.getLogTestController().matchesRegex("Handshake with .* failed", 0ms));
 }
 
 TEST_CASE("PutTCP test missing client cert", "[PutTCP]") {

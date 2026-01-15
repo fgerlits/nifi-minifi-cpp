@@ -160,7 +160,7 @@ TEST_CASE_METHOD(PutAzureDataLakeStorageTestsFixture, "Transfer to success on 'i
   REQUIRE(getFailedFlowFileContents().empty());
   using org::apache::nifi::minifi::test::utils::verifyLogLinePresenceInPollTime;
   CHECK(verifyLogLinePresenceInPollTime(1s, "key:filename value:" + GETFILE_FILE_NAME));
-  CHECK_FALSE(LogTestController::getInstance().contains("key:azure", 0s, 0ms));
+  CHECK_FALSE(test_controller.getLogTestController().contains("key:azure", 0s, 0ms));
 }
 
 TEST_CASE_METHOD(PutAzureDataLakeStorageTestsFixture, "Replace old file on 'replace' resolution strategy if file exists", "[azureDataLakeStorageUpload]") {

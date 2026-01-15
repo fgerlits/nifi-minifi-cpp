@@ -62,10 +62,10 @@ class PushGrafanaLokiGrpcTestFixture {
       : mock_loki_("10991"),
         test_controller_(minifi::test::utils::make_processor<PushGrafanaLokiGrpc>("PushGrafanaLokiGrpc")),
         push_grafana_loki_grpc_(test_controller_.getProcessor()) {
-    LogTestController::getInstance().setDebug<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setTrace<PushGrafanaLokiGrpc>();
+    test_controller.getLogTestController().setDebug<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setTrace<PushGrafanaLokiGrpc>();
     CHECK(test_controller_.plan->setProperty(push_grafana_loki_grpc_, PushGrafanaLokiGrpc::Url, "localhost:10991"));
     CHECK(test_controller_.plan->setProperty(push_grafana_loki_grpc_, PushGrafanaLokiGrpc::StreamLabels, "job=minifi,directory=/opt/minifi/logs/"));
   }

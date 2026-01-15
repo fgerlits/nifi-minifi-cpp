@@ -219,7 +219,7 @@ Provenance Reporting:
       )";
 
     REQUIRE_THROWS_WITH(yamlConfig.getRootFromPayload(CONFIG_YAML_EMPTY_RETRY_ATTRIBUTE), "Unable to parse configuration file for component named 'RetryFlowFile' because ValidationFailed");
-    REQUIRE(LogTestController::getInstance().contains("Invalid value was set for property 'Retry Attribute' creating component 'RetryFlowFile'"));
+    REQUIRE(test_controller.getLogTestController().contains("Invalid value was set for property 'Retry Attribute' creating component 'RetryFlowFile'"));
   }
 }
 
@@ -517,7 +517,7 @@ Processors:
   REQUIRE(uuid);
   REQUIRE(!rootFlowConfig->findProcessorByName("GenerateFlowFile")->getUUIDStr().empty());
 
-  REQUIRE(LogTestController::getInstance().contains("[warning] Unable to set the dynamic property Dynamic Property"));
+  REQUIRE(test_controller.getLogTestController().contains("[warning] Unable to set the dynamic property Dynamic Property"));
 }
 
 TEST_CASE("Test Required Property", "[YamlConfigurationRequiredProperty]") {

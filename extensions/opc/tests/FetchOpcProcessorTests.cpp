@@ -184,7 +184,7 @@ TEST_CASE("Test no fetch result using lazy mode when no timestamps are changed",
   OpcUaTestServer server(4841);
   server.start();
   SingleProcessorTestController controller{minifi::test::utils::make_processor<processors::FetchOPCProcessor>("FetchOPCProcessor")};
-  LogTestController::getInstance().setDebug<processors::FetchOPCProcessor>();
+  test_controller.getLogTestController().setDebug<processors::FetchOPCProcessor>();
   auto fetch_opc_processor = controller.getProcessor();
   REQUIRE(fetch_opc_processor->setProperty(processors::FetchOPCProcessor::OPCServerEndPoint.name, "opc.tcp://127.0.0.1:4841/"));
   REQUIRE(fetch_opc_processor->setProperty(processors::FetchOPCProcessor::NodeIDType.name, "Path"));
@@ -199,14 +199,14 @@ TEST_CASE("Test no fetch result using lazy mode when no timestamps are changed",
   results = controller.trigger();
   REQUIRE(results.at(processors::FetchOPCProcessor::Failure).empty());
   REQUIRE(results.at(processors::FetchOPCProcessor::Success).empty());
-  REQUIRE(LogTestController::getInstance().contains("Node Simulator/Default/Device1/INT3 has no new source timestamp, skipping"));
+  REQUIRE(test_controller.getLogTestController().contains("Node Simulator/Default/Device1/INT3 has no new source timestamp, skipping"));
 }
 
 TEST_CASE("Test fetch for nodes with changed timestamps with lazy mode", "[fetchopcprocessor]") {
   OpcUaTestServer server(4841);
   server.start();
   SingleProcessorTestController controller{minifi::test::utils::make_processor<processors::FetchOPCProcessor>("FetchOPCProcessor")};
-  LogTestController::getInstance().setDebug<processors::FetchOPCProcessor>();
+  test_controller.getLogTestController().setDebug<processors::FetchOPCProcessor>();
   auto fetch_opc_processor = controller.getProcessor();
   REQUIRE(fetch_opc_processor->setProperty(processors::FetchOPCProcessor::OPCServerEndPoint.name, "opc.tcp://127.0.0.1:4841/"));
   REQUIRE(fetch_opc_processor->setProperty(processors::FetchOPCProcessor::NodeIDType.name, "Path"));
@@ -230,7 +230,7 @@ TEST_CASE("Test no fetch result using lazy new value mode when no values are cha
   OpcUaTestServer server(4841);
   server.start();
   SingleProcessorTestController controller{minifi::test::utils::make_processor<processors::FetchOPCProcessor>("FetchOPCProcessor")};
-  LogTestController::getInstance().setDebug<processors::FetchOPCProcessor>();
+  test_controller.getLogTestController().setDebug<processors::FetchOPCProcessor>();
   auto fetch_opc_processor = controller.getProcessor();
   REQUIRE(fetch_opc_processor->setProperty(processors::FetchOPCProcessor::OPCServerEndPoint.name, "opc.tcp://127.0.0.1:4841/"));
   REQUIRE(fetch_opc_processor->setProperty(processors::FetchOPCProcessor::NodeIDType.name, "Path"));
@@ -246,14 +246,14 @@ TEST_CASE("Test no fetch result using lazy new value mode when no values are cha
   results = controller.trigger();
   REQUIRE(results.at(processors::FetchOPCProcessor::Failure).empty());
   REQUIRE(results.at(processors::FetchOPCProcessor::Success).empty());
-  REQUIRE(LogTestController::getInstance().contains("Node Simulator/Default/Device1/INT3 has no new value, skipping"));
+  REQUIRE(test_controller.getLogTestController().contains("Node Simulator/Default/Device1/INT3 has no new value, skipping"));
 }
 
 TEST_CASE("Test fetching new values using lazy new value mode", "[fetchopcprocessor]") {
   OpcUaTestServer server(4841);
   server.start();
   SingleProcessorTestController controller{minifi::test::utils::make_processor<processors::FetchOPCProcessor>("FetchOPCProcessor")};
-  LogTestController::getInstance().setDebug<processors::FetchOPCProcessor>();
+  test_controller.getLogTestController().setDebug<processors::FetchOPCProcessor>();
   auto fetch_opc_processor = controller.getProcessor();
   REQUIRE(fetch_opc_processor->setProperty(processors::FetchOPCProcessor::OPCServerEndPoint.name, "opc.tcp://127.0.0.1:4841/"));
   REQUIRE(fetch_opc_processor->setProperty(processors::FetchOPCProcessor::NodeIDType.name, "Path"));

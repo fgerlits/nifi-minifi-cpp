@@ -61,8 +61,8 @@ FetchFileTestFixture::FetchFileTestFixture()
     permission_denied_file_name_("permission_denied.txt"),
     input_file_name_("test.txt"),
     file_content_("The quick brown fox jumps over the lazy dog\n")  {
-  LogTestController::getInstance().setTrace<TestPlan>();
-  LogTestController::getInstance().setTrace<minifi::processors::FetchFile>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<minifi::processors::FetchFile>();
 
   attributes_ = {{"absolute.path", input_dir_.string()}, {"filename", input_file_name_.string()}};
 

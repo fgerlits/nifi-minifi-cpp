@@ -38,7 +38,7 @@ void check_for_attributes(core::FlowFile& flow_file, uint16_t port) {
 TEST_CASE("ListenUDP test multiple messages", "[ListenUDP][NetworkListenerProcessor]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<ListenUDP>("ListenUDP")};
   const auto listen_udp = controller.getProcessor<ListenUDP>();
-  LogTestController::getInstance().setTrace<ListenUDP>();
+  test_controller.getLogTestController().setTrace<ListenUDP>();
 
   REQUIRE(listen_udp->setProperty(ListenUDP::MaxBatchSize.name, "2"));
 
@@ -70,7 +70,7 @@ TEST_CASE("ListenUDP test multiple messages", "[ListenUDP][NetworkListenerProces
 TEST_CASE("ListenUDP can be rescheduled", "[ListenUDP][NetworkListenerProcessor]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<ListenUDP>("ListenUDP")};
   const auto listen_udp = controller.getProcessor();
-  LogTestController::getInstance().setTrace<ListenUDP>();
+  test_controller.getLogTestController().setTrace<ListenUDP>();
   REQUIRE(listen_udp->setProperty(ListenUDP::Port.name, "0"));
   REQUIRE(listen_udp->setProperty(ListenUDP::MaxBatchSize.name, "100"));
 
@@ -97,7 +97,7 @@ TEST_CASE("ListenUDP max queue and max batch size test", "[ListenUDP][NetworkLis
     endpoint = asio::ip::udp::endpoint(asio::ip::address_v4::loopback(), port);
   }
 
-  LogTestController::getInstance().setWarn<ListenUDP>();
+  test_controller.getLogTestController().setWarn<ListenUDP>();
 
   controller.plan->scheduleProcessor(listen_udp);
   for (auto i = 0; i < 100; ++i) {

@@ -55,15 +55,15 @@ TEST_CASE("Test Creation of ApplyTemplate", "[ApplyTemplateCreate]") {
 
 TEST_CASE("Test usage of ApplyTemplate", "[ApplyTemplateTest]") {
   TestController test_controller;
-  LogTestController::getInstance().setTrace<ApplyTemplate>();
-  LogTestController::getInstance().setTrace<PutFile>();
-  LogTestController::getInstance().setTrace<GetFile>();
-  LogTestController::getInstance().setTrace<ExtractText>();
-  LogTestController::getInstance().setTrace<core::ProcessSession>();
-  LogTestController::getInstance().setTrace<core::repository::VolatileContentRepository>();
-  LogTestController::getInstance().setTrace<Connection>();
-  LogTestController::getInstance().setTrace<core::Connectable>();
-  LogTestController::getInstance().setTrace<core::FlowFile>();
+  test_controller.getLogTestController().setTrace<ApplyTemplate>();
+  test_controller.getLogTestController().setTrace<PutFile>();
+  test_controller.getLogTestController().setTrace<GetFile>();
+  test_controller.getLogTestController().setTrace<ExtractText>();
+  test_controller.getLogTestController().setTrace<core::ProcessSession>();
+  test_controller.getLogTestController().setTrace<core::repository::VolatileContentRepository>();
+  test_controller.getLogTestController().setTrace<Connection>();
+  test_controller.getLogTestController().setTrace<core::Connectable>();
+  test_controller.getLogTestController().setTrace<core::FlowFile>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();

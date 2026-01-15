@@ -29,7 +29,7 @@ class EvaluateJsonPathTestFixture {
       controller_(utils::make_processor<processors::EvaluateJsonPath>("EvaluateJsonPath")),
       evaluate_json_path_processor_(controller_.getProcessor()) {
     REQUIRE(evaluate_json_path_processor_);
-    LogTestController::getInstance().setTrace<processors::EvaluateJsonPath>();
+    test_controller.getLogTestController().setTrace<processors::EvaluateJsonPath>();
   }
 
  protected:

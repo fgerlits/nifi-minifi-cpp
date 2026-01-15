@@ -251,7 +251,7 @@ void check_parsed_attributes(const core::FlowFile& flow_file, const ValidRFC3164
 TEST_CASE("ListenSyslog without parsing test", "[ListenSyslog]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<ListenSyslog>("ListenSyslog")};
   const auto listen_syslog = controller.getProcessor<ListenSyslog>();
-  LogTestController::getInstance().setTrace<ListenSyslog>();
+  test_controller.getLogTestController().setTrace<ListenSyslog>();
   REQUIRE(listen_syslog->setProperty(ListenSyslog::MaxBatchSize.name, "2"));
   REQUIRE(listen_syslog->setProperty(ListenSyslog::ParseMessages.name, "false"));
   std::string protocol;
@@ -307,7 +307,7 @@ TEST_CASE("ListenSyslog without parsing test", "[ListenSyslog]") {
 TEST_CASE("ListenSyslog with parsing test", "[ListenSyslog][NetworkListenerProcessor]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<ListenSyslog>("ListenSyslog")};
   const auto listen_syslog = controller.getProcessor<ListenSyslog>();
-  LogTestController::getInstance().setTrace<ListenSyslog>();
+  test_controller.getLogTestController().setTrace<ListenSyslog>();
   REQUIRE(listen_syslog->setProperty(ListenSyslog::MaxBatchSize.name, "100"));
   REQUIRE(listen_syslog->setProperty(ListenSyslog::ParseMessages.name, "true"));
 
@@ -412,7 +412,7 @@ TEST_CASE("ListenSyslog with parsing test", "[ListenSyslog][NetworkListenerProce
 TEST_CASE("ListenSyslog can be rescheduled", "[ListenSyslog][NetworkListenerProcessor]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<ListenSyslog>("ListenSyslog")};
   const auto listen_syslog = controller.getProcessor<ListenSyslog>();
-  LogTestController::getInstance().setTrace<ListenSyslog>();
+  test_controller.getLogTestController().setTrace<ListenSyslog>();
   REQUIRE(listen_syslog->setProperty(ListenSyslog::Port.name, "0"));
   REQUIRE(listen_syslog->setProperty(ListenSyslog::MaxBatchSize.name, "100"));
   REQUIRE(listen_syslog->setProperty(ListenSyslog::ParseMessages.name, "true"));
@@ -438,7 +438,7 @@ TEST_CASE("ListenSyslog max queue and max batch size test", "[ListenSyslog][Netw
   REQUIRE(listen_syslog->setProperty(ListenSyslog::ParseMessages.name, "false"));
   REQUIRE(listen_syslog->setProperty(ListenSyslog::MaxQueueSize.name, "50"));
 
-  LogTestController::getInstance().setWarn<ListenSyslog>();
+  test_controller.getLogTestController().setWarn<ListenSyslog>();
 
   uint16_t port = 0;
 
@@ -500,7 +500,7 @@ TEST_CASE("Test ListenSyslog via TCP with SSL connection", "[ListenSyslog][Netwo
   REQUIRE(controller.plan->setProperty(ssl_context_service, controllers::SSLContextService::PrivateKey, (executable_dir / "resources" / "localhost.key").string()));
   ssl_context_service->enable();
 
-  LogTestController::getInstance().setTrace<ListenSyslog>();
+  test_controller.getLogTestController().setTrace<ListenSyslog>();
   REQUIRE(listen_syslog->setProperty(ListenSyslog::MaxBatchSize.name, "2"));
   REQUIRE(listen_syslog->setProperty(ListenSyslog::ParseMessages.name, "false"));
   REQUIRE(listen_syslog->setProperty(ListenSyslog::ProtocolProperty.name, "TCP"));

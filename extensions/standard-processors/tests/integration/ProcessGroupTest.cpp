@@ -37,9 +37,9 @@ class ProcessGroupTestHarness : public IntegrationBase {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setInfo<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setTrace<minifi::processors::GenerateFlowFile>();
-    LogTestController::getInstance().setTrace<minifi::processors::UpdateAttribute>();
+    test_controller.getLogTestController().setInfo<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setTrace<minifi::processors::GenerateFlowFile>();
+    test_controller.getLogTestController().setTrace<minifi::processors::UpdateAttribute>();
   }
 
   void runAssertions() override {

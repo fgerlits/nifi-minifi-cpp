@@ -58,19 +58,19 @@ using namespace std::literals::chrono_literals;
 class PutSFTPTestsFixture {
  public:
   PutSFTPTestsFixture() {
-    LogTestController::getInstance().reset();
-    LogTestController::getInstance().setTrace<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<minifi::SchedulingAgent>();
-    LogTestController::getInstance().setDebug<minifi::core::ProcessGroup>();
-    LogTestController::getInstance().setDebug<minifi::core::Processor>();
-    LogTestController::getInstance().setTrace<minifi::core::ProcessSession>();
-    LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
-    LogTestController::getInstance().setTrace<minifi::utils::SFTPClient>();
-    LogTestController::getInstance().setTrace<minifi::processors::PutSFTP>();
-    LogTestController::getInstance().setTrace<minifi::processors::ExtractText>();
-    LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setDebug<SFTPTestServer>();
+    test_controller.getLogTestController().reset();
+    test_controller.getLogTestController().setTrace<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<minifi::SchedulingAgent>();
+    test_controller.getLogTestController().setDebug<minifi::core::ProcessGroup>();
+    test_controller.getLogTestController().setDebug<minifi::core::Processor>();
+    test_controller.getLogTestController().setTrace<minifi::core::ProcessSession>();
+    test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
+    test_controller.getLogTestController().setTrace<minifi::utils::SFTPClient>();
+    test_controller.getLogTestController().setTrace<minifi::processors::PutSFTP>();
+    test_controller.getLogTestController().setTrace<minifi::processors::ExtractText>();
+    test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setDebug<SFTPTestServer>();
 
     REQUIRE_FALSE(src_dir.empty());
     REQUIRE_FALSE(dst_dir.empty());
@@ -229,8 +229,8 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP bad password", "[PutSFTP][authent
     REQUIRE(0 == std::string(e.what()).compare(0, expected.size(), expected));
   }
 
-  REQUIRE(LogTestController::getInstance().contains("Failed to authenticate with password, error: Authentication failed (username/password)"));
-  REQUIRE(LogTestController::getInstance().contains("Could not authenticate with any available method"));
+  REQUIRE(test_controller.getLogTestController().contains("Failed to authenticate with password, error: Authentication failed (username/password)"));
+  REQUIRE(test_controller.getLogTestController().contains("Could not authenticate with any available method"));
 }
 
 TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP public key authentication success", "[PutSFTP][authentication]") {
@@ -241,7 +241,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP public key authentication success
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Successfully authenticated with publickey"));
+  REQUIRE(test_controller.getLogTestController().contains("Successfully authenticated with publickey"));
   testFile("nifi_test/tstFile.ext", "tempFile");
 }
 
@@ -258,8 +258,8 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP public key authentication bad pas
     const std::string expected = minifi::Exception(minifi::PROCESS_SESSION_EXCEPTION, "Can not find the transfer relationship for the updated flow").what();
     REQUIRE(0 == std::string(e.what()).compare(0, expected.size(), expected));
   }
-  REQUIRE(LogTestController::getInstance().contains(PUBLIC_KEY_AUTH_ERROR_MESSAGE));
-  REQUIRE(LogTestController::getInstance().contains("Could not authenticate with any available method"));
+  REQUIRE(test_controller.getLogTestController().contains(PUBLIC_KEY_AUTH_ERROR_MESSAGE));
+  REQUIRE(test_controller.getLogTestController().contains("Could not authenticate with any available method"));
 }
 
 TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP public key authentication bad passphrase fallback to password", "[PutSFTP][authentication]") {
@@ -270,8 +270,8 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP public key authentication bad pas
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains(PUBLIC_KEY_AUTH_ERROR_MESSAGE));
-  REQUIRE(LogTestController::getInstance().contains("Successfully authenticated with password"));
+  REQUIRE(test_controller.getLogTestController().contains(PUBLIC_KEY_AUTH_ERROR_MESSAGE));
+  REQUIRE(test_controller.getLogTestController().contains("Successfully authenticated with password"));
   testFile("nifi_test/tstFile.ext", "tempFile");
 }
 
@@ -283,7 +283,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP host key checking success", "[Put
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Host key verification succeeded for localhost"));
+  REQUIRE(test_controller.getLogTestController().contains("Host key verification succeeded for localhost"));
   testFile("nifi_test/tstFile.ext", "tempFile");
 }
 
@@ -302,7 +302,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP host key checking missing strict"
     REQUIRE(0 == std::string(e.what()).compare(0, expected.size(), expected));
   }
 
-  REQUIRE(LogTestController::getInstance().contains("Host 127.0.0.1 not found in the host key file"));
+  REQUIRE(test_controller.getLogTestController().contains("Host 127.0.0.1 not found in the host key file"));
 }
 
 TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP host key checking missing non-strict", "[PutSFTP][hostkey]") {
@@ -315,7 +315,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP host key checking missing non-str
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Host 127.0.0.1 not found in the host key file"));
+  REQUIRE(test_controller.getLogTestController().contains("Host 127.0.0.1 not found in the host key file"));
   testFile("nifi_test/tstFile.ext", "tempFile");
 }
 
@@ -332,7 +332,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP host key checking mismatch strict
     REQUIRE(0 == std::string(e.what()).compare(0, expected.size(), expected));
   }
 
-  REQUIRE(LogTestController::getInstance().contains("Host key mismatch for localhost, expected: "
+  REQUIRE(test_controller.getLogTestController().contains("Host key mismatch for localhost, expected: "
                                                     "AAAAB3NzaC1yc2EAAAADAQABAAABAQCueV6fHbTECMPps4nXJ9jiVcxArTKXYip+"
                                                     "SEIBwkvmQiEDj4/zldU4KUn4QRwqbFmR9JO3s3SkPVzvP9bKh2Xk3nICB73iMs4v"
                                                     "wO2nZKpkBFtNz6+w0LsqDzQe9piW0ukoXw2Ce41yQK+9xtugPVHbbchP0esDanDf"
@@ -357,7 +357,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution rename", "[Pu
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship success"));
   testFile("nifi_test/1.tstFile1.ext", "content 1");
   testFile("nifi_test/tstFile1.ext", "content 2");
 }
@@ -371,7 +371,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution reject", "[Pu
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship reject"));
+  REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship reject"));
   testFile("nifi_test/tstFile1.ext", "content 2");
 }
 
@@ -384,7 +384,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution fail", "[PutS
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
+  REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship failure"));
   testFile("nifi_test/tstFile1.ext", "content 2");
 }
 
@@ -397,8 +397,8 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution ignore", "[Pu
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Routing tstFile1.ext to SUCCESS despite a file with the same name already existing"));
-  REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("Routing tstFile1.ext to SUCCESS despite a file with the same name already existing"));
+  REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship success"));
   testFile("nifi_test/tstFile1.ext", "content 2");
 }
 
@@ -411,7 +411,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution replace", "[P
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship success"));
   testFile("nifi_test/tstFile1.ext", "content 1");
 }
 
@@ -424,7 +424,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution none", "[PutS
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
+  REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship failure"));
   testFile("nifi_test/tstFile1.ext", "content 2");
 }
 
@@ -457,11 +457,11 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP conflict resolution with director
   test_controller.runSession(plan, true);
 
   if (should_predetect_failure) {
-    REQUIRE(LogTestController::getInstance().contains("Rejecting tstFile1.ext because a directory with the same name already exists"));
-    REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship reject"));
+    REQUIRE(test_controller.getLogTestController().contains("Rejecting tstFile1.ext because a directory with the same name already exists"));
+    REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship reject"));
   } else {
-    REQUIRE(LogTestController::getInstance().contains("Failed to rename remote file \"nifi_test/.tstFile1.ext\" to \"nifi_test/tstFile1.ext\", error: LIBSSH2_FX_FILE_ALREADY_EXISTS"));
-    REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
+    REQUIRE(test_controller.getLogTestController().contains("Failed to rename remote file \"nifi_test/.tstFile1.ext\" to \"nifi_test/tstFile1.ext\", error: LIBSSH2_FX_FILE_ALREADY_EXISTS"));
+    REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship failure"));
   }
 }
 
@@ -472,7 +472,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP reject zero-byte false", "[PutSFT
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship success"));
   testFile("nifi_test/tstFile1.ext", "");
 }
 
@@ -483,8 +483,8 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP reject zero-byte true", "[PutSFTP
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("Rejecting tstFile1.ext because it is zero bytes"));
-  REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship reject"));
+  REQUIRE(test_controller.getLogTestController().contains("Rejecting tstFile1.ext because it is zero bytes"));
+  REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship reject"));
   testFileNotExists("nifi_test/tstFile1.ext");
 }
 
@@ -539,7 +539,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP disable directory creation", "[Pu
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
+  REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship failure"));
   testFileNotExists("nifi_test/tstFile1.ext");
 }
 
@@ -566,10 +566,10 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP test dot rename", "[PutSFTP]") {
   test_controller.runSession(plan, true);
 
   if (should_fail) {
-    REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
+    REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship failure"));
     testFileNotExists("nifi_test/tstFile1.ext");
   } else {
-    REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
+    REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship success"));
     testFile("nifi_test/tstFile1.ext", "content 1");
   }
 }
@@ -598,10 +598,10 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP test temporary filename", "[PutSF
   test_controller.runSession(plan, true);
 
   if (should_fail) {
-    REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
+    REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship failure"));
     testFileNotExists("nifi_test/tstFile1.ext");
   } else {
-    REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
+    REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship success"));
     testFile("nifi_test/tstFile1.ext", "content 1");
   }
 }
@@ -615,7 +615,7 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP test temporary file cleanup", "[P
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship failure"));
+  REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship failure"));
   testFile("nifi_test/tstFile1.ext", "content 2");
   testFileNotExists("nifi_test/.tstFile1.ext");
 }
@@ -635,10 +635,10 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP test disable directory listing", 
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(LogTestController::getInstance().contains("from PutSFTP to relationship success"));
+  REQUIRE(test_controller.getLogTestController().contains("from PutSFTP to relationship success"));
   testFileNotExists("nifi_test/inner/tstFile1.ext");
 
-  REQUIRE(should_list == LogTestController::getInstance().contains("Failed to stat remote path \"nifi_test\", error: LIBSSH2_FX_NO_SUCH_FILE"));
+  REQUIRE(should_list == test_controller.getLogTestController().contains("Failed to stat remote path \"nifi_test\", error: LIBSSH2_FX_NO_SUCH_FILE"));
 }
 
 TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP connection caching reuse", "[PutSFTP][connection-caching]") {
@@ -650,8 +650,8 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP connection caching reuse", "[PutS
   testFile("nifi_test/tstFile1.ext", "content 1");
   testFile("nifi_test/tstFile2.ext", "content 2");
 
-  REQUIRE(LogTestController::getInstance().contains("Adding nifiuser@localhost:" + std::to_string(sftp_server->getPort()) + " to SFTP connection pool"));
-  REQUIRE(LogTestController::getInstance().contains("Removing nifiuser@localhost:" + std::to_string(sftp_server->getPort()) + " from SFTP connection pool"));
+  REQUIRE(test_controller.getLogTestController().contains("Adding nifiuser@localhost:" + std::to_string(sftp_server->getPort()) + " to SFTP connection pool"));
+  REQUIRE(test_controller.getLogTestController().contains("Removing nifiuser@localhost:" + std::to_string(sftp_server->getPort()) + " from SFTP connection pool"));
 }
 
 TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP connection caching does not reuse bad connection", "[PutSFTP][connection-caching]") {
@@ -670,8 +670,8 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP connection caching does not reuse
 
   test_controller.runSession(plan, true);
 
-  REQUIRE(false == LogTestController::getInstance().contains("Adding nifiuser@localhost:" + std::to_string(port) + " to SFTP connection pool"));
-  REQUIRE(LogTestController::getInstance().contains("Cannot connect to SFTP server"));
+  REQUIRE(false == test_controller.getLogTestController().contains("Adding nifiuser@localhost:" + std::to_string(port) + " to SFTP connection pool"));
+  REQUIRE(test_controller.getLogTestController().contains("Cannot connect to SFTP server"));
 }
 
 TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP connection caching reaches limit", "[PutSFTP][connection-caching]") {
@@ -733,13 +733,13 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP connection caching reaches limit"
     plan->reset();
 
     if (i == 8) {
-      REQUIRE(LogTestController::getInstance().contains("SFTP connection pool is full, removing nifiuser@localhost:" + std::to_string(sftp_servers[0]->getPort())));
-      REQUIRE(LogTestController::getInstance().contains("Closing SFTPClient for localhost:" + std::to_string(sftp_servers[0]->getPort())));
-      REQUIRE(LogTestController::getInstance().contains("Adding nifiuser@localhost:" + std::to_string(sftp_servers[8]->getPort()) + " to SFTP connection pool"));
+      REQUIRE(test_controller.getLogTestController().contains("SFTP connection pool is full, removing nifiuser@localhost:" + std::to_string(sftp_servers[0]->getPort())));
+      REQUIRE(test_controller.getLogTestController().contains("Closing SFTPClient for localhost:" + std::to_string(sftp_servers[0]->getPort())));
+      REQUIRE(test_controller.getLogTestController().contains("Adding nifiuser@localhost:" + std::to_string(sftp_servers[8]->getPort()) + " to SFTP connection pool"));
     } else if (i == 9) {
-      REQUIRE(LogTestController::getInstance().contains("SFTP connection pool is full, removing nifiuser@localhost:" + std::to_string(sftp_servers[1]->getPort())));
-      REQUIRE(LogTestController::getInstance().contains("Closing SFTPClient for localhost:" + std::to_string(sftp_servers[1]->getPort())));
-      REQUIRE(LogTestController::getInstance().contains("Adding nifiuser@localhost:" + std::to_string(sftp_servers[9]->getPort()) + " to SFTP connection pool"));
+      REQUIRE(test_controller.getLogTestController().contains("SFTP connection pool is full, removing nifiuser@localhost:" + std::to_string(sftp_servers[1]->getPort())));
+      REQUIRE(test_controller.getLogTestController().contains("Closing SFTPClient for localhost:" + std::to_string(sftp_servers[1]->getPort())));
+      REQUIRE(test_controller.getLogTestController().contains("Adding nifiuser@localhost:" + std::to_string(sftp_servers[9]->getPort()) + " to SFTP connection pool"));
     }
   }
 }
@@ -789,8 +789,8 @@ TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP batching does not fail even if on
 
   testFile("nifi_test/tstFile3.ext", "content 3");
 
-  REQUIRE(LogTestController::getInstance().contains("Routing tstFile1.ext to FAILURE because a file with the same name already exists"));
-  REQUIRE(LogTestController::getInstance().contains("Routing tstFile2.ext to FAILURE because a file with the same name already exists"));
+  REQUIRE(test_controller.getLogTestController().contains("Routing tstFile1.ext to FAILURE because a file with the same name already exists"));
+  REQUIRE(test_controller.getLogTestController().contains("Routing tstFile2.ext to FAILURE because a file with the same name already exists"));
 }
 
 TEST_CASE_METHOD(PutSFTPTestsFixture, "PutSFTP put large file", "[PutSFTP]") {

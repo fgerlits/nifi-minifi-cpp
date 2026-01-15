@@ -44,10 +44,10 @@ class VerifyC2Metrics : public VerifyC2Base {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setTrace<minifi::c2::C2Agent>();
-    LogTestController::getInstance().setDebug<minifi::c2::RESTSender>();
-    LogTestController::getInstance().setDebug<minifi::FlowController>();
-    LogTestController::getInstance().setDebug<minifi::processors::GetTCP>();
+    test_controller.getLogTestController().setTrace<minifi::c2::C2Agent>();
+    test_controller.getLogTestController().setDebug<minifi::c2::RESTSender>();
+    test_controller.getLogTestController().setDebug<minifi::FlowController>();
+    test_controller.getLogTestController().setDebug<minifi::processors::GetTCP>();
     VerifyC2Base::testSetup();
   }
 

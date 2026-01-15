@@ -61,9 +61,9 @@ GetFileTestController::GetFileTestController()
     input_file_name_("test.txt"),
     large_input_file_name_("large_file.txt"),
     hidden_input_file_name_(".test.txt") {
-  LogTestController::getInstance().setTrace<TestPlan>();
-  LogTestController::getInstance().setTrace<minifi::processors::GetFile>();
-  LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setTrace<TestPlan>();
+  test_controller.getLogTestController().setTrace<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setTrace<minifi::processors::LogAttribute>();
 
   REQUIRE(!temp_dir_.empty());
 
@@ -113,10 +113,10 @@ TEST_CASE("GetFile ignores hidden files and files larger than MaxSize", "[GetFil
 
   test_controller.runSession();
 
-  REQUIRE(LogTestController::getInstance().contains("Logged 1 flow files"));  // The hidden and the too big files should be ignored
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:test.txt"));
-  REQUIRE(LogTestController::getInstance().contains("key:flow.id"));
-  REQUIRE(LogTestController::getInstance().contains("Size:44 Offset:0"));
+  REQUIRE(test_controller.getLogTestController().contains("Logged 1 flow files"));  // The hidden and the too big files should be ignored
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:test.txt"));
+  REQUIRE(test_controller.getLogTestController().contains("key:flow.id"));
+  REQUIRE(test_controller.getLogTestController().contains("Size:44 Offset:0"));
 }
 
 TEST_CASE("GetFile ignores files smaller than MinSize", "[GetFile]") {
@@ -125,10 +125,10 @@ TEST_CASE("GetFile ignores files smaller than MinSize", "[GetFile]") {
 
   test_controller.runSession();
 
-  REQUIRE(LogTestController::getInstance().contains("Logged 1 flow files"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:large_file.txt"));
-  REQUIRE(LogTestController::getInstance().contains("key:flow.id"));
-  REQUIRE(LogTestController::getInstance().contains("Size:67 Offset:0"));
+  REQUIRE(test_controller.getLogTestController().contains("Logged 1 flow files"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:large_file.txt"));
+  REQUIRE(test_controller.getLogTestController().contains("key:flow.id"));
+  REQUIRE(test_controller.getLogTestController().contains("Size:67 Offset:0"));
 }
 
 TEST_CASE("GetFile removes the source file if KeepSourceFile is false") {
@@ -156,10 +156,10 @@ TEST_CASE("Hidden files are read when IgnoreHiddenFile property is false", "[get
 
   test_controller.runSession();
 
-  REQUIRE(LogTestController::getInstance().contains("Logged 3 flow files"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:large_file.txt"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:test.txt"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:.test.txt"));
+  REQUIRE(test_controller.getLogTestController().contains("Logged 3 flow files"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:large_file.txt"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:test.txt"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:.test.txt"));
 }
 
 TEST_CASE("Check if subdirectories are ignored or not if Recurse property is set", "[getFileProperty]") {
@@ -173,19 +173,19 @@ TEST_CASE("Check if subdirectories are ignored or not if Recurse property is set
     test_controller.setProperty(minifi::processors::GetFile::Recurse, "false");
     test_controller.runSession();
 
-    REQUIRE(LogTestController::getInstance().contains("Logged 2 flow files"));
-    REQUIRE(LogTestController::getInstance().contains("key:filename value:test.txt"));
-    REQUIRE(LogTestController::getInstance().contains("key:filename value:large_file.txt"));
+    REQUIRE(test_controller.getLogTestController().contains("Logged 2 flow files"));
+    REQUIRE(test_controller.getLogTestController().contains("key:filename value:test.txt"));
+    REQUIRE(test_controller.getLogTestController().contains("key:filename value:large_file.txt"));
   }
 
   SECTION("File in subdirectory is logged when Recurse property set to true")  {
     test_controller.setProperty(minifi::processors::GetFile::Recurse, "true");
     test_controller.runSession();
 
-    REQUIRE(LogTestController::getInstance().contains("Logged 3 flow files"));
-    REQUIRE(LogTestController::getInstance().contains("key:filename value:test.txt"));
-    REQUIRE(LogTestController::getInstance().contains("key:filename value:large_file.txt"));
-    REQUIRE(LogTestController::getInstance().contains("key:filename value:subfile.txt"));
+    REQUIRE(test_controller.getLogTestController().contains("Logged 3 flow files"));
+    REQUIRE(test_controller.getLogTestController().contains("key:filename value:test.txt"));
+    REQUIRE(test_controller.getLogTestController().contains("key:filename value:large_file.txt"));
+    REQUIRE(test_controller.getLogTestController().contains("key:filename value:subfile.txt"));
   }
 }
 
@@ -198,9 +198,9 @@ TEST_CASE("Only older files are read when MinAge property is set", "[getFileProp
 
   test_controller.runSession();
 
-  REQUIRE(LogTestController::getInstance().contains("Logged 1 flow files"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:test.txt"));
-  REQUIRE(LogTestController::getInstance().contains("Size:44 Offset:0"));
+  REQUIRE(test_controller.getLogTestController().contains("Logged 1 flow files"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:test.txt"));
+  REQUIRE(test_controller.getLogTestController().contains("Size:44 Offset:0"));
 }
 
 TEST_CASE("Only newer files are read when MaxAge property is set", "[getFileProperty]") {
@@ -212,9 +212,9 @@ TEST_CASE("Only newer files are read when MaxAge property is set", "[getFileProp
 
   test_controller.runSession();
 
-  REQUIRE(LogTestController::getInstance().contains("Logged 1 flow files"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:large_file.txt"));
-  REQUIRE(LogTestController::getInstance().contains("Size:67 Offset:0"));
+  REQUIRE(test_controller.getLogTestController().contains("Logged 1 flow files"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:large_file.txt"));
+  REQUIRE(test_controller.getLogTestController().contains("Size:67 Offset:0"));
 }
 
 TEST_CASE("Test BatchSize property for the maximum number of files read at once", "[getFileProperty]") {
@@ -223,13 +223,13 @@ TEST_CASE("Test BatchSize property for the maximum number of files read at once"
   SECTION("BatchSize is set to 1 so only 1 file should be logged")  {
     test_controller.setProperty(minifi::processors::GetFile::BatchSize, "1");
     test_controller.runSession();
-    REQUIRE(LogTestController::getInstance().contains("Logged 1 flow files"));
+    REQUIRE(test_controller.getLogTestController().contains("Logged 1 flow files"));
   }
 
   SECTION("BatchSize is set to 5 so all 2 non-hidden files should be logged")  {
     test_controller.setProperty(minifi::processors::GetFile::BatchSize, "5");
     test_controller.runSession();
-    REQUIRE(LogTestController::getInstance().contains("Logged 2 flow files"));
+    REQUIRE(test_controller.getLogTestController().contains("Logged 2 flow files"));
   }
 }
 
@@ -240,9 +240,9 @@ TEST_CASE("Test file filtering of GetFile", "[getFileProperty]") {
 
   test_controller.runSession();
 
-  REQUIRE(LogTestController::getInstance().contains("Logged 2 flow files"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:test.txt"));
-  REQUIRE(LogTestController::getInstance().contains("key:filename value:.test.txt"));
+  REQUIRE(test_controller.getLogTestController().contains("Logged 2 flow files"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:test.txt"));
+  REQUIRE(test_controller.getLogTestController().contains("key:filename value:.test.txt"));
 }
 
 TEST_CASE("Test if GetFile honors PollInterval property when triggered multiple times between intervals", "[getFileProperty]") {
@@ -252,7 +252,7 @@ TEST_CASE("Test if GetFile honors PollInterval property when triggered multiple 
 
   auto start_time = std::chrono::steady_clock::now();
   test_controller.runSession();
-  while (LogTestController::getInstance().countOccurrences("Logged 2 flow files") < 2) {
+  while (test_controller.getLogTestController().countOccurrences("Logged 2 flow files") < 2) {
     test_controller.resetTestPlan();
     test_controller.runSession();
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -264,7 +264,7 @@ TEST_CASE("Test if GetFile honors PollInterval property when triggered multiple 
 TEST_CASE("GetFile sets attributes correctly") {
   using minifi::processors::GetFile;
 
-  LogTestController::getInstance().setTrace<GetFile>();
+  test_controller.getLogTestController().setTrace<GetFile>();
   minifi::test::SingleProcessorTestController test_controller(minifi::test::utils::make_processor<GetFile>("GetFile"));
   const auto get_file = test_controller.getProcessor();
   std::filesystem::path dir = test_controller.createTempDirectory();
@@ -295,7 +295,7 @@ TEST_CASE("GetFile can use expression language in Directory property") {
   minifi::expression::dateSetInstall(TZ_DATA_DIR);
 #endif
   using minifi::processors::GetFile;
-  LogTestController::getInstance().setTrace<GetFile>();
+  test_controller.getLogTestController().setTrace<GetFile>();
 
   minifi::test::SingleProcessorTestController test_controller(minifi::test::utils::make_processor<GetFile>("GetFile"));
   const auto get_file = test_controller.getProcessor();

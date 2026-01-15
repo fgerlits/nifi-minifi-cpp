@@ -41,7 +41,7 @@ TEST_CASE("GenerateFlowFileWithBinaryData") {
 
   minifi::test::SingleProcessorTestController test_controller{minifi::test::utils::make_processor<GenerateFlowFile>("GenerateFlowFile")};
   auto generate_flow_file = test_controller.getProcessor();
-  LogTestController::getInstance().setWarn<GenerateFlowFile>();
+  test_controller.getLogTestController().setWarn<GenerateFlowFile>();
 
   CHECK(test_controller.plan->setProperty(generate_flow_file, GenerateFlowFile::FileSize, "10"));
   CHECK(test_controller.plan->setProperty(generate_flow_file, GenerateFlowFile::BatchSize, "2"));
@@ -64,7 +64,7 @@ TEST_CASE("GenerateFlowFileWithBinaryData") {
     CHECK(first_batch_0 == first_batch_1);
   }
 
-  CHECK(LogTestController::getInstance().contains("Custom Text property is set but not used. For Custom Text to be used, Data Format needs to be Text, and Unique FlowFiles needs to be false."));
+  CHECK(test_controller.getLogTestController().contains("Custom Text property is set but not used. For Custom Text to be used, Data Format needs to be Text, and Unique FlowFiles needs to be false."));
 }
 
 TEST_CASE("GenerateFlowFileTestEmpty") {

@@ -111,11 +111,11 @@ class VerifyC2ControllerUpdate : public VerifyC2Base {
   }
 
   void testSetup() override {
-    LogTestController::getInstance().setTrace<minifi::c2::C2Agent>();
-    LogTestController::getInstance().setDebug<minifi::c2::RESTSender>();
-    LogTestController::getInstance().setDebug<DummmyControllerUserProcessor>();
-    LogTestController::getInstance().setDebug<DummyController>();
-    LogTestController::getInstance().setDebug<core::controller::StandardControllerServiceProvider>();
+    test_controller.getLogTestController().setTrace<minifi::c2::C2Agent>();
+    test_controller.getLogTestController().setDebug<minifi::c2::RESTSender>();
+    test_controller.getLogTestController().setDebug<DummmyControllerUserProcessor>();
+    test_controller.getLogTestController().setDebug<DummyController>();
+    test_controller.getLogTestController().setDebug<core::controller::StandardControllerServiceProvider>();
     VerifyC2Base::testSetup();
   }
 

@@ -37,7 +37,7 @@ using org::apache::nifi::minifi::processors::PerformanceDataCounter;
 class PerformanceDataMonitorTester {
  public:
   PerformanceDataMonitorTester() {
-    LogTestController::getInstance().setTrace<TestPlan>();
+    test_controller.getLogTestController().setTrace<TestPlan>();
     dir_ = test_controller_.createTempDirectory();
     plan_ = test_controller_.createPlan();
     performance_monitor_ = plan_->addProcessor("PerformanceDataMonitor", "pdhsys");
@@ -52,7 +52,7 @@ class PerformanceDataMonitorTester {
         return true;
       }
       plan_->reset();
-      LogTestController::getInstance().reset();
+      test_controller.getLogTestController().reset();
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     return false;

@@ -99,7 +99,7 @@ struct ConsumeMqttTestFixture {
       : test_controller_(utils::make_processor<TestConsumeMQTTProcessor>("TestConsumeMQTTProcessor")),
         consume_mqtt_processor_(test_controller_.getProcessor()) {
     REQUIRE(consume_mqtt_processor_ != nullptr);
-    LogTestController::getInstance().setDebug<TestConsumeMQTTProcessor>();
+    test_controller.getLogTestController().setDebug<TestConsumeMQTTProcessor>();
   }
 
   ConsumeMqttTestFixture(ConsumeMqttTestFixture&&) = delete;
@@ -108,7 +108,7 @@ struct ConsumeMqttTestFixture {
   ConsumeMqttTestFixture& operator=(const ConsumeMqttTestFixture&) = delete;
 
   ~ConsumeMqttTestFixture() {
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
   }
 
   SingleProcessorTestController test_controller_;
@@ -137,7 +137,7 @@ TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_DurableSessionWithID",
   REQUIRE(test_controller_.plan->setProperty(consume_mqtt_processor_, minifi::processors::ConsumeMQTT::CleanSession.name, "false"));
 
   REQUIRE_NOTHROW(test_controller_.plan->scheduleProcessor(consume_mqtt_processor_));
-  REQUIRE_FALSE(LogTestController::getInstance().contains("[warning] Messages are not preserved during client disconnection "
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("[warning] Messages are not preserved during client disconnection "
     "by the broker when QoS is less than 1 for durable (non-clean) sessions. Only subscriptions are preserved.", 0s));
 }
 
@@ -150,7 +150,7 @@ TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_DurableSessionWithQoS0
 
   REQUIRE_NOTHROW(test_controller_.plan->scheduleProcessor(consume_mqtt_processor_));
 
-  REQUIRE(LogTestController::getInstance().contains("[warning] Messages are not preserved during client disconnection "
+  REQUIRE(test_controller.getLogTestController().contains("[warning] Messages are not preserved during client disconnection "
     "by the broker when QoS is less than 1 for durable (non-clean) sessions. Only subscriptions are preserved.", 1s));
 }
 
@@ -164,7 +164,7 @@ TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_DurableSessionWithID_V
   REQUIRE(test_controller_.plan->setProperty(consume_mqtt_processor_, minifi::processors::ConsumeMQTT::SessionExpiryInterval.name, "1 h"));
 
   REQUIRE_NOTHROW(test_controller_.plan->scheduleProcessor(consume_mqtt_processor_));
-  REQUIRE_FALSE(LogTestController::getInstance().contains("[warning] Messages are not preserved during client disconnection "
+  REQUIRE_FALSE(test_controller.getLogTestController().contains("[warning] Messages are not preserved during client disconnection "
                                                           "by the broker when QoS is less than 1 for durable (Session Expiry Interval > 0) sessions. Only subscriptions are preserved.", 0s));
 }
 
@@ -179,7 +179,7 @@ TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_DurableSessionWithQoS0
 
   REQUIRE_NOTHROW(test_controller_.plan->scheduleProcessor(consume_mqtt_processor_));
 
-  REQUIRE(LogTestController::getInstance().contains("[warning] Messages are not preserved during client disconnection "
+  REQUIRE(test_controller.getLogTestController().contains("[warning] Messages are not preserved during client disconnection "
                                                     "by the broker when QoS is less than 1 for durable (Session Expiry Interval > 0) sessions. Only subscriptions are preserved.", 1s));
 }
 
@@ -189,7 +189,7 @@ TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_CleanStart_V_3", "[con
   REQUIRE(test_controller_.plan->setProperty(consume_mqtt_processor_, minifi::processors::ConsumeMQTT::CleanStart.name, "true"));
 
   REQUIRE_NOTHROW(test_controller_.plan->scheduleProcessor(consume_mqtt_processor_));
-  REQUIRE(LogTestController::getInstance().contains("[warning] MQTT 3.x specification does not support Clean Start. Property is not used.", 1s));
+  REQUIRE(test_controller.getLogTestController().contains("[warning] MQTT 3.x specification does not support Clean Start. Property is not used.", 1s));
 }
 
 TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_SessionExpiryInterval_V_3", "[consumeMQTTTest]") {
@@ -198,7 +198,7 @@ TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_SessionExpiryInterval_
   REQUIRE(test_controller_.plan->setProperty(consume_mqtt_processor_, minifi::processors::ConsumeMQTT::SessionExpiryInterval.name, "1 h"));
 
   REQUIRE_NOTHROW(test_controller_.plan->scheduleProcessor(consume_mqtt_processor_));
-  REQUIRE(LogTestController::getInstance().contains("[warning] MQTT 3.x specification does not support Session Expiry Intervals. Property is not used.", 1s));
+  REQUIRE(test_controller.getLogTestController().contains("[warning] MQTT 3.x specification does not support Session Expiry Intervals. Property is not used.", 1s));
 }
 
 TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_CleanSession_V_5", "[consumeMQTTTest]") {
@@ -210,7 +210,7 @@ TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_CleanSession_V_5", "[c
   REQUIRE(test_controller_.plan->setProperty(consume_mqtt_processor_, minifi::processors::ConsumeMQTT::CleanSession.name, "true"));
 
   REQUIRE_NOTHROW(test_controller_.plan->scheduleProcessor(consume_mqtt_processor_));
-  REQUIRE(LogTestController::getInstance().contains("[warning] MQTT 5.0 specification does not support Clean Session. Property is not used.", 1s));
+  REQUIRE(test_controller.getLogTestController().contains("[warning] MQTT 5.0 specification does not support Clean Session. Property is not used.", 1s));
 }
 
 TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_TopicAliasMaximum_V_3", "[consumeMQTTTest]") {
@@ -219,7 +219,7 @@ TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_TopicAliasMaximum_V_3"
   REQUIRE(test_controller_.plan->setProperty(consume_mqtt_processor_, minifi::processors::ConsumeMQTT::TopicAliasMaximum.name, "1"));
 
   REQUIRE_NOTHROW(test_controller_.plan->scheduleProcessor(consume_mqtt_processor_));
-  REQUIRE(LogTestController::getInstance().contains("[warning] MQTT 3.x specification does not support Topic Alias Maximum. Property is not used.", 1s));
+  REQUIRE(test_controller.getLogTestController().contains("[warning] MQTT 3.x specification does not support Topic Alias Maximum. Property is not used.", 1s));
 }
 
 TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_ReceiveMaximum_V_3", "[consumeMQTTTest]") {
@@ -228,7 +228,7 @@ TEST_CASE_METHOD(ConsumeMqttTestFixture, "ConsumeMQTTTest_ReceiveMaximum_V_3", "
   REQUIRE(test_controller_.plan->setProperty(consume_mqtt_processor_, minifi::processors::ConsumeMQTT::ReceiveMaximum.name, "1"));
 
   REQUIRE_NOTHROW(test_controller_.plan->scheduleProcessor(consume_mqtt_processor_));
-  REQUIRE(LogTestController::getInstance().contains("[warning] MQTT 3.x specification does not support Receive Maximum. Property is not used.", 1s));
+  REQUIRE(test_controller.getLogTestController().contains("[warning] MQTT 3.x specification does not support Receive Maximum. Property is not used.", 1s));
 }
 
 TEST_CASE_METHOD(ConsumeMqttTestFixture, "Read XML messages and write them to json records", "[consumeMQTTTest]") {
@@ -290,7 +290,7 @@ TEST_CASE_METHOD(ConsumeMqttTestFixture, "Invalid XML payload does not result in
 
   const auto trigger_results = test_controller_.trigger();
   CHECK(trigger_results.at(TestConsumeMQTTProcessor::Success).empty());
-  REQUIRE(LogTestController::getInstance().contains("[error] Failed to read records from MQTT message", 1s));
+  REQUIRE(test_controller.getLogTestController().contains("[error] Failed to read records from MQTT message", 1s));
 }
 
 TEST_CASE_METHOD(ConsumeMqttTestFixture, "Read MQTT message and write it to a flow file", "[consumeMQTTTest]") {

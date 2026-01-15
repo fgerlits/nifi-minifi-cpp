@@ -28,17 +28,17 @@
 #include "core/extension/ExtensionManager.h"
 
 TestControllerWithFlow::TestControllerWithFlow(const char* yamlConfigContent, bool setup_flow) {
-  LogTestController::getInstance().setTrace<minifi::Connection>();
-  LogTestController::getInstance().setTrace<core::Connectable>();
-  LogTestController::getInstance().setTrace<minifi::SchedulingAgent>();
-  LogTestController::getInstance().setTrace<minifi::ThreadedSchedulingAgent>();
-  LogTestController::getInstance().setTrace<core::Processor>();
-  LogTestController::getInstance().setTrace<minifi::TimerDrivenSchedulingAgent>();
-  LogTestController::getInstance().setTrace<minifi::EventDrivenSchedulingAgent>();
-  LogTestController::getInstance().setTrace<minifi::FlowController>();
-  LogTestController::getInstance().setTrace<minifi::core::extension::ExtensionManager>();
-  LogTestController::getInstance().setTrace<minifi::core::extension::Extension>();
-  LogTestController::getInstance().setTrace<minifi::core::ClassLoader>();
+  test_controller.getLogTestController().setTrace<minifi::Connection>();
+  test_controller.getLogTestController().setTrace<core::Connectable>();
+  test_controller.getLogTestController().setTrace<minifi::SchedulingAgent>();
+  test_controller.getLogTestController().setTrace<minifi::ThreadedSchedulingAgent>();
+  test_controller.getLogTestController().setTrace<core::Processor>();
+  test_controller.getLogTestController().setTrace<minifi::TimerDrivenSchedulingAgent>();
+  test_controller.getLogTestController().setTrace<minifi::EventDrivenSchedulingAgent>();
+  test_controller.getLogTestController().setTrace<minifi::FlowController>();
+  test_controller.getLogTestController().setTrace<minifi::core::extension::ExtensionManager>();
+  test_controller.getLogTestController().setTrace<minifi::core::extension::Extension>();
+  test_controller.getLogTestController().setTrace<minifi::core::ClassLoader>();
 
   home_ = createTempDirectory();
 
@@ -83,5 +83,5 @@ TestControllerWithFlow::~TestControllerWithFlow() {
   if (controller_) {
     controller_->stop();
   }
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }

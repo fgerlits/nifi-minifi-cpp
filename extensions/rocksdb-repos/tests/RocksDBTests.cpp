@@ -36,10 +36,10 @@ struct OpenDatabase {
 
 struct RocksDBTest : TestController {
   RocksDBTest() {
-    LogTestController::getInstance().setTrace<minifi::internal::RocksDatabase>();
-    LogTestController::getInstance().setTrace<minifi::internal::RocksDbInstance>();
-    LogTestController::getInstance().setTrace<minifi::internal::ColumnHandle>();
-    LogTestController::getInstance().setTrace<minifi::internal::DbHandle>();
+    test_controller.getLogTestController().setTrace<minifi::internal::RocksDatabase>();
+    test_controller.getLogTestController().setTrace<minifi::internal::RocksDbInstance>();
+    test_controller.getLogTestController().setTrace<minifi::internal::ColumnHandle>();
+    test_controller.getLogTestController().setTrace<minifi::internal::DbHandle>();
     db_dir = createTempDirectory().string();
   }
 

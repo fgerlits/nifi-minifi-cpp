@@ -31,7 +31,7 @@ namespace org::apache::nifi::minifi::test {
 TEST_CASE("LogAttribute logs payload", "[LogAttribute]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<LogAttribute>("log_attribute")};
   const auto log_attribute = controller.getProcessor();
-  LogTestController::getInstance().setTrace<LogAttribute>();
+  test_controller.getLogTestController().setTrace<LogAttribute>();
 
   const auto [hexencode_payload, expected_payload] = GENERATE(
     std::make_tuple("false", "hello world"),
@@ -43,20 +43,20 @@ TEST_CASE("LogAttribute logs payload", "[LogAttribute]") {
   controller.plan->scheduleProcessor(log_attribute);
   const auto result = controller.trigger("hello world", {{"eng", "apple"}, {"ger", "Apfel"}, {"fra", "pomme"}});
   CHECK(result.at(LogAttribute::Success).size() == 1);
-  CHECK(LogTestController::getInstance().contains("--------------------------------------------------", 1s));
-  CHECK(LogTestController::getInstance().contains("Size:11 Offset:0", 0s));
-  CHECK(LogTestController::getInstance().contains("FlowFile Attributes Map Content", 0s));
-  CHECK(LogTestController::getInstance().contains("key:eng value:apple", 0s));
-  CHECK(LogTestController::getInstance().contains("key:ger value:Apfel", 0s));
-  CHECK(LogTestController::getInstance().contains("key:fra value:pomme", 0s));
+  CHECK(test_controller.getLogTestController().contains("--------------------------------------------------", 1s));
+  CHECK(test_controller.getLogTestController().contains("Size:11 Offset:0", 0s));
+  CHECK(test_controller.getLogTestController().contains("FlowFile Attributes Map Content", 0s));
+  CHECK(test_controller.getLogTestController().contains("key:eng value:apple", 0s));
+  CHECK(test_controller.getLogTestController().contains("key:ger value:Apfel", 0s));
+  CHECK(test_controller.getLogTestController().contains("key:fra value:pomme", 0s));
 
-  CHECK(LogTestController::getInstance().contains(fmt::format("Payload:\n{}", expected_payload), 0s));
+  CHECK(test_controller.getLogTestController().contains(fmt::format("Payload:\n{}", expected_payload), 0s));
 }
 
 TEST_CASE("LogAttribute LogLevel and LogPrefix", "[LogAttribute]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<LogAttribute>("log_attribute")};
   const auto log_attribute = controller.getProcessor();
-  LogTestController::getInstance().setTrace<LogAttribute>();
+  test_controller.getLogTestController().setTrace<LogAttribute>();
 
   const auto [log_level, log_prefix, expected_dash] = GENERATE(
     std::make_tuple(std::string_view("info"), std::string_view(""), std::string_view("--------------------------------------------------")),
@@ -71,19 +71,19 @@ TEST_CASE("LogAttribute LogLevel and LogPrefix", "[LogAttribute]") {
   controller.plan->scheduleProcessor(log_attribute);
   const auto result = controller.trigger("hello world", {{"eng", "apple"}, {"ger", "Apfel"}, {"fra", "pomme"}});
   CHECK(result.at(LogAttribute::Success).size() == 1);
-  CHECK(LogTestController::getInstance().contains(fmt::format("[org::apache::nifi::minifi::processors::LogAttribute] [{}] Logging for flow file\n{}", log_level, expected_dash), 1s));
-  CHECK(LogTestController::getInstance().contains("key:fra value:pomme", 0s));
-  CHECK(LogTestController::getInstance().contains("Size:11 Offset:0", 0s));
-  CHECK(LogTestController::getInstance().contains("FlowFile Attributes Map Content", 0s));
-  CHECK(LogTestController::getInstance().contains("key:eng value:apple", 0s));
-  CHECK(LogTestController::getInstance().contains("key:ger value:Apfel", 0s));
-  CHECK(LogTestController::getInstance().contains("key:fra value:pomme", 0s));
+  CHECK(test_controller.getLogTestController().contains(fmt::format("[org::apache::nifi::minifi::processors::LogAttribute] [{}] Logging for flow file\n{}", log_level, expected_dash), 1s));
+  CHECK(test_controller.getLogTestController().contains("key:fra value:pomme", 0s));
+  CHECK(test_controller.getLogTestController().contains("Size:11 Offset:0", 0s));
+  CHECK(test_controller.getLogTestController().contains("FlowFile Attributes Map Content", 0s));
+  CHECK(test_controller.getLogTestController().contains("key:eng value:apple", 0s));
+  CHECK(test_controller.getLogTestController().contains("key:ger value:Apfel", 0s));
+  CHECK(test_controller.getLogTestController().contains("key:fra value:pomme", 0s));
 }
 
 TEST_CASE("LogAttribute filtering attributes", "[LogAttribute]") {
   SingleProcessorTestController controller{minifi::test::utils::make_processor<LogAttribute>("log_attribute")};
   const auto log_attribute = controller.getProcessor();
-  LogTestController::getInstance().setTrace<LogAttribute>();
+  test_controller.getLogTestController().setTrace<LogAttribute>();
 
   std::string_view attrs_to_log;
   std::string_view attrs_to_ignore;
@@ -119,12 +119,12 @@ TEST_CASE("LogAttribute filtering attributes", "[LogAttribute]") {
   controller.plan->scheduleProcessor(log_attribute);
   const auto result = controller.trigger("hello world", {{"eng", "apple"}, {"ger", "Apfel"}, {"fra", "pomme"}});
   CHECK(result.at(LogAttribute::Success).size() == 1);
-  CHECK(LogTestController::getInstance().contains("--------------------------------------------------", 1s));
-  CHECK(LogTestController::getInstance().contains("Size:11 Offset:0", 0s));
-  CHECK(LogTestController::getInstance().contains("FlowFile Attributes Map Content", 0s));
-  CHECK(LogTestController::getInstance().contains("key:eng value:apple", 0s) == expected_eng);
-  CHECK(LogTestController::getInstance().contains("key:ger value:Apfel", 0s) == expected_ger);
-  CHECK(LogTestController::getInstance().contains("key:fra value:pomme", 0s) == expected_fra);
+  CHECK(test_controller.getLogTestController().contains("--------------------------------------------------", 1s));
+  CHECK(test_controller.getLogTestController().contains("Size:11 Offset:0", 0s));
+  CHECK(test_controller.getLogTestController().contains("FlowFile Attributes Map Content", 0s));
+  CHECK(test_controller.getLogTestController().contains("key:eng value:apple", 0s) == expected_eng);
+  CHECK(test_controller.getLogTestController().contains("key:ger value:Apfel", 0s) == expected_ger);
+  CHECK(test_controller.getLogTestController().contains("key:fra value:pomme", 0s) == expected_fra);
 }
 
 TEST_CASE("LogAttribute batch test", "[LogAttribute]") {

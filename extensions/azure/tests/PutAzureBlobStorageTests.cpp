@@ -283,7 +283,7 @@ TEST_CASE_METHOD(PutAzureBlobStorageTestsFixture, "Test Azure blob upload failur
   plan_->setDynamicProperty(update_attribute_processor_, "filename", "");
   setDefaultCredentials();
   test_controller_.runSession(plan_, true);
-  REQUIRE(LogTestController::getInstance().contains("Blob is not set and default 'filename' attribute could not be found!"));
+  REQUIRE(test_controller.getLogTestController().contains("Blob is not set and default 'filename' attribute could not be found!"));
 }
 
 TEST_CASE_METHOD(PutAzureBlobStorageTestsFixture, "Test Azure blob upload", "[azureBlobStorageUpload]") {
@@ -291,12 +291,12 @@ TEST_CASE_METHOD(PutAzureBlobStorageTestsFixture, "Test Azure blob upload", "[az
   plan_->setProperty(azure_blob_storage_processor_, "Container Name", "${test.container}");
   setDefaultCredentials();
   test_controller_.runSession(plan_, true);
-  CHECK(LogTestController::getInstance().contains("key:azure.container value:" + CONTAINER_NAME));
-  CHECK(LogTestController::getInstance().contains("key:azure.blobname value:" + GET_FILE_NAME));
-  CHECK(LogTestController::getInstance().contains("key:azure.primaryUri value:" + mock_blob_storage_ptr_->PRIMARY_URI + "\n"));
-  CHECK(LogTestController::getInstance().contains("key:azure.etag value:" + mock_blob_storage_ptr_->ETAG));
-  CHECK(LogTestController::getInstance().contains("key:azure.length value:" + std::to_string(TEST_DATA.size())));
-  CHECK(LogTestController::getInstance().contains("key:azure.timestamp value:" + mock_blob_storage_ptr_->TEST_TIMESTAMP));
+  CHECK(test_controller.getLogTestController().contains("key:azure.container value:" + CONTAINER_NAME));
+  CHECK(test_controller.getLogTestController().contains("key:azure.blobname value:" + GET_FILE_NAME));
+  CHECK(test_controller.getLogTestController().contains("key:azure.primaryUri value:" + mock_blob_storage_ptr_->PRIMARY_URI + "\n"));
+  CHECK(test_controller.getLogTestController().contains("key:azure.etag value:" + mock_blob_storage_ptr_->ETAG));
+  CHECK(test_controller.getLogTestController().contains("key:azure.length value:" + std::to_string(TEST_DATA.size())));
+  CHECK(test_controller.getLogTestController().contains("key:azure.timestamp value:" + mock_blob_storage_ptr_->TEST_TIMESTAMP));
   CHECK(mock_blob_storage_ptr_->getInputData() == TEST_DATA);
   CHECK(mock_blob_storage_ptr_->getContainerCreated() == false);
   auto passed_params = mock_blob_storage_ptr_->getPassedPutParams();
@@ -312,12 +312,12 @@ TEST_CASE_METHOD(PutAzureBlobStorageTestsFixture, "Test Azure blob upload with c
   plan_->setProperty(azure_blob_storage_processor_, "Create Container", "true");
   setDefaultCredentials();
   test_controller_.runSession(plan_, true);
-  CHECK(LogTestController::getInstance().contains("key:azure.container value:" + CONTAINER_NAME));
-  CHECK(LogTestController::getInstance().contains("key:azure.blobname value:" + BLOB_NAME));
-  CHECK(LogTestController::getInstance().contains("key:azure.primaryUri value:" + mock_blob_storage_ptr_->PRIMARY_URI + "\n"));
-  CHECK(LogTestController::getInstance().contains("key:azure.etag value:" + mock_blob_storage_ptr_->ETAG));
-  CHECK(LogTestController::getInstance().contains("key:azure.length value:" + std::to_string(TEST_DATA.size())));
-  CHECK(LogTestController::getInstance().contains("key:azure.timestamp value:" + mock_blob_storage_ptr_->TEST_TIMESTAMP));
+  CHECK(test_controller.getLogTestController().contains("key:azure.container value:" + CONTAINER_NAME));
+  CHECK(test_controller.getLogTestController().contains("key:azure.blobname value:" + BLOB_NAME));
+  CHECK(test_controller.getLogTestController().contains("key:azure.primaryUri value:" + mock_blob_storage_ptr_->PRIMARY_URI + "\n"));
+  CHECK(test_controller.getLogTestController().contains("key:azure.etag value:" + mock_blob_storage_ptr_->ETAG));
+  CHECK(test_controller.getLogTestController().contains("key:azure.length value:" + std::to_string(TEST_DATA.size())));
+  CHECK(test_controller.getLogTestController().contains("key:azure.timestamp value:" + mock_blob_storage_ptr_->TEST_TIMESTAMP));
   CHECK(mock_blob_storage_ptr_->getInputData() == TEST_DATA);
   CHECK(mock_blob_storage_ptr_->getContainerCreated() == true);
   auto passed_params = mock_blob_storage_ptr_->getPassedPutParams();

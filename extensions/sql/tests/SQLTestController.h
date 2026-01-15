@@ -56,13 +56,13 @@ const std::string DRIVER = "libsqlite3odbc.so";
 class SQLTestController : public TestController {
  public:
   SQLTestController() {
-    LogTestController::getInstance().setTrace<TestPlan>();
-    LogTestController::getInstance().setTrace<minifi::processors::GenerateFlowFile>();
-    LogTestController::getInstance().setTrace<minifi::processors::UpdateAttribute>();
-    LogTestController::getInstance().setTrace<minifi::processors::LogAttribute>();
-    LogTestController::getInstance().setTrace<minifi::processors::PutSQL>();
-    LogTestController::getInstance().setTrace<minifi::processors::ExecuteSQL>();
-    LogTestController::getInstance().setTrace<minifi::processors::QueryDatabaseTable>();
+    test_controller.getLogTestController().setTrace<TestPlan>();
+    test_controller.getLogTestController().setTrace<minifi::processors::GenerateFlowFile>();
+    test_controller.getLogTestController().setTrace<minifi::processors::UpdateAttribute>();
+    test_controller.getLogTestController().setTrace<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setTrace<minifi::processors::PutSQL>();
+    test_controller.getLogTestController().setTrace<minifi::processors::ExecuteSQL>();
+    test_controller.getLogTestController().setTrace<minifi::processors::QueryDatabaseTable>();
 
     test_dir_ = createTempDirectory();
     database_ = test_dir_ / "test.db";

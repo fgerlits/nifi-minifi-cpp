@@ -283,7 +283,7 @@ TEST_CASE_METHOD(DeleteAzureBlobStorageTestsFixture, "Test Azure blob delete fai
   plan_->setDynamicProperty(update_attribute_processor_, "filename", "");
   setDefaultCredentials();
   test_controller_.runSession(plan_, true);
-  REQUIRE(LogTestController::getInstance().contains("Blob is not set and default 'filename' attribute could not be found!"));
+  REQUIRE(test_controller.getLogTestController().contains("Blob is not set and default 'filename' attribute could not be found!"));
 }
 
 TEST_CASE_METHOD(DeleteAzureBlobStorageTestsFixture, "Test Azure blob delete with default blob name", "[azureBlobStorageDelete]") {

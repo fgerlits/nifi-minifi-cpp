@@ -56,10 +56,10 @@ TEST_CASE("Test Creation of HashContent", "[HashContentCreate]") {
 
 TEST_CASE("Test usage of ExtractText", "[extracttextTest]") {
   TestController test_controller;
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::GetFile>();
-  LogTestController::getInstance().setTrace<core::ProcessSession>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::HashContent>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::GetFile>();
+  test_controller.getLogTestController().setTrace<core::ProcessSession>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::HashContent>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   std::shared_ptr<TestRepository> repo = std::make_shared<TestRepository>();
@@ -108,28 +108,28 @@ TEST_CASE("Test usage of ExtractText", "[extracttextTest]") {
   ss2 << "key:" << MD5_ATTR << " value:" << MD5_CHECKSUM << "\n";
   std::string log_check = ss2.str();
 
-  REQUIRE(LogTestController::getInstance().contains(log_check));
+  REQUIRE(test_controller.getLogTestController().contains(log_check));
 
   ss2.str("");
   ss2 << "key:" << SHA1_ATTR << " value:" << SHA1_CHECKSUM << "\n";
   log_check = ss2.str();
 
-  REQUIRE(LogTestController::getInstance().contains(log_check));
+  REQUIRE(test_controller.getLogTestController().contains(log_check));
 
   ss2.str("");
   ss2 << "key:" << SHA256_ATTR << " value:" << SHA256_CHECKSUM << "\n";
   log_check = ss2.str();
 
-  REQUIRE(LogTestController::getInstance().contains(log_check));
+  REQUIRE(test_controller.getLogTestController().contains(log_check));
 }
 
 TEST_CASE("TestingFailOnEmptyProperty", "[HashContentPropertiesCheck]") {
   using minifi::processors::HashContent;
   TestController test_controller;
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::GetFile>();
-  LogTestController::getInstance().setTrace<core::ProcessSession>();
-  LogTestController::getInstance().setTrace<org::apache::nifi::minifi::processors::HashContent>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::GetFile>();
+  test_controller.getLogTestController().setTrace<core::ProcessSession>();
+  test_controller.getLogTestController().setTrace<org::apache::nifi::minifi::processors::HashContent>();
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
   auto tempdir = test_controller.createTempDirectory();
@@ -153,7 +153,7 @@ TEST_CASE("TestingFailOnEmptyProperty", "[HashContentPropertiesCheck]") {
     plan->runNextProcessor();
     plan->runNextProcessor();
 
-    REQUIRE(LogTestController::getInstance().contains("attempting read"));
+    REQUIRE(test_controller.getLogTestController().contains("attempting read"));
   }
   SECTION("with an empty file and fail on empty property set to true") {
     plan->setProperty(md5processor, HashContent::FailOnEmpty, "true");
@@ -161,7 +161,7 @@ TEST_CASE("TestingFailOnEmptyProperty", "[HashContentPropertiesCheck]") {
     plan->runNextProcessor();
     plan->runNextProcessor();
 
-    REQUIRE(LogTestController::getInstance().contains("Failure as flow file is empty"));
+    REQUIRE(test_controller.getLogTestController().contains("Failure as flow file is empty"));
   }
 }
 

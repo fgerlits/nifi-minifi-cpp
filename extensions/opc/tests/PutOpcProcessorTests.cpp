@@ -172,7 +172,7 @@ TEST_CASE("Test missing path reference types", "[putopcprocessor]") {
 TEST_CASE("Test namespace cannot be empty", "[putopcprocessor]") {
   OpcUaTestServer server;
   server.start();
-  LogTestController::getInstance().setTrace<processors::PutOPCProcessor>();
+  test_controller.getLogTestController().setTrace<processors::PutOPCProcessor>();
   SingleProcessorTestController controller{minifi::test::utils::make_processor<processors::PutOPCProcessor>("PutOPCProcessor")};
   auto put_opc_processor = controller.getProcessor();
   REQUIRE(put_opc_processor->setProperty(processors::PutOPCProcessor::OPCServerEndPoint.name, "opc.tcp://127.0.0.1:4840/"));
@@ -189,13 +189,13 @@ TEST_CASE("Test namespace cannot be empty", "[putopcprocessor]") {
   REQUIRE(results.at(processors::PutOPCProcessor::Failure).size() == 1);
   auto flow_file = results.at(processors::PutOPCProcessor::Failure)[0];
   CHECK(controller.plan->getContent(flow_file) == "42");
-  REQUIRE(LogTestController::getInstance().contains("had no target namespace index specified, routing to failure"));
+  REQUIRE(test_controller.getLogTestController().contains("had no target namespace index specified, routing to failure"));
 }
 
 TEST_CASE("Test valid namespace being required", "[putopcprocessor]") {
   OpcUaTestServer server;
   server.start();
-  LogTestController::getInstance().setTrace<processors::PutOPCProcessor>();
+  test_controller.getLogTestController().setTrace<processors::PutOPCProcessor>();
   SingleProcessorTestController controller{minifi::test::utils::make_processor<processors::PutOPCProcessor>("PutOPCProcessor")};
   auto put_opc_processor = controller.getProcessor();
   REQUIRE(put_opc_processor->setProperty(processors::PutOPCProcessor::OPCServerEndPoint.name, "opc.tcp://127.0.0.1:4840/"));
@@ -212,7 +212,7 @@ TEST_CASE("Test valid namespace being required", "[putopcprocessor]") {
   REQUIRE(results.at(processors::PutOPCProcessor::Failure).size() == 1);
   auto flow_file = results.at(processors::PutOPCProcessor::Failure)[0];
   CHECK(controller.plan->getContent(flow_file) == "42");
-  REQUIRE(LogTestController::getInstance().contains("has invalid namespace index (invalid_index), routing to failure"));
+  REQUIRE(test_controller.getLogTestController().contains("has invalid namespace index (invalid_index), routing to failure"));
 }
 
 TEST_CASE("Test username and password should both be provided", "[putopcprocessor]") {
@@ -320,7 +320,7 @@ TEST_CASE("Test invalid parent node id path", "[putopcprocessor]") {
   const auto results = controller.trigger("42");
   REQUIRE(results.at(processors::PutOPCProcessor::Success).empty());
   REQUIRE(results.at(processors::PutOPCProcessor::Failure).empty());
-  REQUIRE(LogTestController::getInstance().contains("to node id, no flow files will be put"));
+  REQUIRE(test_controller.getLogTestController().contains("to node id, no flow files will be put"));
 }
 
 TEST_CASE("Test missing target node id", "[putopcprocessor]") {
@@ -343,7 +343,7 @@ TEST_CASE("Test missing target node id", "[putopcprocessor]") {
   REQUIRE(results.at(processors::PutOPCProcessor::Failure).size() == 1);
   auto flow_file = results.at(processors::PutOPCProcessor::Failure)[0];
   CHECK(controller.plan->getContent(flow_file) == "42");
-  REQUIRE(LogTestController::getInstance().contains("had target node ID type specified (Int) without ID, routing to failure"));
+  REQUIRE(test_controller.getLogTestController().contains("had target node ID type specified (Int) without ID, routing to failure"));
 }
 
 TEST_CASE("Test invalid target node id", "[putopcprocessor]") {
@@ -366,7 +366,7 @@ TEST_CASE("Test invalid target node id", "[putopcprocessor]") {
   REQUIRE(results.at(processors::PutOPCProcessor::Failure).size() == 1);
   auto flow_file = results.at(processors::PutOPCProcessor::Failure)[0];
   CHECK(controller.plan->getContent(flow_file) == "42");
-  REQUIRE(LogTestController::getInstance().contains("target node ID is not a valid integer: invalid_int. Routing to failure"));
+  REQUIRE(test_controller.getLogTestController().contains("target node ID is not a valid integer: invalid_int. Routing to failure"));
 }
 
 TEST_CASE("Test missing target node type", "[putopcprocessor]") {
@@ -389,7 +389,7 @@ TEST_CASE("Test missing target node type", "[putopcprocessor]") {
   REQUIRE(results.at(processors::PutOPCProcessor::Failure).size() == 1);
   auto flow_file = results.at(processors::PutOPCProcessor::Failure)[0];
   CHECK(controller.plan->getContent(flow_file) == "42");
-  REQUIRE(LogTestController::getInstance().contains("target node ID type is invalid: invalid. Routing to failure!"));
+  REQUIRE(test_controller.getLogTestController().contains("target node ID type is invalid: invalid. Routing to failure!"));
 }
 
 TEST_CASE("Test value type mismatch", "[putopcprocessor]") {
@@ -412,7 +412,7 @@ TEST_CASE("Test value type mismatch", "[putopcprocessor]") {
   REQUIRE(results.at(processors::PutOPCProcessor::Failure).size() == 1);
   auto flow_file = results.at(processors::PutOPCProcessor::Failure)[0];
   CHECK(controller.plan->getContent(flow_file) == "42");
-  REQUIRE(LogTestController::getInstance().contains("Failed to convert 42 to data type Boolean"));
+  REQUIRE(test_controller.getLogTestController().contains("Failed to convert 42 to data type Boolean"));
 }
 
 }  // namespace org::apache::nifi::minifi::test

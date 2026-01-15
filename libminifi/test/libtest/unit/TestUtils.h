@@ -94,39 +94,6 @@ class ManualClock : public minifi::utils::timeutils::SteadyClock {
   std::chrono::milliseconds time_{0};
 };
 
-template <class Rep, class Period, typename Fun>
-bool verifyEventHappenedInPollTime(
-    const std::chrono::duration<Rep, Period>& wait_duration,
-    Fun&& check,
-    std::chrono::microseconds check_interval = std::chrono::milliseconds(100)) {
-  std::chrono::steady_clock::time_point wait_end = std::chrono::steady_clock::now() + wait_duration;
-  do {
-    if (std::forward<Fun>(check)()) {
-      return true;
-    }
-    std::this_thread::sleep_for(check_interval);
-  } while (std::chrono::steady_clock::now() < wait_end);
-  return false;
-}
-
-template <class Rep, class Period, typename ...String>
-bool verifyLogLinePresenceInPollTime(const std::chrono::duration<Rep, Period>& wait_duration, String&&... patterns) {
-  auto check = [&patterns...] {
-    const std::string logs = LogTestController::getInstance().getLogs();
-    return ((logs.find(patterns) != std::string::npos) && ...);
-  };
-  return verifyEventHappenedInPollTime(wait_duration, check);
-}
-
-template <class Rep, class Period, typename ...String>
-bool verifyLogLineVariantPresenceInPollTime(const std::chrono::duration<Rep, Period>& wait_duration, String&&... patterns) {
-  auto check = [&patterns...] {
-    const std::string logs = LogTestController::getInstance().getLogs();
-    return ((logs.find(patterns) != std::string::npos) || ...);
-  };
-  return verifyEventHappenedInPollTime(wait_duration, check);
-}
-
 namespace internal {
 struct JsonContext {
   const JsonContext *parent{nullptr};

@@ -45,10 +45,10 @@ TEST_CASE("Test Creation of PutFile", "[getfileCreate]") {
 TEST_CASE("PutFileTest", "[getfileputpfile]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
-  LogTestController::getInstance().setDebug<TestPlan>();
-  LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::PutFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
@@ -85,9 +85,9 @@ TEST_CASE("PutFileTest", "[getfileputpfile]") {
 
   std::filesystem::remove(path);
 
-  REQUIRE(true == LogTestController::getInstance().contains("key:absolute.path value:" + (dir / "").string()));
-  REQUIRE(true == LogTestController::getInstance().contains("Size:8 Offset:0"));
-  REQUIRE(true == LogTestController::getInstance().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
+  REQUIRE(true == test_controller.getLogTestController().contains("key:absolute.path value:" + (dir / "").string()));
+  REQUIRE(true == test_controller.getLogTestController().contains("Size:8 Offset:0"));
+  REQUIRE(true == test_controller.getLogTestController().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
   // verify that the fle was moved
   REQUIRE(false == std::ifstream(path).good());
   auto moved_path = putfiledir / "tstFile.ext";
@@ -99,16 +99,16 @@ TEST_CASE("PutFileTest", "[getfileputpfile]") {
                        std::istreambuf_iterator<char>());
   REQUIRE("tempFile" == contents);
   file.close();
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("PutFileTestFileExists", "[getfileputpfile]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
-  LogTestController::getInstance().setDebug<TestPlan>();
-  LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::PutFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
@@ -151,23 +151,23 @@ TEST_CASE("PutFileTestFileExists", "[getfileputpfile]") {
 
   std::filesystem::remove(path);
 
-  REQUIRE(true == LogTestController::getInstance().contains("key:absolute.path value:" + (dir / "").string()));
-  REQUIRE(true == LogTestController::getInstance().contains("Size:8 Offset:0"));
-  REQUIRE(true == LogTestController::getInstance().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
+  REQUIRE(true == test_controller.getLogTestController().contains("key:absolute.path value:" + (dir / "").string()));
+  REQUIRE(true == test_controller.getLogTestController().contains("Size:8 Offset:0"));
+  REQUIRE(true == test_controller.getLogTestController().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
   // verify that the fle was moved
   REQUIRE(false == std::ifstream(path).good());
   REQUIRE(true == std::ifstream(moved_path).good());
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("PutFileTestFileExistsIgnore", "[getfileputpfile]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
-  LogTestController::getInstance().setDebug<TestPlan>();
-  LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::PutFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
@@ -213,23 +213,23 @@ TEST_CASE("PutFileTestFileExistsIgnore", "[getfileputpfile]") {
 
   std::filesystem::remove(path);
 
-  REQUIRE(true == LogTestController::getInstance().contains("key:absolute.path value:" + (dir / "").string() ));
-  REQUIRE(true == LogTestController::getInstance().contains("Size:8 Offset:0"));
-  REQUIRE(true == LogTestController::getInstance().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
+  REQUIRE(true == test_controller.getLogTestController().contains("key:absolute.path value:" + (dir / "").string() ));
+  REQUIRE(true == test_controller.getLogTestController().contains("Size:8 Offset:0"));
+  REQUIRE(true == test_controller.getLogTestController().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
   // verify that the fle was moved
   REQUIRE(false == std::ifstream(path).good());
   REQUIRE(true == std::ifstream(moved_path).good());
   REQUIRE(file_mod_time == utils::file::last_write_time(moved_path));
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("PutFileTestFileExistsReplace", "[getfileputpfile]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
-  LogTestController::getInstance().setDebug<TestPlan>();
-  LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::PutFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
@@ -275,25 +275,25 @@ TEST_CASE("PutFileTestFileExistsReplace", "[getfileputpfile]") {
 
   std::filesystem::remove(path);
 
-  REQUIRE(true == LogTestController::getInstance().contains("key:absolute.path value:" + (dir / "").string()));
-  REQUIRE(true == LogTestController::getInstance().contains("Size:8 Offset:0"));
-  REQUIRE(true == LogTestController::getInstance().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
+  REQUIRE(true == test_controller.getLogTestController().contains("key:absolute.path value:" + (dir / "").string()));
+  REQUIRE(true == test_controller.getLogTestController().contains("Size:8 Offset:0"));
+  REQUIRE(true == test_controller.getLogTestController().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
   // verify that the fle was moved
   REQUIRE(false == std::ifstream(path).good());
   REQUIRE(true == std::ifstream(moved_path).good());
 #ifndef WIN32
   REQUIRE(file_mod_time != utils::file::last_write_time(moved_path));
 #endif
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("PutFileMaxFileCountTest", "[getfileputpfilemaxcount]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
-  LogTestController::getInstance().setDebug<TestPlan>();
-  LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::PutFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
@@ -329,9 +329,9 @@ TEST_CASE("PutFileMaxFileCountTest", "[getfileputpfilemaxcount]") {
   test_controller.runSession(plan);
 
 
-  REQUIRE(LogTestController::getInstance().contains("key:absolute.path value:" + (dir / "").string()));
-  REQUIRE(LogTestController::getInstance().contains("Size:8 Offset:0"));
-  REQUIRE(LogTestController::getInstance().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
+  REQUIRE(test_controller.getLogTestController().contains("key:absolute.path value:" + (dir / "").string()));
+  REQUIRE(test_controller.getLogTestController().contains("Size:8 Offset:0"));
+  REQUIRE(test_controller.getLogTestController().contains("key:path value:" + (std::filesystem::path(".") / "").string()));
 
   // Only 1 of the 2 files should make it to the target dir
   // Non-deterministic, so let's just count them
@@ -348,17 +348,17 @@ TEST_CASE("PutFileMaxFileCountTest", "[getfileputpfilemaxcount]") {
 
   REQUIRE(files_in_dir == 1);
 
-  REQUIRE(LogTestController::getInstance().contains("which exceeds the configured max number of files"));
+  REQUIRE(test_controller.getLogTestController().contains("which exceeds the configured max number of files"));
 
-  LogTestController::getInstance().reset();
+  test_controller.getLogTestController().reset();
 }
 
 TEST_CASE("PutFileEmptyTest", "[EmptyFilePutTest]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
-  LogTestController::getInstance().setDebug<TestPlan>();
-  LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::PutFile>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
@@ -389,9 +389,9 @@ TEST_CASE("PutFileEmptyTest", "[EmptyFilePutTest]") {
 TEST_CASE("TestPutFilePermissions", "[PutFilePermissions]") {
   TestController test_controller;
 
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
-  LogTestController::getInstance().setDebug<TestPlan>();
-  LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::PutFile>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
 
@@ -425,10 +425,10 @@ TEST_CASE("TestPutFilePermissions", "[PutFilePermissions]") {
 
 TEST_CASE("PutFileCreateDirectoryTest", "[PutFileProperties]") {
   TestController test_controller;
-  LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
-  LogTestController::getInstance().setDebug<TestPlan>();
-  LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
-  LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+  test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
+  test_controller.getLogTestController().setDebug<TestPlan>();
+  test_controller.getLogTestController().setDebug<minifi::processors::PutFile>();
+  test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
   std::shared_ptr<TestPlan> plan = test_controller.createPlan();
   auto getfile = plan->addProcessor("GetFile", "getfileCreate2");

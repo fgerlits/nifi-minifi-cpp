@@ -59,9 +59,9 @@ int main(int argc, char* argv[]) {
 class VolatileMapStateStorageTestFixture {
  public:
   VolatileMapStateStorageTestFixture() {
-    LogTestController::getInstance().setTrace<TestPlan>();
-    LogTestController::getInstance().setTrace<minifi::controllers::KeyValueStateStorage>();
-    LogTestController::getInstance().setTrace<minifi::controllers::AutoPersistor>();
+    test_controller.getLogTestController().setTrace<TestPlan>();
+    test_controller.getLogTestController().setTrace<minifi::controllers::KeyValueStateStorage>();
+    test_controller.getLogTestController().setTrace<minifi::controllers::AutoPersistor>();
 
     std::filesystem::current_path(test_controller.createTempDirectory());
 
@@ -85,7 +85,7 @@ class VolatileMapStateStorageTestFixture {
 
   virtual ~VolatileMapStateStorageTestFixture() {
     std::filesystem::current_path(minifi::utils::file::get_executable_dir());
-    LogTestController::getInstance().reset();
+    test_controller.getLogTestController().reset();
   }
 
  protected:

@@ -37,12 +37,12 @@ class AttributesToJSONTestFixture {
   const std::string TEST_FILE_NAME = "tstFile.ext";
 
   AttributesToJSONTestFixture() {
-    LogTestController::getInstance().setTrace<TestPlan>();
-    LogTestController::getInstance().setDebug<minifi::processors::AttributesToJSON>();
-    LogTestController::getInstance().setDebug<minifi::processors::GetFile>();
-    LogTestController::getInstance().setDebug<minifi::processors::PutFile>();
-    LogTestController::getInstance().setDebug<minifi::processors::UpdateAttribute>();
-    LogTestController::getInstance().setDebug<minifi::processors::LogAttribute>();
+    test_controller.getLogTestController().setTrace<TestPlan>();
+    test_controller.getLogTestController().setDebug<minifi::processors::AttributesToJSON>();
+    test_controller.getLogTestController().setDebug<minifi::processors::GetFile>();
+    test_controller.getLogTestController().setDebug<minifi::processors::PutFile>();
+    test_controller.getLogTestController().setDebug<minifi::processors::UpdateAttribute>();
+    test_controller.getLogTestController().setDebug<minifi::processors::LogAttribute>();
 
     dir_ = test_controller_.createTempDirectory();
 
@@ -65,7 +65,7 @@ class AttributesToJSONTestFixture {
   }
 
   static void assertJSONAttributesFromLog(const std::unordered_map<std::string, std::optional<std::string>>& expected_attributes) {
-    auto match = LogTestController::getInstance().matchesRegex("key:JSONAttributes value:(.*)");
+    auto match = test_controller.getLogTestController().matchesRegex("key:JSONAttributes value:(.*)");
     REQUIRE(match);
     assertAttributes(expected_attributes, (*match)[1]);
   }

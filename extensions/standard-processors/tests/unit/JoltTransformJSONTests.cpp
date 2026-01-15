@@ -307,7 +307,7 @@ TEST_CASE("Run tests from https://github.com/bazaarvoice/jolt") {
 
     SingleProcessorTestController controller{minifi::test::utils::make_processor<minifi::processors::JoltTransformJSON>("JoltProc")};
     auto proc = controller.getProcessor();
-    LogTestController::getInstance().setTrace<minifi::processors::JoltTransformJSON>();
+    test_controller.getLogTestController().setTrace<minifi::processors::JoltTransformJSON>();
     controller.plan->setProperty(proc, processors::JoltTransformJSON::JoltTransform, magic_enum::enum_name(processors::jolt_transform_json::JoltTransform::Shift));
     controller.plan->setProperty(proc, processors::JoltTransformJSON::JoltSpecification, to_string(doc["spec"]));
 

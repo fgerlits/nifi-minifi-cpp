@@ -31,7 +31,7 @@ class ExecuteProcessTestsFixture {
   ExecuteProcessTestsFixture()
       : controller_(minifi::test::utils::make_processor<processors::ExecuteProcess>("ExecuteProcess")),
         execute_process_(controller_.getProcessor()) {
-    LogTestController::getInstance().setTrace<processors::ExecuteProcess>();
+    test_controller.getLogTestController().setTrace<processors::ExecuteProcess>();
   }
  protected:
   test::SingleProcessorTestController controller_;
