@@ -158,8 +158,9 @@ void LogTestController::reset() {
     setLevel(name, spdlog::level::err);
   }
   modified_loggers.clear();
-  if (config)
-    config = logging::LoggerConfiguration::newInstance();
+  if (config) {
+    config = std::make_unique<logging::LoggerConfiguration>();
+  }
   my_properties_ = std::make_shared<logging::LoggerProperties>("");
   clear();
   init(nullptr);
@@ -195,7 +196,7 @@ void LogTestController::init(const std::shared_ptr<logging::LoggerProperties>& l
     logging::LoggerConfiguration::getConfiguration().initialize(my_properties_);
     logger_ = logging::LoggerConfiguration::getConfiguration().getLogger(minifi::core::className<LogTestController>());
   } else {
-    config = logging::LoggerConfiguration::newInstance();
+    config = std::make_unique<logging::LoggerConfiguration>();
     // create for test purposes. most tests use the main logging factory, but this exists to test the logging
     // framework itself.
     config->initialize(my_properties_);

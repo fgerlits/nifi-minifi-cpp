@@ -228,7 +228,7 @@ class LoggerTestAccessor {
 };
 
 TEST_CASE("Test Compression", "[ttl9]") {
-  auto log_config = logging::LoggerConfiguration::newInstance();
+  logging::LoggerConfiguration log_config;
   auto properties = std::make_shared<logging::LoggerProperties>("");
   std::string className;
   SECTION("Using root logger") {
@@ -241,38 +241,38 @@ TEST_CASE("Test Compression", "[ttl9]") {
     properties->set("appender.null", "null");
     properties->set("logger." + className, "INFO,null");
   }
-  log_config->initialize(properties);
-  auto logger = log_config->getLogger(className);
+  log_config.initialize(properties);
+  auto logger = log_config.getLogger(className);
   logger->log_error("Hi there");
 
-  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(*log_config));
-  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(*log_config);
+  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(log_config));
+  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(log_config);
   REQUIRE(compressed_logs.size() == 1);
   auto logs = decompress(compressed_logs[0]);
   REQUIRE(logs.find("Hi there") != std::string::npos);
 }
 
 TEST_CASE("Test Compression cache overflow is discarded intermittently", "[ttl10]") {
-  auto log_config = logging::LoggerConfiguration::newInstance();
+  logging::LoggerConfiguration log_config;
   auto properties = std::make_shared<logging::LoggerProperties>("");
   properties->set(logging::internal::CompressionManager::compression_cached_log_max_size_, "10 KB");
-  LoggerTestAccessor::setCompressionCacheSegmentSize(*log_config, 1_KiB);
+  LoggerTestAccessor::setCompressionCacheSegmentSize(log_config, 1_KiB);
   std::string className = "CompressionTestCacheCleaned";
   // by default the root logger is OFF
   properties->set("logger.root", "INFO");
-  log_config->initialize(properties);
-  auto logger = log_config->getLogger(className);
+  log_config.initialize(properties);
+  auto logger = log_config.getLogger(className);
   for (size_t idx = 0; idx < 10000; ++idx) {
     logger->log_error("Hi there");
   }
   bool cache_shrunk = minifi::test::utils::verifyEventHappenedInPollTime(std::chrono::seconds{1}, [&] {
-    return LoggerTestAccessor::getUncompressedSize(*log_config) <= 10_KiB;
+    return LoggerTestAccessor::getUncompressedSize(log_config) <= 10_KiB;
   });
   REQUIRE(cache_shrunk);
 }
 
 TEST_CASE("Setting either properties to 0 disables in-memory compressed logs", "[ttl11]") {
-  auto log_config = logging::LoggerConfiguration::newInstance();
+  logging::LoggerConfiguration log_config;
   auto properties = std::make_shared<logging::LoggerProperties>("");
   bool is_empty = false;
   SECTION("Cached log size is set to 0") {
@@ -289,26 +289,26 @@ TEST_CASE("Setting either properties to 0 disables in-memory compressed logs", "
   }
   // by default the root logger is OFF
   properties->set("logger.root", "INFO");
-  log_config->initialize(properties);
-  auto logger = log_config->getLogger("DisableCompressionTestLogger");
+  log_config.initialize(properties);
+  auto logger = log_config.getLogger("DisableCompressionTestLogger");
   logger->log_error("Hi there");
 
-  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(*log_config));
-  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(*log_config);
+  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(log_config));
+  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(log_config);
   REQUIRE(compressed_logs.empty() == is_empty);
 }
 
 TEST_CASE("Setting max log entry length property trims long log entries", "[ttl12]") {
-  auto log_config = logging::LoggerConfiguration::newInstance();
+  logging::LoggerConfiguration log_config;
   auto properties = std::make_shared<logging::LoggerProperties>("");
   properties->set("max.log.entry.length", "2");
   properties->set("logger.root", "INFO");
-  log_config->initialize(properties);
-  auto logger = log_config->getLogger("SetMaxLogEntryLengthTestLogger");
+  log_config.initialize(properties);
+  auto logger = log_config.getLogger("SetMaxLogEntryLengthTestLogger");
   logger->log_error("Hi there");
 
-  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(*log_config));
-  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(*log_config);
+  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(log_config));
+  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(log_config);
   REQUIRE(compressed_logs.size() == 1);
   auto logs = decompress(compressed_logs[0]);
   REQUIRE(logs.find("Hi ") == std::string::npos);
@@ -316,16 +316,16 @@ TEST_CASE("Setting max log entry length property trims long log entries", "[ttl1
 }
 
 TEST_CASE("Setting max log entry length property trims long formatted log entries", "[ttl13]") {
-  auto log_config = logging::LoggerConfiguration::newInstance();
+  logging::LoggerConfiguration log_config;
   auto properties = std::make_shared<logging::LoggerProperties>("");
   properties->set("max.log.entry.length", "2");
   properties->set("logger.root", "INFO");
-  log_config->initialize(properties);
-  auto logger = log_config->getLogger("SetMaxLogEntryLengthInFormattedTestLogger");
+  log_config.initialize(properties);
+  auto logger = log_config.getLogger("SetMaxLogEntryLengthInFormattedTestLogger");
   logger->log_error("Hi there {}", "John");
 
-  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(*log_config));
-  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(*log_config);
+  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(log_config));
+  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(log_config);
   REQUIRE(compressed_logs.size() == 1);
   auto logs = decompress(compressed_logs[0]);
   REQUIRE(logs.find("Hi ") == std::string::npos);
@@ -333,18 +333,18 @@ TEST_CASE("Setting max log entry length property trims long formatted log entrie
 }
 
 TEST_CASE("Setting max log entry length to a size larger than the internal buffer size", "[ttl14]") {
-  auto log_config = logging::LoggerConfiguration::newInstance();
+  logging::LoggerConfiguration log_config;
   auto properties = std::make_shared<logging::LoggerProperties>("");
   properties->set("max.log.entry.length", "1500");
   properties->set("logger.root", "INFO");
-  log_config->initialize(properties);
-  auto logger = log_config->getLogger("SetMaxLogEntryLengthToLargerThanBufferSizeTestLogger");
+  log_config.initialize(properties);
+  auto logger = log_config.getLogger("SetMaxLogEntryLengthToLargerThanBufferSizeTestLogger");
   std::string log(2000, 'a');
   std::string expected_log(1500, 'a');
   logger->log_error("{}", log);
 
-  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(*log_config));
-  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(*log_config);
+  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(log_config));
+  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(log_config);
   REQUIRE(compressed_logs.size() == 1);
   auto logs = decompress(compressed_logs[0]);
   REQUIRE(logs.find(log) == std::string::npos);
@@ -352,7 +352,7 @@ TEST_CASE("Setting max log entry length to a size larger than the internal buffe
 }
 
 TEST_CASE("Setting max log entry length to unlimited results in unlimited log entry size", "[ttl15]") {
-  auto log_config = logging::LoggerConfiguration::newInstance();
+  logging::LoggerConfiguration log_config;
   auto properties = std::make_shared<logging::LoggerProperties>("");
   std::string_view logger_name;
   SECTION("Use unlimited value") {
@@ -364,13 +364,13 @@ TEST_CASE("Setting max log entry length to unlimited results in unlimited log en
     logger_name = "SetMaxLogEntryLengthTo-1TestLogger";
   }
   properties->set("logger.root", "INFO");
-  log_config->initialize(properties);
-  auto logger = log_config->getLogger(logger_name);
+  log_config.initialize(properties);
+  auto logger = log_config.getLogger(logger_name);
   std::string log(5000, 'a');
   logger->log_error("{}", log);
 
-  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(*log_config));
-  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(*log_config);
+  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(log_config));
+  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(log_config);
   REQUIRE(compressed_logs.size() == 1);
   auto logs = decompress(compressed_logs[0]);
   REQUIRE(logs.find(log) != std::string::npos);
@@ -417,22 +417,22 @@ std::vector<std::string> generateRandomStrings() {
 }
 
 TEST_CASE("Test sending multiple segments at once", "[ttl16]") {
-  auto log_config = logging::LoggerConfiguration::newInstance();
-  LoggerTestAccessor::setCompressionCompressedSegmentSize(*log_config, 100);
-  LoggerTestAccessor::setCompressionCacheSegmentSize(*log_config, 100);
+  logging::LoggerConfiguration log_config;
+  LoggerTestAccessor::setCompressionCompressedSegmentSize(log_config, 100);
+  LoggerTestAccessor::setCompressionCacheSegmentSize(log_config, 100);
   auto properties = std::make_shared<logging::LoggerProperties>("");
   // by default the root logger is OFF
   properties->set("logger.root", "INFO");
-  log_config->initialize(properties);
-  auto logger = log_config->getLogger("CompressionTestMultiSegment");
+  log_config.initialize(properties);
+  auto logger = log_config.getLogger("CompressionTestMultiSegment");
 
   const auto random_strings = generateRandomStrings();
   for (const auto& random_string : random_strings) {
     logger->log_error("{}", random_string);
   }
 
-  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(*log_config));
-  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(*log_config);
+  REQUIRE(LoggerTestAccessor::waitForCompressionToHappen(log_config));
+  auto compressed_logs = LoggerTestAccessor::getCompressedLogs(log_config);
   REQUIRE(compressed_logs.size() == random_strings.size());
   for (size_t i = 0; i < compressed_logs.size(); ++i) {
     auto logs = decompress(compressed_logs[i]);
