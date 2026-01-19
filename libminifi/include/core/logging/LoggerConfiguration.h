@@ -71,14 +71,8 @@ class LoggerConfiguration {
   friend class ::LogTestController;
 
  public:
-  /**
-   * Gets the current log configuration
-   */
+  LoggerConfiguration();  // used in some tests only
   static LoggerConfiguration& getConfiguration();
-
-  static std::unique_ptr<LoggerConfiguration> newInstance() {
-    return std::unique_ptr<LoggerConfiguration>(new LoggerConfiguration());  // NOLINT(modernize-make-unique, cppcoreguidelines-owning-memory
-  }
 
   void disableLogging() {
     controller_->setEnabled(false);
@@ -163,7 +157,6 @@ class LoggerConfiguration {
 
   static std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> getRotatingFileSink(const std::string& appender_key, const std::shared_ptr<LoggerProperties>& properties);
 
-  LoggerConfiguration();
   internal::CompressionManager compression_manager_;
   std::shared_ptr<internal::LoggerNamespace> root_namespace_;
 
