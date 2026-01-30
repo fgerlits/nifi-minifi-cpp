@@ -13,16 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from behave import step, given, then
+
 from minifi_test_framework.steps import checking_steps  # noqa: F401
 from minifi_test_framework.steps import configuration_steps  # noqa: F401
 from minifi_test_framework.steps import core_steps  # noqa: F401
 from minifi_test_framework.steps import flow_building_steps  # noqa: F401
 
+from minifi_test_framework.minifi.processor import Processor
 
 @given("a {processor_type} processor in a Kubernetes cluster")
 @given("a {processor_type} processor in the Kubernetes cluster")
 def step_impl(context, processor_type):
-    __create_processor(context, processor_type, processor_type, None, None, "kubernetes", "kubernetes")
+    processor = Processor(processor_type, processor_type)
+    context.get_or_create_minifi_container(minifi_container_name).flow_definition.add_processor(processor)
 
 
 # Kubernetes
