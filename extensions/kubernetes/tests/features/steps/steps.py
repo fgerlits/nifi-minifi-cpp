@@ -22,16 +22,26 @@ from minifi_test_framework.steps import flow_building_steps  # noqa: F401
 
 from minifi_test_framework.minifi.processor import Processor
 
+from behave_framework.src.minifi_test_framework.minifi.controller_service import ControllerService
+from minifi_as_pod_in_kubernetes_cluster import MinifiAsPodInKubernetesCluster
+
+
+@given("a MiNiFi set up in a Kubernetes cluster")
+def step_impl(context):
+    context.containers["kubernetes"] = MinifiAsPodInKubernetesCluster(context)
+
+
 @given("a {processor_type} processor in a Kubernetes cluster")
 @given("a {processor_type} processor in the Kubernetes cluster")
 def step_impl(context, processor_type):
     processor = Processor(processor_type, processor_type)
-    context.get_or_create_minifi_container(minifi_container_name).flow_definition.add_processor(processor)
+    context.get_or_create_minifi_container("kubernetes").flow_definition.add_processor(processor)
 
 
 # Kubernetes
 def __set_up_the_kubernetes_controller_service(context, processor_name, service_property_name, properties):
-    kubernetes_controller_service = KubernetesControllerService("Kubernetes Controller Service", properties)
+    kubernetes_controller_service = ControllerService(class_name="KubernetesControllerService", service_name="Kubernetes Controller Service")
+    context.get_or_create_minifi_container("kubernetes").flow_definition.controller_services.append(kubernetes_controller_service)
     processor = context.test.get_node_by_name(processor_name)
     processor.controller_services.append(kubernetes_controller_service)
     processor.set_property(service_property_name, kubernetes_controller_service.name)

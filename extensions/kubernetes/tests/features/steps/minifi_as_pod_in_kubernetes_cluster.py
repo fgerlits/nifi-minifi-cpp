@@ -19,15 +19,15 @@ import logging
 import os
 import shutil
 
-from ..LogSource import LogSource
-from .MinifiContainer import MinifiContainer
+from minifi_test_framework.containers.minifi_container import MinifiContainer
+from kubernetes_proxy import KubernetesProxy
 
 
 class MinifiAsPodInKubernetesCluster(MinifiContainer):
     MINIFI_IMAGE_NAME = 'apacheminificpp'
     MINIFI_IMAGE_TAG = 'docker_test'
 
-    def __init__(self, feature_context, kubernetes_proxy, config_dir, minifi_options, name, vols, network, image_store, command=None):
+    def __init__(self, feature_context, config_dir, minifi_options, name, vols, network, image_store, command=None):
         test_dir = os.environ['TEST_DIRECTORY']
         shutil.copy(os.path.join(test_dir, 'resources', 'kubernetes', 'minifi-conf', 'minifi.properties'), config_dir)
         shutil.copy(os.path.join(test_dir, 'resources', 'kubernetes', 'minifi-conf', 'minifi-log.properties'), config_dir)
@@ -40,7 +40,7 @@ class MinifiAsPodInKubernetesCluster(MinifiContainer):
                          image_store=image_store,
                          command=command)
 
-        self.kubernetes_proxy = kubernetes_proxy
+        self.kubernetes_proxy = KubernetesProxy()
 
         docker_client = docker.from_env()
         minifi_image = docker_client.images.get(MinifiAsPodInKubernetesCluster.MINIFI_IMAGE_NAME + ':' + MinifiContainer.MINIFI_TAG_PREFIX + MinifiContainer.MINIFI_VERSION)
@@ -61,9 +61,6 @@ class MinifiAsPodInKubernetesCluster(MinifiContainer):
         self.kubernetes_proxy.create_minifi_pod()
 
         logging.info('Finished setting up container: %s', self.name)
-
-    def log_source(self):
-        return LogSource.FROM_GET_APP_LOG_METHOD
 
     def get_app_log(self):
         return 'OK', self.kubernetes_proxy.get_logs('daemon', 'minifi')
