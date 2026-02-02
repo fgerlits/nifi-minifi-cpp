@@ -20,15 +20,15 @@ from minifi_test_framework.steps import configuration_steps  # noqa: F401
 from minifi_test_framework.steps import core_steps  # noqa: F401
 from minifi_test_framework.steps import flow_building_steps  # noqa: F401
 
+from minifi_test_framework.core.minifi_test_context import MinifiTestContext
 from minifi_test_framework.minifi.processor import Processor
-
-from behave_framework.src.minifi_test_framework.minifi.controller_service import ControllerService
+from minifi_test_framework.minifi.controller_service import ControllerService
 from minifi_as_pod_in_kubernetes_cluster import MinifiAsPodInKubernetesCluster
 
 
 @given("a MiNiFi set up in a Kubernetes cluster")
-def step_impl(context):
-    context.containers["kubernetes"] = MinifiAsPodInKubernetesCluster(context)
+def step_impl(context: MinifiTestContext):
+    context.containers["kubernetes"] = MinifiAsPodInKubernetesCluster("kubernetes", context)
 
 
 @given("a {processor_type} processor in a Kubernetes cluster")
