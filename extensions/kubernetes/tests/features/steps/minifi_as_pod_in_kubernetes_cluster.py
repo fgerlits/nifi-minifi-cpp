@@ -13,13 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import docker
 import logging
-import os
-import shutil
 
 from minifi_test_framework.containers.minifi_container import MinifiContainer
+from minifi_test_framework.core.minifi_test_context import MinifiTestContext
 from kubernetes_proxy import KubernetesProxy
 
 
@@ -27,24 +25,28 @@ class MinifiAsPodInKubernetesCluster(MinifiContainer):
     MINIFI_IMAGE_NAME = 'apacheminificpp'
     MINIFI_IMAGE_TAG = 'docker_test'
 
-    def __init__(self, feature_context, config_dir, minifi_options, name, vols, network, image_store, command=None):
-        test_dir = os.environ['TEST_DIRECTORY']
-        shutil.copy(os.path.join(test_dir, 'resources', 'kubernetes', 'minifi-conf', 'minifi.properties'), config_dir)
-        shutil.copy(os.path.join(test_dir, 'resources', 'kubernetes', 'minifi-conf', 'minifi-log.properties'), config_dir)
-        super().__init__(feature_context=feature_context,
-                         config_dir=config_dir,
-                         options=minifi_options,
-                         name=name,
-                         vols=vols,
-                         network=network,
-                         image_store=image_store,
-                         command=command)
-
+    def __init__(self, container_name: str, test_context: MinifiTestContext):
+        super().__init__(container_name, test_context)
+        self._set_custom_properties()
         self.kubernetes_proxy = KubernetesProxy()
 
         docker_client = docker.from_env()
         minifi_image = docker_client.images.get(MinifiAsPodInKubernetesCluster.MINIFI_IMAGE_NAME + ':' + MinifiContainer.MINIFI_TAG_PREFIX + MinifiContainer.MINIFI_VERSION)
         minifi_image.tag(MinifiAsPodInKubernetesCluster.MINIFI_IMAGE_NAME, MinifiAsPodInKubernetesCluster.MINIFI_IMAGE_TAG)
+
+    def _set_custom_properties(self):
+        self.properties["nifi.administrative.yield.duration"] = "30 sec"
+        self.properties["nifi.bored.yield.duration"] = "100 millis"
+        self.properties["nifi.provenance.repository.max.storage.time"] = "1 MIN"
+        self.properties["nifi.provenance.repository.max.storage.size"] = "1 MB"
+        self.properties["nifi.provenance.repository.class.name"] = "NoOpRepository"
+        self.properties["nifi.content.repository.class.name"] = "DatabaseContentRepository"
+        self.properties["nifi.c2.root.classes"] = "DeviceInfoNode,AgentInformation,FlowInformation,AssetInformation"
+        self.properties["nifi.c2.full.heartbeat"] = "false"
+
+        self.log_properties["spdlog.pattern"] = "[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] %v"
+        self.log_properties["appender.stdout"] = "stdout"
+        self.log_properties["logger.root"] = "INFO,stdout"
 
     def _create_container_config_dir(self, config_dir):
         return config_dir
