@@ -12,16 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import docker
 import os
 
-from minifi_test_framework.core.hooks import common_before_scenario
-from minifi_test_framework.core.hooks import common_after_scenario
+from minifi_test_framework.core.hooks import common_after_scenario, common_before_scenario, get_minifi_container_image
 
 
 def before_feature(context, feature):
-    # should be based on context.get_default_minifi_container().is_fhs ? -- then we don't need the tag
     if "SKIP_RPM" in feature.tags and "rpm" in os.environ['MINIFI_TAG_PREFIX']:
         feature.skip("This feature is not yet supported on RPM installed images")
+
+    minifi_image = docker.from_env().images.get(get_minifi_container_image())
+    minifi_image.tag("apacheminificpp", "docker_test")
 
 
 def before_scenario(context, scenario):

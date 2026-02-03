@@ -22,17 +22,10 @@ from kubernetes_proxy import KubernetesProxy
 
 
 class MinifiAsPodInKubernetesCluster(MinifiContainer):
-    MINIFI_IMAGE_NAME = 'apacheminificpp'
-    MINIFI_IMAGE_TAG = 'docker_test'
-
     def __init__(self, container_name: str, test_context: MinifiTestContext):
         super().__init__(container_name, test_context)
         self._set_custom_properties()
         self.kubernetes_proxy = KubernetesProxy()
-
-        docker_client = docker.from_env()
-        minifi_image = docker_client.images.get(MinifiAsPodInKubernetesCluster.MINIFI_IMAGE_NAME + ':' + MinifiContainer.MINIFI_TAG_PREFIX + MinifiContainer.MINIFI_VERSION)
-        minifi_image.tag(MinifiAsPodInKubernetesCluster.MINIFI_IMAGE_NAME, MinifiAsPodInKubernetesCluster.MINIFI_IMAGE_TAG)
 
     def _set_custom_properties(self):
         self.properties["nifi.administrative.yield.duration"] = "30 sec"
