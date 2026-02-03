@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import docker
 import glob
 import logging
@@ -21,18 +20,19 @@ import os
 import re
 import stat
 import subprocess
+import tempfile
 import time
 import platform
 from textwrap import dedent
 
 
 class KubernetesProxy:
-    def __init__(self, temp_directory, resources_directory):
-        self.temp_directory = temp_directory
+    def __init__(self, resources_directory):
+        self.temp_directory = tempfile.TemporaryDirectory()
         self.resources_directory = resources_directory
 
-        self.kind_binary_path = os.path.join(self.temp_directory, 'kind')
-        self.kind_config_path = os.path.join(self.temp_directory, 'kind-config.yml')
+        self.kind_binary_path = os.path.join(self.temp_directory.name, 'kind')
+        self.kind_config_path = os.path.join(self.temp_directory.name, 'kind-config.yml')
         self.__download_kind()
         self.docker_client = docker.from_env()
 

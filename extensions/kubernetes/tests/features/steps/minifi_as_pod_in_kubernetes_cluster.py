@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import docker
 import logging
 
 from minifi_test_framework.containers.minifi_container import MinifiContainer
@@ -25,7 +24,7 @@ class MinifiAsPodInKubernetesCluster(MinifiContainer):
     def __init__(self, container_name: str, test_context: MinifiTestContext):
         super().__init__(container_name, test_context)
         self._set_custom_properties()
-        self.kubernetes_proxy = KubernetesProxy()
+        self.kubernetes_proxy = KubernetesProxy(resources_directory=__file__.resolve().parent / "resources")
 
     def _set_custom_properties(self):
         self.properties["nifi.administrative.yield.duration"] = "30 sec"
