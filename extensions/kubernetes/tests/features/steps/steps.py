@@ -41,10 +41,10 @@ def step_impl(context, processor_type):
 # Kubernetes
 def __set_up_the_kubernetes_controller_service(context, processor_name, service_property_name, properties):
     kubernetes_controller_service = ControllerService(class_name="KubernetesControllerService", service_name="Kubernetes Controller Service")
-    context.get_or_create_minifi_container("kubernetes").flow_definition.controller_services.append(kubernetes_controller_service)
-    processor = context.test.get_node_by_name(processor_name)
-    processor.controller_services.append(kubernetes_controller_service)
-    processor.set_property(service_property_name, kubernetes_controller_service.name)
+    kubernetes_controller_service.properties = properties
+    flow = context.containers["kubernetes"].flow_definition
+    flow.controller_services.append(kubernetes_controller_service)
+    flow.processors[processor_name].add_property(service_property_name, kubernetes_controller_service.name)
 
 
 @given("the {processor_name} processor has a {service_property_name} which is a Kubernetes Controller Service")
