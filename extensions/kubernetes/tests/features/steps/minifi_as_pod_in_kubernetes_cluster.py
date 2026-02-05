@@ -52,9 +52,10 @@ class MinifiAsPodInKubernetesCluster(MinifiContainer):
 
         logging.info('Finished setting up container: %s', self.name)
 
-    def get_app_log(self):
-        return 'OK', self.kubernetes_proxy.get_logs('daemon', 'minifi')
-
-    def cleanup(self):
-        # cleanup is done through the kubernetes cluster in the environment.py
-        pass
+    def get_logs(self) -> str:
+        logging.debug("Getting logs from container '%s'", self.container_name)
+        logs = self.kubernetes_proxy.get_logs('daemon', 'minifi')
+        if logs:
+            return logs
+        else:
+            return "No logs found"
