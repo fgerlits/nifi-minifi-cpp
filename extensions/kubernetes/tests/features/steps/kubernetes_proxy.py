@@ -26,6 +26,9 @@ import platform
 from textwrap import dedent
 
 
+KUBERNETES_CONTAINER_NAME = "kind-control-plane"
+
+
 class KubernetesProxy:
     def __init__(self, resources_directory):
         self.temp_directory = tempfile.TemporaryDirectory()
@@ -109,7 +112,7 @@ class KubernetesProxy:
 
     def __wait_for_pod_startup(self, namespace, pod_name):
         for _ in range(120):
-            (code, output) = self.docker_client.containers.get('kind-control-plane').exec_run(['kubectl', '-n', namespace, 'get', 'pods'])
+            (code, output) = self.docker_client.containers.get(KUBERNETES_CONTAINER_NAME).exec_run(['kubectl', '-n', namespace, 'get', 'pods'])
             if code == 0 and re.search(f'{pod_name}.*Running', output.decode('utf-8')):
                 return
             time.sleep(1)
@@ -117,7 +120,7 @@ class KubernetesProxy:
 
     def __wait_for_default_service_account(self, namespace):
         for _ in range(120):
-            (code, output) = self.docker_client.containers.get('kind-control-plane').exec_run(['kubectl', '-n', namespace, 'get', 'serviceaccount', 'default'])
+            (code, output) = self.docker_client.containers.get(KUBERNETES_CONTAINER_NAME).exec_run(['kubectl', '-n', namespace, 'get', 'serviceaccount', 'default'])
             if code == 0:
                 return
             time.sleep(1)
@@ -128,7 +131,7 @@ class KubernetesProxy:
         for full_file_name in glob.iglob(os.path.join(directory, f'*.{type}.yml')):
             file_name = os.path.basename(full_file_name)
             file_name_in_container = os.path.join('/var/tmp', file_name)
-            self.__copy_file_to_container(full_file_name, 'kind-control-plane', file_name_in_container)
+            self.copy_file_to_container(full_file_name, file_name_in_container)
 
             (code, output) = self.docker_client.containers.get('kind-control-plane').exec_run(['kubectl', 'apply', '-f', file_name_in_container])
             if code != 0:
@@ -149,8 +152,8 @@ class KubernetesProxy:
             else:
                 raise Exception("Could not delete kubernetes object from file '%s': %s", full_file_name, output.decode('utf-8'))
 
-    def __copy_file_to_container(self, host_file, container_name, container_file):
-        if subprocess.run(['docker', 'cp', host_file, container_name + ':' + container_file]).returncode != 0:
+    def copy_file_to_container(self, host_file, container_file):
+        if subprocess.run(['docker', 'cp', host_file, KUBERNETES_CONTAINER_NAME + ':' + container_file]).returncode != 0:
             raise Exception("Could not copy file '%s' into container '%s' as '%s'" % (host_file, container_name, container_file))
 
     def get_logs(self, namespace, pod_name):

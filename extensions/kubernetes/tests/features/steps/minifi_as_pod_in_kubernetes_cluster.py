@@ -14,6 +14,8 @@
 # limitations under the License.
 
 import logging
+import os
+import tempfile
 
 from minifi_test_framework.containers.minifi_container import MinifiContainer
 from minifi_test_framework.core.minifi_test_context import MinifiTestContext
@@ -42,15 +44,29 @@ class MinifiAsPodInKubernetesCluster(MinifiContainer):
         self.log_properties["appender.stdout"] = "stdout"
         self.log_properties["logger.root"] = "INFO,stdout"
 
-    def deploy(self):
-        logging.info('Setting up container: %s', self.name)
+    def __copy_file_to_kubernetes_container(self, temp_dir: str, file_name: str, file_content: str):
+        host_file = os.path.join(temp_dir, file_name)
+        container_file = os.path.join("/tmp/kubernetes_config", file_name)
+        self._write_content_to_file(host_file, None, file_content)
+        self.kubernetes_proxy.copy_file_to_container(host_file, container_file)
 
-        self._create_config()
+    def __copy_minifi_config_to_kubernetes_container(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            self.__copy_file_to_kubernetes_container(temp_dir, "minifi.properties", self._get_properties_file_content())
+            self.__copy_file_to_kubernetes_container(temp_dir, "minifi-log.properties", self._get_log_properties_file_content())
+            self.__copy_file_to_kubernetes_container(temp_dir, "config.yml", self.flow_definition.to_yaml())
+
+    def deploy(self):
+        logging.info('Setting up kubernetes container')
+
+        self.__copy_minifi_config_to_kubernetes_container()
+
         self.kubernetes_proxy.create_helper_objects()
-        self.kubernetes_proxy.load_docker_image(MinifiAsPodInKubernetesCluster.MINIFI_IMAGE_NAME, MinifiAsPodInKubernetesCluster.MINIFI_IMAGE_TAG)
+        self.kubernetes_proxy.load_docker_image("apacheminificpp", "docker_test")
         self.kubernetes_proxy.create_minifi_pod()
 
-        logging.info('Finished setting up container: %s', self.name)
+        logging.info('Finished setting up kubernetes container')
+        return True
 
     def get_logs(self) -> str:
         logging.debug("Getting logs from container '%s'", self.container_name)
