@@ -26,8 +26,7 @@ from minifi_test_framework.minifi.controller_service import ControllerService
 from minifi_as_pod_in_kubernetes_cluster import MinifiAsPodInKubernetesCluster
 
 
-@given("a MiNiFi set up in a Kubernetes cluster")
-def step_impl(context: MinifiTestContext):
+def __ensure_kubernetes_cluster(context: MinifiTestContext):
     if not isinstance(context.containers[DEFAULT_MINIFI_CONTAINER_NAME], MinifiAsPodInKubernetesCluster):
         context.containers[DEFAULT_MINIFI_CONTAINER_NAME] = MinifiAsPodInKubernetesCluster("kubernetes", context)
 
@@ -35,6 +34,7 @@ def step_impl(context: MinifiTestContext):
 @given("a {processor_type} processor in a Kubernetes cluster")
 @given("a {processor_type} processor in the Kubernetes cluster")
 def step_impl(context: MinifiTestContext, processor_type: str):
+    __ensure_kubernetes_cluster(context)
     processor = Processor(class_name=processor_type, proc_name=processor_type)
     context.get_or_create_default_minifi_container().flow_definition.add_processor(processor)
 
