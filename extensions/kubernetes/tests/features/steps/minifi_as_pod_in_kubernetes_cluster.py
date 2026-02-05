@@ -27,6 +27,7 @@ class MinifiAsPodInKubernetesCluster(MinifiContainer):
         self.kubernetes_proxy = KubernetesProxy(resources_directory=__file__.resolve().parent / "resources")
 
     def _set_custom_properties(self):
+        ### TODO(fgerlits) do we need these?
         self.properties["nifi.administrative.yield.duration"] = "30 sec"
         self.properties["nifi.bored.yield.duration"] = "100 millis"
         self.properties["nifi.provenance.repository.max.storage.time"] = "1 MIN"
@@ -36,17 +37,12 @@ class MinifiAsPodInKubernetesCluster(MinifiContainer):
         self.properties["nifi.c2.root.classes"] = "DeviceInfoNode,AgentInformation,FlowInformation,AssetInformation"
         self.properties["nifi.c2.full.heartbeat"] = "false"
 
+        ### TODO(fgerlits) do we need this? by default, we log to stderr, which may be OK
         self.log_properties["spdlog.pattern"] = "[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] %v"
         self.log_properties["appender.stdout"] = "stdout"
         self.log_properties["logger.root"] = "INFO,stdout"
 
-    def _create_container_config_dir(self, config_dir):
-        return config_dir
-
     def deploy(self):
-        if not self.set_deployed():
-            return
-
         logging.info('Setting up container: %s', self.name)
 
         self._create_config()
