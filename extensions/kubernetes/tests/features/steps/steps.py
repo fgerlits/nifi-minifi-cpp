@@ -27,7 +27,7 @@ from minifi_as_pod_in_kubernetes_cluster import MinifiAsPodInKubernetesCluster
 
 
 def __ensure_kubernetes_cluster(context: MinifiTestContext):
-    if not isinstance(context.containers[DEFAULT_MINIFI_CONTAINER_NAME], MinifiAsPodInKubernetesCluster):
+    if not DEFAULT_MINIFI_CONTAINER_NAME in context.containers or not isinstance(context.containers[DEFAULT_MINIFI_CONTAINER_NAME], MinifiAsPodInKubernetesCluster):
         context.containers[DEFAULT_MINIFI_CONTAINER_NAME] = MinifiAsPodInKubernetesCluster("kubernetes", context)
 
 

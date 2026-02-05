@@ -16,6 +16,7 @@
 import logging
 import os
 import tempfile
+from pathlib import Path
 
 from minifi_test_framework.containers.minifi_container import MinifiContainer
 from minifi_test_framework.core.minifi_test_context import MinifiTestContext
@@ -26,7 +27,7 @@ class MinifiAsPodInKubernetesCluster(MinifiContainer):
     def __init__(self, container_name: str, test_context: MinifiTestContext):
         super().__init__(container_name, test_context)
         self._set_custom_properties()
-        self.kubernetes_proxy = KubernetesProxy(resources_directory=__file__.resolve().parent / "resources")
+        self.kubernetes_proxy = KubernetesProxy(resources_directory=Path(__file__).resolve().parent / "resources")
 
     def _set_custom_properties(self):
         ### TODO(fgerlits) do we need these?
