@@ -34,27 +34,27 @@ def step_impl(context: MinifiTestContext):
 
 @given("a {processor_type} processor in a Kubernetes cluster")
 @given("a {processor_type} processor in the Kubernetes cluster")
-def step_impl(context, processor_type):
-    processor = Processor(processor_type, processor_type)
-    context.get_or_create_minifi_container("kubernetes").flow_definition.add_processor(processor)
+def step_impl(context: MinifiTestContext, processor_type: str):
+    processor = Processor(class_name=processor_type, proc_name=processor_type)
+    context.get_or_create_default_minifi_container().flow_definition.add_processor(processor)
 
 
 # Kubernetes
-def __set_up_the_kubernetes_controller_service(context, processor_name, service_property_name, properties):
+def __set_up_the_kubernetes_controller_service(context: MinifiTestContext, processor_name: str, service_property_name: str, properties: dict[str, str]):
     kubernetes_controller_service = ControllerService(class_name="KubernetesControllerService", service_name="Kubernetes Controller Service")
     kubernetes_controller_service.properties = properties
-    flow = context.containers["kubernetes"].flow_definition
+    flow = context.get_or_create_default_minifi_container().flow_definition
     flow.controller_services.append(kubernetes_controller_service)
     flow.processors[processor_name].add_property(service_property_name, kubernetes_controller_service.name)
 
 
 @given("the {processor_name} processor has a {service_property_name} which is a Kubernetes Controller Service")
 @given("the {processor_name} processor has an {service_property_name} which is a Kubernetes Controller Service")
-def step_impl(context, processor_name, service_property_name):
+def step_impl(context: MinifiTestContext, processor_name: str, service_property_name: str):
     __set_up_the_kubernetes_controller_service(context, processor_name, service_property_name, {})
 
 
 @given("the {processor_name} processor has a {service_property_name} which is a Kubernetes Controller Service with the \"{property_name}\" property set to \"{property_value}\"")
 @given("the {processor_name} processor has an {service_property_name} which is a Kubernetes Controller Service with the \"{property_name}\" property set to \"{property_value}\"")
-def step_impl(context, processor_name, service_property_name, property_name, property_value):
+def step_impl(context: MinifiTestContext, processor_name: str, service_property_name: str, property_name: str, property_value: str):
     __set_up_the_kubernetes_controller_service(context, processor_name, service_property_name, {property_name: property_value})
