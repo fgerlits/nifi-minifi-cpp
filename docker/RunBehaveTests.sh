@@ -202,6 +202,7 @@ exec \
     "${docker_dir}/../extensions/gcp/tests/features" \
     "${docker_dir}/../extensions/grafana-loki/tests/features" \
     "${docker_dir}/../extensions/kafka/tests/features" \
+    "${docker_dir}/../extensions/kubernetes/tests/features" \
     "${docker_dir}/../extensions/llamacpp/tests/features" \
     "${docker_dir}/../extensions/lua/tests/features/" \
     "${docker_dir}/../extensions/opc/tests/features" \
