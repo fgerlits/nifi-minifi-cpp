@@ -45,7 +45,7 @@ def __set_up_the_kubernetes_controller_service(context: MinifiTestContext, proce
     kubernetes_controller_service.properties = properties
     flow = context.get_or_create_default_minifi_container().flow_definition
     flow.controller_services.append(kubernetes_controller_service)
-    flow.processors[processor_name].add_property(service_property_name, kubernetes_controller_service.name)
+    flow.get_processor(processor_name).add_property(service_property_name, kubernetes_controller_service.name)
 
 
 @given("the {processor_name} processor has a {service_property_name} which is a Kubernetes Controller Service")
