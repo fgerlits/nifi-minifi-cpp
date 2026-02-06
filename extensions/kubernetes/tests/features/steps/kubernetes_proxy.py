@@ -37,6 +37,7 @@ class KubernetesProxy:
         self.kind_binary_path = os.path.join(self.temp_directory.name, 'kind')
         self.kind_config_path = os.path.join(self.temp_directory.name, 'kind-config.yml')
         self.minifi_conf_dir = os.path.join(self.temp_directory.name, 'kubernetes_config')
+        os.mkdir(self.minifi_conf_dir)
         self.__download_kind()
         self.docker_client = docker.from_env()
 
