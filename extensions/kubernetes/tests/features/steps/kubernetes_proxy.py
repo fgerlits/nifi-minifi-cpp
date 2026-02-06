@@ -154,7 +154,7 @@ class KubernetesProxy:
 
     def copy_file_to_container(self, host_file, container_file):
         if subprocess.run(['docker', 'cp', host_file, KUBERNETES_CONTAINER_NAME + ':' + container_file]).returncode != 0:
-            raise Exception("Could not copy file '%s' into container '%s' as '%s'" % (host_file, container_name, container_file))
+            raise Exception("Could not copy the file '%s' into the kubernetes container as '%s'" % (host_file, container_file))
 
     def get_logs(self, namespace, pod_name):
         (code, output) = self.docker_client.containers.get('kind-control-plane').exec_run(['kubectl', '-n', namespace, 'logs', pod_name])
