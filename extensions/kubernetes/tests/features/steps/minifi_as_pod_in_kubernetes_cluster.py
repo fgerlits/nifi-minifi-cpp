@@ -60,8 +60,8 @@ class MinifiAsPodInKubernetesCluster(MinifiContainer):
     def deploy(self):
         logging.info('Setting up kubernetes container')
 
+        self.kubernetes_proxy.start_cluster()
         self.__copy_minifi_config_to_kubernetes_container()
-
         self.kubernetes_proxy.create_helper_objects()
         self.kubernetes_proxy.load_docker_image("apacheminificpp", "docker_test")
         self.kubernetes_proxy.create_minifi_pod()
