@@ -28,7 +28,7 @@ Feature: TailFile can collect logs from Kubernetes pods
     And the "Directory" property of the PutFile processor is set to "/tmp/output"
     And the "success" relationship of the TailFile processor is connected to the PutFile
     When the MiNiFi instance starts up
-    Then two flowfiles with the contents "Hello World!" and "Hello again, World!" are placed in the monitored directory in less than 30 seconds
+    Then two flowfiles with the contents "Hello World!" and "Hello again, World!" are placed in the "/tmp/output" directory in less than 30 seconds
 
   Scenario: Collect logs from selected pods
     Given a TailFile processor in a Kubernetes cluster
@@ -41,7 +41,7 @@ Feature: TailFile can collect logs from Kubernetes pods
     And the "Directory" property of the PutFile processor is set to "/tmp/output"
     And the "success" relationship of the TailFile processor is connected to the PutFile
     When the MiNiFi instance starts up
-    Then one flowfile with the contents "Hello World!" is placed in the monitored directory in less than 30 seconds
+    Then one flowfile with the contents "Hello World!" is placed in the "/tmp/output" directory in less than 30 seconds
 
   Scenario: Collect logs from selected containers
     Given a TailFile processor in a Kubernetes cluster
@@ -54,7 +54,7 @@ Feature: TailFile can collect logs from Kubernetes pods
     And the "Directory" property of the PutFile processor is set to "/tmp/output"
     And the "success" relationship of the TailFile processor is connected to the PutFile
     When the MiNiFi instance starts up
-    Then one flowfile with the contents "Hello again, World!" is placed in the monitored directory in less than 30 seconds
+    Then one flowfile with the contents "Hello again, World!" is placed in the "/tmp/output" directory in less than 30 seconds
 
   Scenario: Pod name etc are added as flow file attributes
     Given a TailFile processor in a Kubernetes cluster
@@ -78,7 +78,7 @@ Feature: TailFile can collect logs from Kubernetes pods
     And the "Directory" property of the PutFile processor is set to "/tmp/output"
     And the "success" relationship of the CollectKubernetesPodMetrics processor is connected to the PutFile
     When the MiNiFi instance starts up
-    Then at least one flowfile with the content '"kind":"PodMetricsList","apiVersion":"metrics.k8s.io/v1beta1"' is placed in the monitored directory in less than 2 minutes
+    Then at least one flowfile with the content '"kind":"PodMetricsList","apiVersion":"metrics.k8s.io/v1beta1"' is placed in the "/tmp/output" directory in less than 2 minutes
 
   Scenario: Collect metrics from selected pods
     Given a CollectKubernetesPodMetrics processor in a Kubernetes cluster
@@ -87,7 +87,7 @@ Feature: TailFile can collect logs from Kubernetes pods
     And the "Directory" property of the PutFile processor is set to "/tmp/output"
     And the "success" relationship of the CollectKubernetesPodMetrics processor is connected to the PutFile
     When the MiNiFi instance starts up
-    Then at least one flowfile with the content '"metadata":{"name":"hello-world-one","namespace":"default"' is placed in the monitored directory in less than 2 minutes
+    Then at least one flowfile with the content '"metadata":{"name":"hello-world-one","namespace":"default"' is placed in the "/tmp/output" directory in less than 2 minutes
 
   Scenario: Collect metrics from selected containers
     Given a CollectKubernetesPodMetrics processor in a Kubernetes cluster
@@ -96,4 +96,4 @@ Feature: TailFile can collect logs from Kubernetes pods
     And the "Directory" property of the PutFile processor is set to "/tmp/output"
     And the "success" relationship of the CollectKubernetesPodMetrics processor is connected to the PutFile
     When the MiNiFi instance starts up
-    Then at least one flowfile with the content '"containers":[{"name":"echo-two","usage":{"cpu":"0","memory":' is placed in the monitored directory in less than 2 minutes
+    Then at least one flowfile with the content '"containers":[{"name":"echo-two","usage":{"cpu":"0","memory":' is placed in the "/tmp/output" directory in less than 2 minutes
