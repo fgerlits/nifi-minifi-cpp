@@ -57,7 +57,7 @@ class KubernetesProxy:
                 raise Exception("Could not download kind")
             os.chmod(self.kind_binary_path, stat.S_IXUSR)
 
-    def create_config(self, volumes):
+    def create_config(self, extra_mounts):
         kind_config = dedent("""\
                 apiVersion: kind.x-k8s.io/v1alpha4
                 kind: Cluster
@@ -65,13 +65,13 @@ class KubernetesProxy:
                    - role: control-plane
                 """)
 
-        if volumes:
+        if extra_mounts:
             kind_config += "     extraMounts:\n"
 
-        for host_path, container_path in volumes.items():
-            kind_config += "      - hostPath: {path}\n".format(path=host_path)
-            kind_config += "        containerPath: {path}\n".format(path=container_path['bind'])
-            if container_path['mode'] != 'rw':
+        for host_path, container_path, mode in extra_mounts:
+            kind_config += f"      - hostPath: {host_path}\n"
+            kind_config += f"        containerPath: {container_path}\n"
+            if mode != 'rw':
                 kind_config += "        readOnly: true\n"
 
         with open(self.kind_config_path, 'wb') as config_file:
