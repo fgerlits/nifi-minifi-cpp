@@ -168,6 +168,6 @@ class KubernetesProxy:
     def get_logs(self, namespace, pod_name):
         (code, output) = self.docker_client.containers.get('kind-control-plane').exec_run(['kubectl', '-n', namespace, 'logs', pod_name])
         if code == 0:
-            return output
+            return output.decode('utf-8')
         else:
             return None
