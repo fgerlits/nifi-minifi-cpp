@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import shutil
 
 import docker
 import glob
@@ -32,13 +33,17 @@ KUBERNETES_CONTAINER_NAME = "kind-control-plane"
 class KubernetesProxy:
     def __init__(self, resources_directory):
         self.temp_directory = tempfile.TemporaryDirectory()
-        self.resources_directory = resources_directory
 
         self.kind_binary_path = os.path.join(self.temp_directory.name, 'kind')
         self.kind_config_path = os.path.join(self.temp_directory.name, 'kind-config.yml')
+        self.__download_kind()
+
+        self.resources_directory = os.path.join(self.temp_directory.name, 'resources')
+        shutil.copytree(resources_directory, self.resources_directory)
+
         self.minifi_conf_dir = os.path.join(self.temp_directory.name, 'kubernetes_config')
         os.mkdir(self.minifi_conf_dir)
-        self.__download_kind()
+
         self.docker_client = docker.from_env()
 
     def cleanup(self):
@@ -68,6 +73,8 @@ class KubernetesProxy:
                     extraMounts:
                       - hostPath: {self.minifi_conf_dir}
                         containerPath: /tmp/kubernetes_config
+                      - hostPath: {self.resources_directory}
+                        containerPath: /var/tmp
                       - hostPath: /tmp/output
                         containerPath: /tmp/output
                 """)
@@ -92,21 +99,21 @@ class KubernetesProxy:
 
     def create_helper_objects(self):
         self.__wait_for_default_service_account('default')
-        namespaces = self.__create_objects_of_type(self.resources_directory, 'namespace')
+        namespaces = self.__create_objects_of_type('namespace')
         for namespace in namespaces:
             self.__wait_for_default_service_account(namespace)
 
-        self.__create_objects_of_type(self.resources_directory, 'dependencies')
-        self.__create_objects_of_type(self.resources_directory, 'helper-pod')
-        self.__create_objects_of_type(self.resources_directory, 'clusterrole')
-        self.__create_objects_of_type(self.resources_directory, 'clusterrolebinding')
+        self.__create_objects_of_type('dependencies')
+        self.__create_objects_of_type('helper-pod')
+        self.__create_objects_of_type('clusterrole')
+        self.__create_objects_of_type('clusterrolebinding')
 
         self.__wait_for_pod_startup('default', 'hello-world-one')
         self.__wait_for_pod_startup('default', 'hello-world-two')
         self.__wait_for_pod_startup('kube-system', 'metrics-server')
 
     def create_minifi_pod(self):
-        self.__create_objects_of_type(self.resources_directory, 'test-pod')
+        self.__create_objects_of_type('test-pod')
         self.__wait_for_pod_startup('daemon', 'minifi')
 
     def delete_pods(self):
@@ -129,12 +136,11 @@ class KubernetesProxy:
             time.sleep(1)
         raise Exception("Default service account for namespace '%s' not found" % namespace)
 
-    def __create_objects_of_type(self, directory, type):
+    def __create_objects_of_type(self, type):
         found_objects = []
-        for full_file_name in glob.iglob(os.path.join(directory, f'*.{type}.yml')):
+        for full_file_name in glob.iglob(os.path.join(self.resources_directory, f'*.{type}.yml')):
             file_name = os.path.basename(full_file_name)
             file_name_in_container = os.path.join('/var/tmp', file_name)
-            self.copy_file_to_container(full_file_name, file_name_in_container)
 
             (code, output) = self.docker_client.containers.get('kind-control-plane').exec_run(['kubectl', 'apply', '-f', file_name_in_container])
             if code != 0:
