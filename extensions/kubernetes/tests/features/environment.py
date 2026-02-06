@@ -28,8 +28,14 @@ def before_feature(context, feature):
 
 
 def before_scenario(context, scenario):
+    if "skip" in scenario.tags:
+        scenario.skip("Skipping this scenario")
+        return
     common_before_scenario(context, scenario)
 
 
 def after_scenario(context, scenario):
+    if "skip" in scenario.tags:
+        scenario.skip("Skipping this scenario")
+        return
     common_after_scenario(context, scenario)
