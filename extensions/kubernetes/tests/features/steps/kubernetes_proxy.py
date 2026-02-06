@@ -36,6 +36,7 @@ class KubernetesProxy:
 
         self.kind_binary_path = os.path.join(self.temp_directory.name, 'kind')
         self.kind_config_path = os.path.join(self.temp_directory.name, 'kind-config.yml')
+        self.minifi_conf_dir = os.path.join(self.temp_directory.name, 'kubernetes_config')
         self.__download_kind()
         self.docker_client = docker.from_env()
 
@@ -57,25 +58,26 @@ class KubernetesProxy:
                 raise Exception("Could not download kind")
             os.chmod(self.kind_binary_path, stat.S_IXUSR)
 
-    def create_config(self, extra_mounts):
-        kind_config = dedent("""\
+    def create_config(self):
+        kind_config = dedent(f"""\
                 apiVersion: kind.x-k8s.io/v1alpha4
                 kind: Cluster
                 nodes:
-                   - role: control-plane
+                  - role: control-plane
+                    extraMounts:
+                      - hostPath: {self.minifi_conf_dir}
+                        containerPath: /tmp/kubernetes_config
+                      - hostPath: /tmp/output
+                        containerPath: /tmp/output
                 """)
-
-        if extra_mounts:
-            kind_config += "     extraMounts:\n"
-
-        for host_path, container_path, mode in extra_mounts:
-            kind_config += f"      - hostPath: {host_path}\n"
-            kind_config += f"        containerPath: {container_path}\n"
-            if mode != 'rw':
-                kind_config += "        readOnly: true\n"
 
         with open(self.kind_config_path, 'wb') as config_file:
             config_file.write(kind_config.encode('utf-8'))
+
+    def write_minifi_conf_file(self, file_name: str, content: str):
+        file_path = os.path.join(self.minifi_conf_dir, file_name)
+        with open(file_path, "w") as file:
+            file.write(content)
 
     def start_cluster(self):
         subprocess.run([self.kind_binary_path, 'delete', 'cluster'])
