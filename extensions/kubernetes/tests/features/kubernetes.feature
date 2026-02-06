@@ -40,6 +40,7 @@ Feature: TailFile can collect logs from Kubernetes pods
     And a PutFile processor in the Kubernetes cluster
     And the "Directory" property of the PutFile processor is set to "/tmp/output"
     And the "success" relationship of the TailFile processor is connected to the PutFile
+    And the PutFile's success relationship is auto-terminated
     When the MiNiFi instance starts up
     Then one flowfile with the contents "Hello World!" is placed in the "/tmp/output" directory in less than 30 seconds
 
@@ -53,6 +54,7 @@ Feature: TailFile can collect logs from Kubernetes pods
     And a PutFile processor in the Kubernetes cluster
     And the "Directory" property of the PutFile processor is set to "/tmp/output"
     And the "success" relationship of the TailFile processor is connected to the PutFile
+    And the PutFile's success relationship is auto-terminated
     When the MiNiFi instance starts up
     Then one flowfile with the contents "Hello again, World!" is placed in the "/tmp/output" directory in less than 30 seconds
 
@@ -65,6 +67,7 @@ Feature: TailFile can collect logs from Kubernetes pods
     And the TailFile processor has an Attribute Provider Service which is a Kubernetes Controller Service with the "Pod Name Filter" property set to ".*one"
     And a LogAttribute processor in the Kubernetes cluster
     And the "success" relationship of the TailFile processor is connected to the LogAttribute
+    And the LogAttribute's success relationship is auto-terminated
     When the MiNiFi instance starts up
     Then the Minifi logs contain the following message: "key:kubernetes.namespace value:default" in less than 30 seconds
     And the Minifi logs contain the following message: "key:kubernetes.pod value:hello-world-one" in less than 1 second
@@ -77,6 +80,7 @@ Feature: TailFile can collect logs from Kubernetes pods
     And a PutFile processor in the Kubernetes cluster
     And the "Directory" property of the PutFile processor is set to "/tmp/output"
     And the "success" relationship of the CollectKubernetesPodMetrics processor is connected to the PutFile
+    And the PutFile's success relationship is auto-terminated
     When the MiNiFi instance starts up
     Then at least one flowfile with the content '"kind":"PodMetricsList","apiVersion":"metrics.k8s.io/v1beta1"' is placed in the "/tmp/output" directory in less than 2 minutes
 
@@ -86,6 +90,7 @@ Feature: TailFile can collect logs from Kubernetes pods
     And a PutFile processor in the Kubernetes cluster
     And the "Directory" property of the PutFile processor is set to "/tmp/output"
     And the "success" relationship of the CollectKubernetesPodMetrics processor is connected to the PutFile
+    And the PutFile's success relationship is auto-terminated
     When the MiNiFi instance starts up
     Then at least one flowfile with the content '"metadata":{"name":"hello-world-one","namespace":"default"' is placed in the "/tmp/output" directory in less than 2 minutes
 
@@ -95,5 +100,6 @@ Feature: TailFile can collect logs from Kubernetes pods
     And a PutFile processor in the Kubernetes cluster
     And the "Directory" property of the PutFile processor is set to "/tmp/output"
     And the "success" relationship of the CollectKubernetesPodMetrics processor is connected to the PutFile
+    And the PutFile's success relationship is auto-terminated
     When the MiNiFi instance starts up
     Then at least one flowfile with the content '"containers":[{"name":"echo-two","usage":{"cpu":"0","memory":' is placed in the "/tmp/output" directory in less than 2 minutes
