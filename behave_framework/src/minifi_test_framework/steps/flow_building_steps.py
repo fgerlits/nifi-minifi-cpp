@@ -155,17 +155,20 @@ def step_impl(context: MinifiTestContext, funnel_name: str, target: str):
 
 
 @step("{processor_name}'s {relationship} relationship is auto-terminated in the \"{minifi_container_name}\" flow")
+@step("the {processor_name}'s {relationship} relationship is auto-terminated in the \"{minifi_container_name}\" flow")
 def step_impl(context: MinifiTestContext, processor_name: str, relationship: str, minifi_container_name: str):
     context.get_or_create_minifi_container(minifi_container_name).flow_definition.get_processor(processor_name).auto_terminated_relationships.append(
         relationship)
 
 
 @step("{processor_name}'s {relationship} relationship is auto-terminated in the NiFi flow")
+@step("the {processor_name}'s {relationship} relationship is auto-terminated in the NiFi flow")
 def step_impl(context: MinifiTestContext, processor_name: str, relationship: str):
     context.containers["nifi"].flow_definition.get_processor(processor_name).auto_terminated_relationships.append(relationship)
 
 
 @step("{processor_name}'s {relationship} relationship is auto-terminated")
+@step("the {processor_name} processor's {relationship} relationship is auto-terminated")
 def step_impl(context: MinifiTestContext, processor_name: str, relationship: str):
     context.execute_steps(f'given {processor_name}\'s {relationship} relationship is auto-terminated in the "{DEFAULT_MINIFI_CONTAINER_NAME}" flow')
 

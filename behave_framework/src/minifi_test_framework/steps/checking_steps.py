@@ -54,6 +54,7 @@ def step_impl(context: MinifiTestContext, container_name: str, content: str, dir
 
 
 @then('at least one file with the content "{content}" is placed in the "{directory}" directory in less than {duration}')
+@then('at least one file with the content \'{content}\' is placed in the "{directory}" directory in less than {duration}')
 def step_impl(context: MinifiTestContext, content: str, directory: str, duration: str):
     context.execute_steps(f'then in the "{DEFAULT_MINIFI_CONTAINER_NAME}" container at least one file with the content "{content}" is placed in the "{directory}" directory in less than {duration}')
 
@@ -139,6 +140,7 @@ def step_impl(context: MinifiTestContext, num: int, directory: str, duration: st
 
 
 @then('at least one file in "{directory}" content match the following regex: "{regex_str}" in less than {duration}')
+@then('the content of at least one file in the "{directory}" directory matches the \'{regex_str}\' regex in less than {duration}')
 def step_impl(context: MinifiTestContext, directory: str, regex_str: str, duration: str):
     duration_seconds = humanfriendly.parse_timespan(duration)
     assert wait_for_condition(

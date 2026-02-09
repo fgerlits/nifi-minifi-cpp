@@ -194,17 +194,18 @@ echo "${BEHAVE_OPTS[@]}"
 
 exec \
   behavex "${BEHAVE_OPTS[@]}" \
-    "${docker_dir}/../extensions/standard-processors/tests/features" \
     "${docker_dir}/../extensions/aws/tests/features" \
     "${docker_dir}/../extensions/azure/tests/features" \
-    "${docker_dir}/../extensions/sql/tests/features" \
-    "${docker_dir}/../extensions/llamacpp/tests/features" \
-    "${docker_dir}/../extensions/opc/tests/features" \
-    "${docker_dir}/../extensions/kafka/tests/features" \
+    "${docker_dir}/../extensions/civetweb/tests/features/" \
     "${docker_dir}/../extensions/couchbase/tests/features" \
     "${docker_dir}/../extensions/elasticsearch/tests/features" \
-    "${docker_dir}/../extensions/splunk/tests/features" \
     "${docker_dir}/../extensions/gcp/tests/features" \
     "${docker_dir}/../extensions/grafana-loki/tests/features" \
+    "${docker_dir}/../extensions/kafka/tests/features" \
+    "${docker_dir}/../extensions/kubernetes/tests/features" \
+    "${docker_dir}/../extensions/llamacpp/tests/features" \
     "${docker_dir}/../extensions/lua/tests/features/" \
-    "${docker_dir}/../extensions/civetweb/tests/features/"
+    "${docker_dir}/../extensions/opc/tests/features" \
+    "${docker_dir}/../extensions/splunk/tests/features" \
+    "${docker_dir}/../extensions/sql/tests/features" \
+    "${docker_dir}/../extensions/standard-processors/tests/features"
