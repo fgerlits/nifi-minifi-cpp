@@ -52,7 +52,7 @@ set /a count=0
 
 	echo }  // namespace org::apache::nifi::minifi
 
-) >> "%out_dir%/agent_version.cpp"
+) > "%out_dir%/agent_version.cpp"
 
  goto :EOF
 
