@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import platform
+import docker
 from minifi_test_framework.core.hooks import common_before_scenario
 from minifi_test_framework.core.hooks import common_after_scenario
 
@@ -28,8 +29,28 @@ def before_feature(context, feature):
             feature.skip("This feature is only x86/x64 compatible")
 
 
+def is_minifi_image_alpine_based(context):
+    client: docker.DockerClient = docker.from_env()
+    container = client.containers.create(
+        image=context.minifi_container_image,
+        command=['cat', '/etc/os-release'],
+    )
+    try:
+        container.start()
+        result = container.logs()
+        container.remove(force=True)
+    except docker.errors.APIError:
+        container.remove(force=True)
+        return False
+
+    return "alpine" in result.decode('utf-8').lower()
+
+
 def before_scenario(context, scenario):
     common_before_scenario(context, scenario)
+    if "ALPINE_ONLY" in scenario.tags:
+        if not is_minifi_image_alpine_based(context):
+            scenario.skip("This scenario is only compatible with Alpine-based Minifi images")
 
 
 def after_scenario(context, scenario):

@@ -16,6 +16,7 @@
 @CORE
 Feature: Flow file and content repositories work as expected
 
+  @ALPINE_ONLY
   Scenario: Flow file content is removed from memory when terminated when using Volatile Content Repository
     Given a GenerateFlowFile processor with the "File Size" property set to "20 MB"
     And the scheduling period of the GenerateFlowFile processor is set to "1 sec"
