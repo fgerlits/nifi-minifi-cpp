@@ -149,10 +149,10 @@ TEST_CASE("C2DebugBundleTest", "[c2test]") {
 
   std::filesystem::path home_dir = controller.createTempDirectory();
   minifi::utils::file::PathUtils::create_dir(home_dir / "conf");
-  std::ofstream{home_dir / "conf/minifi.properties", std::ios::binary} << properties_file;
-  std::ofstream{home_dir / "conf/config.yml", std::ios::binary} << flow_config_file;
+  std::ofstream{home_dir / "conf" / "minifi.properties", std::ios::binary} << properties_file;
+  std::ofstream{home_dir / "conf" / "config.yml", std::ios::binary} << flow_config_file;
 
-  VerifyDebugInfo harness(home_dir / "conf/config.yml", [&]() -> bool {
+  VerifyDebugInfo harness(home_dir / "conf" / "config.yml", [&]() -> bool {
     if (!ack_handler.isAcknowledged("79")) {
       return false;
     }
@@ -190,7 +190,7 @@ TEST_CASE("C2DebugBundleTest", "[c2test]") {
     return true;
   });
 
-  harness.getConfiguration()->loadConfigureFile(home_dir / "conf/minifi.properties");
+  harness.getConfiguration()->loadConfigureFile(home_dir / "conf" / "minifi.properties");
   harness.setUrl("http://localhost:0/heartbeat", &heartbeat_handler);
   harness.setUrl("http://localhost:0/acknowledge", &ack_handler);
   harness.setUrl("http://localhost:0/debug_bundle", &bundle_handler);
@@ -199,6 +199,37 @@ TEST_CASE("C2DebugBundleTest", "[c2test]") {
   heartbeat_handler.setC2RestResponse("http://localhost:" + harness.getWebPort() + "/debug_bundle");
 
   logging::LoggerFactory<C2HeartbeatHandler>::getLogger()->log_error("Tis but a scratch");
+
+  harness.run();
+}
+
+TEST_CASE("Test that the debug bundle operation works when config.yml does not exist", "[c2test]") {
+  TestController controller;
+
+  C2HeartbeatHandler heartbeat_handler;
+  C2AcknowledgeHandler ack_handler;
+  C2DebugBundleHandler bundle_handler;
+
+  std::filesystem::path home_dir = controller.createTempDirectory();
+  minifi::utils::file::PathUtils::create_dir(home_dir / "conf");
+  std::ofstream{home_dir / "conf" / "minifi.properties", std::ios::binary} << properties_file;
+
+  VerifyDebugInfo harness(home_dir / "conf" / "config.yml", [&]() -> bool {
+    if (!ack_handler.isAcknowledged("79")) {
+      return false;
+    }
+    auto bundles = bundle_handler.getBundles();
+    REQUIRE(bundles.size() == 1);
+    return true;
+  });
+
+  harness.getConfiguration()->loadConfigureFile(home_dir / "conf" / "minifi.properties");
+  harness.setUrl("http://localhost:0/heartbeat", &heartbeat_handler);
+  harness.setUrl("http://localhost:0/acknowledge", &ack_handler);
+  harness.setUrl("http://localhost:0/debug_bundle", &bundle_handler);
+  harness.setC2Url("/heartbeat", "/acknowledge");
+
+  heartbeat_handler.setC2RestResponse("http://localhost:" + harness.getWebPort() + "/debug_bundle");
 
   harness.run();
 }
