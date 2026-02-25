@@ -36,6 +36,7 @@
 #include "minifi-cpp/core/Connectable.h"
 #include "utils/file/PathUtils.h"
 #include "utils/file/FileSystem.h"
+#include "utils/file/FileUtils.h"
 #include "http/BaseHTTPClient.h"
 #include "io/NetworkPrioritizer.h"
 #include "io/FileStream.h"
@@ -482,7 +483,9 @@ std::map<std::string, std::unique_ptr<io::InputStream>> FlowController::getDebug
     debug_info["minifi.log" + index_str + ".gz"] = std::move(logs[i]);
   }
   if (auto opt_flow_path = flow_configuration_->getConfigurationPath()) {
-    debug_info["config.yml"] = std::make_unique<io::FileStream>(opt_flow_path.value(), 0, false);
+    if (utils::file::exists(opt_flow_path.value())) {
+      debug_info["config.yml"] = std::make_unique<io::FileStream>(opt_flow_path.value(), 0, false);
+    }
   }
   debug_info["minifi.properties"] = std::make_unique<io::FileStream>(configuration_->getFilePath(), 0, false);
 
