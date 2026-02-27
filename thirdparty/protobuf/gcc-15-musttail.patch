@@ -1,0 +1,18 @@
+# workaround for issue https://github.com/protocolbuffers/protobuf/issues/21333
+diff -ur a/src/google/protobuf/port_def.inc b/src/google/protobuf/port_def.inc
+--- a/src/google/protobuf/port_def.inc	2025-05-28 18:52:59.000000000 +0200
++++ b/src/google/protobuf/port_def.inc	2026-02-27 12:02:46.212814246 +0100
+@@ -234,7 +234,12 @@
+ #ifdef PROTOBUF_TAILCALL
+ #error PROTOBUF_TAILCALL was previously defined
+ #endif
+-#if ABSL_HAVE_CPP_ATTRIBUTE(clang::musttail) && !defined(__arm__) &&  \
++
++// See https://github.com/protocolbuffers/protobuf/issues/21333
++#if defined(__GNUC__) && __GNUC__ >= 15
++#define PROTOBUF_MUSTTAIL
++#define PROTOBUF_TAILCALL false
++#elif ABSL_HAVE_CPP_ATTRIBUTE(clang::musttail) && !defined(__arm__) &&  \
+     !defined(_ARCH_PPC) && !defined(__wasm__) &&                      \
+     !(defined(_MSC_VER) && defined(_M_IX86)) && !defined(__i386__)
+ // Compilation fails on ARM32: b/195943306

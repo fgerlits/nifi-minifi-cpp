@@ -18,10 +18,16 @@ include(FetchContent)
 
 set(protobuf_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
+set(PATCH_FILE_1 "${CMAKE_SOURCE_DIR}/thirdparty/protobuf/gcc-15-musttail.patch")
+
+set(PC ${Bash_EXECUTABLE}  -c "set -x &&\
+        (\\\"${Patch_EXECUTABLE}\\\" -p1 -R -s -f --dry-run -i \\\"${PATCH_FILE_1}\\\" || \\\"${Patch_EXECUTABLE}\\\" -p1 -N -i \\\"${PATCH_FILE_1}\\\")")
+
 FetchContent_Declare(
     protobuf
     URL      https://github.com/protocolbuffers/protobuf/archive/refs/tags/v31.1.tar.gz
     URL_HASH SHA256=c3a0a9ece8932e31c3b736e2db18b1c42e7070cd9b881388b26d01aa71e24ca2
+    PATCH_COMMAND "${PC}"
 )
 FetchContent_MakeAvailable(protobuf)
 
