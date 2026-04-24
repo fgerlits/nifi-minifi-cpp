@@ -7,7 +7,7 @@ import shutil
 
 required_conan_version = ">=2.0"
 
-shared_requires = ("openssl/3.2.1", "libcurl/8.4.0", "civetweb/1.16", "libxml2/2.12.6", "fmt/10.2.1", "spdlog/1.14.0", "catch2/3.5.4", "zlib/1.2.11", "zstd/1.5.2", "bzip2/1.0.8", "rocksdb/8.10.2@minifi/develop")
+shared_requires = ("openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.15.3", "catch2/3.9.1", "zlib/1.3.1", "zstd/1.5.2", "bzip2/1.0.8", "rocksdb/10.5.1")
 
 shared_sources = ("CMakeLists.txt", "libminifi/*", "extensions/*", "minifi_main/*", "nanofi/*", "bin/*", "bootstrap/*", "cmake/*", "conf/*", "controller/*", "encrypt-config/*", "etc/*", "examples/*", "packaging/msi/*", "thirdparty/*", "docker/*", "LICENSE", "NOTICE", "README.md", "C2.md", "CONFIGURE.md", "CONTRIBUTING.md", "CONTROLLERS.md", "EXPRESSIONS.md", "Extensions.md", "JNI.md", "METRICS.md", "OPS.md", "PROCESSORS.md", "ThirdParties.md", "Windows.md", "CPPLINT.cfg", "generateVersion.sh", "run_clang_tidy.sh", "run_clang_tidy.sh", "run_flake8.sh", "run_shellcheck.sh", "versioninfo.rc.in")
 
