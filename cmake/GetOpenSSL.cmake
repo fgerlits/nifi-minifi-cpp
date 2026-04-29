@@ -15,10 +15,23 @@
 # specific language governing permissions and limitations
 # under the License.
 
+include(CMakePrintHelpers)
+
 function(get_openssl SOURCE_DIR BINARY_DIR)
     if(MINIFI_OPENSSL_SOURCE STREQUAL "CONAN")
         message("Using Conan to install OpenSSL")
         find_package(OpenSSL REQUIRED)
+
+        cmake_print_properties(
+                TARGETS
+                OpenSSL::SSL
+                OpenSSL::Crypto
+                PROPERTIES
+                IMPORTED_LOCATION
+                IMPORTED_LOCATION_DEBUG
+                IMPORTED_LOCATION_RELEASE
+        )
+
     elseif(MINIFI_OPENSSL_SOURCE STREQUAL "BUILD")
         message("Using CMake to build OpenSSL from source")
         include(BundledOpenSSL)
