@@ -28,17 +28,17 @@ class MiNiFiCppMain(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        tc.variables["MINIFI_LIBCURL_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_OPENSSL_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_ZLIB_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_ROCKSDB_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_ZSTD_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_BZIP2_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_CIVETWEB_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_LIBXML2_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_FMT_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_SPDLOG_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_CATCH2_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_LIBCURL_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_OPENSSL_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_ZLIB_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_ROCKSDB_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_ZSTD_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_BZIP2_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_CIVETWEB_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_LIBXML2_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_FMT_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_SPDLOG_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_CATCH2_SOURCE"] = "BUILD"
 
         tc.variables["SKIP_TESTS"] = "OFF"
         tc.variables["ENABLE_CIVET"] = "ON"
