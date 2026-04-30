@@ -44,10 +44,13 @@ class MiNiFiCppMain(ConanFile):
 
         tc.variables["SKIP_TESTS"] = "OFF"
         tc.variables["ENABLE_CIVET"] = "ON"
-        tc.variables["ENABLE_LIBARCHIVE"] = "OFF"
+        tc.variables["ENABLE_LIBARCHIVE"] = "ON"
         tc.variables["ENABLE_AWS"] = "OFF"
+        tc.variables["ENABLE_AZURE"] = "OFF"
         tc.variables["ENABLE_SQL"] = "OFF"
         tc.variables["ENABLE_GCP"] = "OFF"
+        tc.variables["ENABLE_GRPC_FOR_LOKI"] = "OFF"
+        tc.variables["ENABLE_LLAMACPP"] = "OFF"
         tc.variables["ENABLE_LUA_SCRIPTING"] = "OFF"
 
         tc.generate()
