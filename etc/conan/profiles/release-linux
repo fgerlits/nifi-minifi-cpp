@@ -9,4 +9,5 @@ compiler.version=13
 [conf]
 tools.system.package_manager:mode=install
 tools.system.package_manager:sudo=True
+tools.cmake.cmaketoolchain:generator=Ninja
 [options]
