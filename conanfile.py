@@ -7,7 +7,7 @@ import shutil
 
 required_conan_version = ">=2.0"
 
-shared_requires = ()
+shared_requires = ("zstd/1.5.2")
 
 all_shared_requires = ("openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.9.1", "zlib/1.3.1", "zstd/1.5.2", "bzip2/1.0.8", "rocksdb/10.5.1")
 
@@ -35,7 +35,7 @@ class MiNiFiCppMain(ConanFile):
         tc.variables["MINIFI_OPENSSL_SOURCE"] = "BUILD"
         tc.variables["MINIFI_ZLIB_SOURCE"] = "BUILD"
         tc.variables["MINIFI_ROCKSDB_SOURCE"] = "BUILD"
-        tc.variables["MINIFI_ZSTD_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_ZSTD_SOURCE"] = "CONAN"
         tc.variables["MINIFI_BZIP2_SOURCE"] = "BUILD"
         tc.variables["MINIFI_CIVETWEB_SOURCE"] = "BUILD"
         tc.variables["MINIFI_LIBXML2_SOURCE"] = "BUILD"
