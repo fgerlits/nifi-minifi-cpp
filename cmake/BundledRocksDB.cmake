@@ -19,7 +19,8 @@ function(use_bundled_rocksdb SOURCE_DIR BINARY_DIR)
     message("Using bundled RocksDB")
 
     if (NOT WIN32)
-        include(Zstd)
+        include(GetZstd)
+        get_zstd()
         include(LZ4)
     endif()
 

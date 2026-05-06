@@ -16,8 +16,9 @@
 # under the License.
 
 include(FetchContent)
-include(Zstd)
 
+include(GetZstd)
+get_zstd()
 include(LZ4)
 
 set(WITH_SSL "ON" CACHE STRING "" FORCE)
@@ -45,7 +46,10 @@ FetchContent_Declare(libkafka
 
 FetchContent_MakeAvailable(libkafka)
 
-get_target_property(ZSTD_INCLUDE_DIRS zstd::zstd INTERFACE_INCLUDE_DIRECTORIES)
+if(NOT DEFINED ZSTD_INCLUDE_DIRS)
+    get_target_property(ZSTD_INCLUDE_DIRS zstd::zstd INTERFACE_INCLUDE_DIRECTORIES)
+endif()
+
 get_target_property(LZ4_INCLUDE_DIRS lz4::lz4 INCLUDE_DIRECTORIES)
 
 target_include_directories(rdkafka SYSTEM PRIVATE ${ZSTD_INCLUDE_DIRS})
