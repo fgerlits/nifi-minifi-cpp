@@ -18,9 +18,7 @@
 include(FetchContent)
 
 include(GetZstd)
-get_zstd()
 include(GetLZ4)
-get_lz4()
 
 set(WITH_SSL "ON" CACHE STRING "" FORCE)
 set(WITH_SASL "OFF" CACHE STRING "" FORCE)

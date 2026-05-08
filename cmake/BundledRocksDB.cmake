@@ -20,9 +20,7 @@ function(use_bundled_rocksdb SOURCE_DIR BINARY_DIR)
 
     if (NOT WIN32)
         include(GetZstd)
-        get_zstd()
         include(GetLZ4)
-        get_lz4()
     endif()
 
     set(PATCH_FILE_1 "${SOURCE_DIR}/thirdparty/rocksdb/all/patches/dboptions_equality_operator.patch")
