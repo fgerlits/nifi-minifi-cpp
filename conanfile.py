@@ -7,9 +7,9 @@ import shutil
 
 required_conan_version = ">=2.0"
 
-shared_requires = ("lz4/1.9.4", "zstd/1.5.2")
+shared_requires = ("lz4/1.9.4", "zstd/1.5.2", "openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.9.1", "bzip2/1.0.8")
 
-disabled_shared_requires = ("openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.9.1", "zstd/1.5.2", "bzip2/1.0.8", "rocksdb/10.5.1")
+disabled_shared_requires = ("rocksdb/10.5.1")
 
 shared_sources = ("C2.md", "CMakeLists.txt", "CMakeUserPresets.json", "CONAN.md", "CONFIGURE.md", "CONTRIBUTING.md", "CONTROLLERS.md", "CPPLINT.cfg", "EXPRESSIONS.md", "Extensions.md", "LICENSE", "METRICS.md", "NOTICE", "OPS.md", "PARAMETER_PROVIDERS.md", "PROCESSORS.md", "README.md", "SITE_TO_SITE.md", "ThirdParties.md", "Windows.md", "behave_framework/*", "behave_venv/*", "bin/*", "bootstrap/*", "build_conan/*", "cmake-build-relwithdebinfo/*", "cmake/*", "conanfile.py", "conf/*", "controller/*", "core-framework/*", "docker/*", "docs/*", "encrypt-config/*", "etc/*", "examples/*", "extension-framework/*", "extensions/*", "fips/*", "generateVersion.bat", "generateVersion.sh*", "github_scripts/*", "libminifi/*", "minifi-api/*", "minifi_main/*", "packaging/*", "run_clang_tidy.sh*", "run_flake8.sh*", "run_shellcheck.sh*", "test-env-py3/*", "thirdparty/*", "venv/*", "versioninfo.rc.in", "win_build_vs.bat")
 
@@ -34,20 +34,21 @@ class MiNiFiCppMain(ConanFile):
         tc.variables["MINIFI_LZ4_SOURCE"] = "CONAN"
         tc.variables["MINIFI_ZSTD_SOURCE"] = "CONAN"
 
-        tc.variables["MINIFI_LIBCURL_SOURCE"] = "BUILD"
-        tc.variables["MINIFI_OPENSSL_SOURCE"] = "BUILD"
-        tc.variables["MINIFI_ZLIB_SOURCE"] = "BUILD"
+        tc.variables["MINIFI_LIBCURL_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_OPENSSL_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_ZLIB_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_BZIP2_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_CIVETWEB_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_LIBXML2_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_FMT_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_SPDLOG_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_CATCH2_SOURCE"] = "CONAN"
+
         tc.variables["MINIFI_ROCKSDB_SOURCE"] = "BUILD"
-        tc.variables["MINIFI_BZIP2_SOURCE"] = "BUILD"
-        tc.variables["MINIFI_CIVETWEB_SOURCE"] = "BUILD"
-        tc.variables["MINIFI_LIBXML2_SOURCE"] = "BUILD"
-        tc.variables["MINIFI_FMT_SOURCE"] = "BUILD"
-        tc.variables["MINIFI_SPDLOG_SOURCE"] = "BUILD"
-        tc.variables["MINIFI_CATCH2_SOURCE"] = "BUILD"
 
         tc.variables["SKIP_TESTS"] = "OFF"
         tc.variables["ENABLE_CIVET"] = "ON"
-        tc.variables["ENABLE_LIBARCHIVE"] = "ON"
+        tc.variables["ENABLE_LIBARCHIVE"] = "OFF"
         tc.variables["ENABLE_AWS"] = "OFF"
         tc.variables["ENABLE_AZURE"] = "OFF"
         tc.variables["ENABLE_SQL"] = "OFF"
