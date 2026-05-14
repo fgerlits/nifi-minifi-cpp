@@ -26,6 +26,12 @@ if (ENABLE_LZMA)
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/liblzma/dummy")
 endif()
 
+if(NOT TARGET openssl::openssl)
+    find_package(OpenSSL REQUIRED)
+    cmake_path(GET OpenSSL_INCLUDE_DIR PARENT_PATH OpenSSL_ROOT_DIR)
+    set(OPENSSL_ROOT_DIR "${OpenSSL_ROOT_DIR}" CACHE INTERNAL "OpenSSL location for the bundled LibArchive")
+endif()
+
 include(BundledLibArchive)
 use_bundled_libarchive(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 
