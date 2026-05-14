@@ -11,8 +11,7 @@ shared_requires = ("openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/
 
 disabled_shared_requires = ("rocksdb/10.5.1")
 
-shared_sources = ("C2.md", "CMakeLists.txt", "CMakeUserPresets.json", "CONAN.md", "CONFIGURE.md", "CONTRIBUTING.md", "CONTROLLERS.md", "CPPLINT.cfg", "EXPRESSIONS.md", "Extensions.md", "LICENSE", "METRICS.md", "NOTICE", "OPS.md", "PARAMETER_PROVIDERS.md", "PROCESSORS.md", "README.md", "SITE_TO_SITE.md", "ThirdParties.md", "Windows.md", "behave_framework/*", "behave_venv/*", "bin/*", "bootstrap/*", "build_conan/*", "cmake-build-relwithdebinfo/*", "cmake/*", "conanfile.py", "conf/*", "controller/*", "core-framework/*", "docker/*", "docs/*", "encrypt-config/*", "etc/*", "examples/*", "extension-framework/*", "extensions/*", "fips/*", "generateVersion.bat", "generateVersion.sh*", "github_scripts/*", "libminifi/*", "minifi-api/*", "minifi_main/*", "packaging/*", "run_clang_tidy.sh*", "run_flake8.sh*", "run_shellcheck.sh*", "test-env-py3/*", "thirdparty/*", "venv/*", "versioninfo.rc.in", "win_build_vs.bat")
-
+shared_sources = ("CMakeLists.txt", "libminifi/*", "extensions/*", "minifi_main/*", "behave_framework", "bin/*", "bootstrap/*", "cmake/*", "conf/*", "controller/*", "core-framework/*", "docs/*", "encrypt-config/*", "etc/*", "examples/*", "extension-framework/*", "fips/*", "minifi-api/*", "packaging/*", "thirdparty/*", "docker/*", "LICENSE", "NOTICE", "README.md", "C2.md", "CONAN.md", "CONFIGURE.md", "CONTRIBUTING.md", "CONTROLLERS.md", "EXPRESSIONS.md", "Extensions.md", "METRICS.md", "OPS.md", "PARAMETER_PROVIDERS.md", "PROCESSORS.md", "SITE_TO_SITE.md", "ThirdParties.md", "Windows.md", "CPPLINT.cfg", "generateVersion.bat", "generateVersion.sh", "run_clang_tidy.sh", "run_flake8.sh", "run_shellcheck.sh", "versioninfo.rc.in", "win_build_vs.bat")
 
 class MiNiFiCppMain(ConanFile):
     name = "minifi-cpp"
