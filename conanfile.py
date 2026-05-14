@@ -7,7 +7,7 @@ import shutil
 
 required_conan_version = ">=2.0"
 
-shared_requires = ("lz4/1.9.4", "zstd/1.5.2", "openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.9.1", "bzip2/1.0.8")
+shared_requires = ("openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.9.1", "zlib/1.3.2", "zstd/1.5.2", "bzip2/1.0.8", "lz4/1.9.4")
 
 disabled_shared_requires = ("rocksdb/10.5.1")
 
