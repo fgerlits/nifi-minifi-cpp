@@ -31,20 +31,19 @@ class MiNiFiCppMain(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = "OFF"
 
-        tc.variables["MINIFI_LZ4_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_ZSTD_SOURCE"] = "CONAN"
-
         tc.variables["MINIFI_LIBCURL_SOURCE"] = "CONAN"
         tc.variables["MINIFI_OPENSSL_SOURCE"] = "CONAN"
         tc.variables["MINIFI_ZLIB_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_ROCKSDB_SOURCE"] = "BUILD"  # FIXME
+        tc.variables["MINIFI_ZSTD_SOURCE"] = "CONAN"
         tc.variables["MINIFI_BZIP2_SOURCE"] = "CONAN"
         tc.variables["MINIFI_CIVETWEB_SOURCE"] = "CONAN"
         tc.variables["MINIFI_LIBXML2_SOURCE"] = "CONAN"
         tc.variables["MINIFI_FMT_SOURCE"] = "CONAN"
         tc.variables["MINIFI_SPDLOG_SOURCE"] = "CONAN"
         tc.variables["MINIFI_CATCH2_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_LZ4_SOURCE"] = "CONAN"
 
-        tc.variables["MINIFI_ROCKSDB_SOURCE"] = "BUILD"
 
         tc.variables["SKIP_TESTS"] = "OFF"
         tc.variables["ENABLE_CIVET"] = "ON"
