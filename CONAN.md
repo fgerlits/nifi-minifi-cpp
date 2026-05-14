@@ -52,10 +52,10 @@ export MINIFI_HOME=$(pwd)
 
 # install conan packages for MiNiFi C++ using conanfile.py invoking Conan
 # since we created default profile earlier, we can override it with our own minifi profile
-conan install . --build=missing --output-folder=build_conan -pr=etc/conan/profiles/release-linux
+conan install . --build=missing --output-folder=build_conan --profile=etc/conan/profiles/release-linux
 
 # build MiNiFi C++ using conanfile.py invoking Conan & CMake
-conan build . --output-folder=build_conan -pr=etc/conan/profiles/release-linux
+conan build . --output-folder=build_conan --profile=etc/conan/profiles/release-linux
 ~~~
 
 - **NOTE**: After building MiNiFi, we must have the MINIFI_HOME environment variable created in order to successfully run the minifi binary executable.
