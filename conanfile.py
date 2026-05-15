@@ -7,7 +7,7 @@ import shutil
 
 required_conan_version = ">=2.0"
 
-shared_requires = ("openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.9.1", "zlib/1.3.2", "zstd/1.5.2", "bzip2/1.0.8", "lz4/1.9.4")
+shared_requires = ("libarchive/3.8.7", "openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.9.1", "zlib/1.3.2", "zstd/1.5.2", "bzip2/1.0.8", "lz4/1.9.4")
 
 disabled_shared_requires = ("rocksdb/10.5.1")
 
@@ -30,6 +30,7 @@ class MiNiFiCppMain(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = "OFF"
 
+        tc.variables["MINIFI_LIBARCHIVE_SOURCE"] = "CONAN"
         tc.variables["MINIFI_LIBCURL_SOURCE"] = "CONAN"
         tc.variables["MINIFI_OPENSSL_SOURCE"] = "CONAN"
         tc.variables["MINIFI_ZLIB_SOURCE"] = "CONAN"
@@ -46,7 +47,7 @@ class MiNiFiCppMain(ConanFile):
 
         tc.variables["SKIP_TESTS"] = "OFF"
         tc.variables["ENABLE_CIVET"] = "ON"
-        tc.variables["ENABLE_LIBARCHIVE"] = "OFF"
+        tc.variables["ENABLE_LIBARCHIVE"] = "ON"
         tc.variables["ENABLE_AWS"] = "OFF"
         tc.variables["ENABLE_AZURE"] = "OFF"
         tc.variables["ENABLE_SQL"] = "OFF"
