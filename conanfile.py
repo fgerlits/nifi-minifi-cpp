@@ -7,11 +7,16 @@ import shutil
 
 required_conan_version = ">=2.0"
 
-shared_requires = ("libarchive/3.8.7", "openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.9.1", "zlib/1.3.2", "zstd/1.5.2", "bzip2/1.0.8", "lz4/1.9.4")
+shared_requires = ("libarchive/3.8.7", "openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.9.1", "zlib/1.3.2", "zstd/1.5.2",
+                   "bzip2/1.0.8", "lz4/1.9.4")
 
 disabled_shared_requires = ("rocksdb/10.5.1")
 
-shared_sources = ("CMakeLists.txt", "libminifi/*", "extensions/*", "minifi_main/*", "behave_framework", "bin/*", "bootstrap/*", "cmake/*", "conf/*", "controller/*", "core-framework/*", "docs/*", "encrypt-config/*", "etc/*", "examples/*", "extension-framework/*", "fips/*", "minifi-api/*", "packaging/*", "thirdparty/*", "docker/*", "LICENSE", "NOTICE", "README.md", "C2.md", "CONAN.md", "CONFIGURE.md", "CONTRIBUTING.md", "CONTROLLERS.md", "EXPRESSIONS.md", "Extensions.md", "METRICS.md", "OPS.md", "PARAMETER_PROVIDERS.md", "PROCESSORS.md", "SITE_TO_SITE.md", "ThirdParties.md", "Windows.md", "CPPLINT.cfg", "generateVersion.bat", "generateVersion.sh", "run_clang_tidy.sh", "run_flake8.sh", "run_shellcheck.sh", "versioninfo.rc.in", "win_build_vs.bat")
+shared_sources = ("CMakeLists.txt", "libminifi/*", "extensions/*", "minifi_main/*", "behave_framework", "bin/*", "bootstrap/*", "cmake/*", "conf/*", "controller/*", "core-framework/*",
+                  "docs/*", "encrypt-config/*", "etc/*", "examples/*", "extension-framework/*", "fips/*", "minifi-api/*", "packaging/*", "thirdparty/*", "docker/*", "LICENSE", "NOTICE",
+                  "README.md", "C2.md", "CONAN.md", "CONFIGURE.md", "CONTRIBUTING.md", "CONTROLLERS.md", "EXPRESSIONS.md", "Extensions.md", "METRICS.md", "OPS.md", "PARAMETER_PROVIDERS.md",
+                  "PROCESSORS.md", "SITE_TO_SITE.md", "ThirdParties.md", "Windows.md", "CPPLINT.cfg", "generateVersion.bat", "generateVersion.sh", "run_clang_tidy.sh", "run_flake8.sh",
+                  "run_shellcheck.sh", "versioninfo.rc.in", "win_build_vs.bat")
 
 class MiNiFiCppMain(ConanFile):
     name = "minifi-cpp"
