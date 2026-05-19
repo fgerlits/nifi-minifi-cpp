@@ -87,21 +87,21 @@ class RocksDBConan(ConanFile):
 
     def requirements(self):
         if self.options.with_gflags:
-            self.requires("gflags/2.2.2")
+            self.requires("gflags/2.3.0")
         if self.options.with_snappy:
-            self.requires("snappy/1.1.10")
+            self.requires("snappy/1.2.1")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.4")
+            self.requires("lz4/1.10.0")
         if self.options.with_zlib:
-            self.requires("zlib/[>=1.2.11 <2]")
+            self.requires("zlib/[>=1.3.2 <2]")
         if self.options.with_bz2:
             self.requires("bzip2/1.0.8")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.2")
+            self.requires("zstd/1.5.7")
         if self.options.get_safe("with_tbb"):
-            self.requires("onetbb/2021.10.0")
+            self.requires("onetbb/2023.0.0")
         if self.options.with_jemalloc:
-            self.requires("jemalloc/5.3.0")
+            self.requires("jemalloc/5.3.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
