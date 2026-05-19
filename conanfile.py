@@ -52,7 +52,6 @@ class MiNiFiCppMain(ConanFile):
         tc.variables["ENABLE_CIVET"] = "ON"
         tc.variables["ENABLE_LIBARCHIVE"] = "ON"
         tc.variables["ENABLE_AWS"] = "OFF"
-        tc.variables["ENABLE_AZURE"] = "OFF"
         tc.variables["ENABLE_SQL"] = "OFF"
         tc.variables["ENABLE_GCP"] = "OFF"
         tc.variables["ENABLE_GRPC_FOR_LOKI"] = "OFF"
