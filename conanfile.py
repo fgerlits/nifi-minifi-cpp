@@ -16,6 +16,7 @@ shared_sources = ("CMakeLists.txt", "libminifi/*", "extensions/*", "minifi_main/
                   "PROCESSORS.md", "SITE_TO_SITE.md", "ThirdParties.md", "Windows.md", "CPPLINT.cfg", "generateVersion.bat", "generateVersion.sh", "run_clang_tidy.sh", "run_flake8.sh",
                   "run_shellcheck.sh", "versioninfo.rc.in", "win_build_vs.bat")
 
+
 class MiNiFiCppMain(ConanFile):
     name = "minifi-cpp"
     version = "1.0.0"
@@ -46,7 +47,6 @@ class MiNiFiCppMain(ConanFile):
         tc.variables["MINIFI_SPDLOG_SOURCE"] = "CONAN"
         tc.variables["MINIFI_CATCH2_SOURCE"] = "CONAN"
         tc.variables["MINIFI_LIBARCHIVE_SOURCE"] = "CONAN"
-
 
         tc.variables["ENABLE_AWS"] = "OFF"
         tc.variables["ENABLE_LLAMACPP"] = "OFF"
