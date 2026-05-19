@@ -7,8 +7,8 @@ import shutil
 
 required_conan_version = ">=2.0"
 
-shared_requires = ("libarchive/3.8.7", "openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.9.1", "zlib/1.3.2", "zstd/1.5.2",
-                   "bzip2/1.0.8", "rocksdb/11.1.1@minifi/develop", "lz4/1.9.4")
+shared_requires = ("lz4/1.9.4", "openssl/3.3.7", "libcurl/8.18.0", "civetweb/1.16", "libxml2/2.15.2", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.9.1", "zlib/1.3.2", "zstd/1.5.2",
+                   "bzip2/1.0.8", "rocksdb/11.1.1@minifi/develop", "libarchive/3.8.7")
 
 shared_sources = ("CMakeLists.txt", "libminifi/*", "extensions/*", "minifi_main/*", "behave_framework", "bin/*", "bootstrap/*", "cmake/*", "conf/*", "controller/*", "core-framework/*",
                   "docs/*", "encrypt-config/*", "etc/*", "examples/*", "extension-framework/*", "fips/*", "minifi-api/*", "packaging/*", "thirdparty/*", "docker/*", "LICENSE", "NOTICE",
@@ -33,7 +33,7 @@ class MiNiFiCppMain(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_FIND_PACKAGE_PREFER_CONFIG"] = "OFF"
 
-        tc.variables["MINIFI_LIBARCHIVE_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_LZ4_SOURCE"] = "CONAN"
         tc.variables["MINIFI_LIBCURL_SOURCE"] = "CONAN"
         tc.variables["MINIFI_OPENSSL_SOURCE"] = "CONAN"
         tc.variables["MINIFI_ZLIB_SOURCE"] = "CONAN"
@@ -45,7 +45,7 @@ class MiNiFiCppMain(ConanFile):
         tc.variables["MINIFI_FMT_SOURCE"] = "CONAN"
         tc.variables["MINIFI_SPDLOG_SOURCE"] = "CONAN"
         tc.variables["MINIFI_CATCH2_SOURCE"] = "CONAN"
-        tc.variables["MINIFI_LZ4_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_LIBARCHIVE_SOURCE"] = "CONAN"
 
 
         tc.variables["SKIP_TESTS"] = "OFF"
