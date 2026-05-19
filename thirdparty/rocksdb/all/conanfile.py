@@ -174,7 +174,7 @@ class RocksDBConan(ConanFile):
 
     def build(self):
         for patch_data in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, patch_file=patch_data["patch_file"], base_path=self.source_folder, strip=1, fuzz=True)
+            patch(self, patch_file=patch_data["patch_file"], base_path=self.source_folder, strip=0, fuzz=True)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
