@@ -46,7 +46,10 @@ FetchContent_Declare(libkafka
 FetchContent_MakeAvailable(libkafka)
 
 get_target_property(ZSTD_INCLUDE_DIRS zstd::zstd INTERFACE_INCLUDE_DIRECTORIES)
-get_target_property(LZ4_INCLUDE_DIRS lz4::lz4 INCLUDE_DIRECTORIES)
+
+if(NOT DEFINED LZ4_INCLUDE_DIRS)
+    get_target_property(LZ4_INCLUDE_DIRS lz4::lz4 INCLUDE_DIRECTORIES)
+endif()
 
 target_include_directories(rdkafka SYSTEM PRIVATE ${ZSTD_INCLUDE_DIRS})
 target_include_directories(rdkafka SYSTEM PRIVATE ${LZ4_INCLUDE_DIRS})
