@@ -18,5 +18,5 @@
 #
 
 add_library(libminifi-c-unittest INTERFACE)
-target_link_libraries(libminifi-c-unittest INTERFACE minifi-cpp-extension-lib core-minifi Catch2WithMain)
+target_link_libraries(libminifi-c-unittest INTERFACE minifi-cpp-extension-lib core-minifi)
 target_include_directories(libminifi-c-unittest INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")

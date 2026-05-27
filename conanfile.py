@@ -48,7 +48,6 @@ class MiNiFiCppMain(ConanFile):
         tc.variables["MINIFI_LIBARCHIVE_SOURCE"] = "CONAN"
 
         tc.variables["ENABLE_AWS"] = "OFF"
-        tc.variables["ENABLE_LLAMACPP"] = "OFF"
         tc.variables["ENABLE_LUA_SCRIPTING"] = "OFF"
 
         tc.generate()
