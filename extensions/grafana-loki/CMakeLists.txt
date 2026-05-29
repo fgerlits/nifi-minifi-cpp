@@ -23,7 +23,7 @@ endif()
 include(${CMAKE_SOURCE_DIR}/extensions/ExtensionHeader.txt)
 
 if (ENABLE_GRPC_FOR_LOKI)
-    include(Grpc)
+    include(GetGrpc)
 
     set(LOKI_PROTOBUF_GENERATED_DIR ${CMAKE_BINARY_DIR}/grafana-loki-protobuf-generated)
     file(MAKE_DIRECTORY ${LOKI_PROTOBUF_GENERATED_DIR})

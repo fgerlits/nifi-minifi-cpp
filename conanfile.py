@@ -8,7 +8,7 @@ import shutil
 required_conan_version = ">=2.0"
 
 simple_requires = ("lz4/1.10.0", "openssl/3.6.2", "libcurl/8.20.0", "civetweb/1.16", "libxml2/2.15.3", "fmt/12.1.0", "spdlog/1.17.0", "catch2/3.14.0", "zlib/1.3.2", "zstd/1.5.7",
-                   "bzip2/1.0.8", "rocksdb/11.1.1@minifi/develop", "libarchive/3.8.7")
+                   "bzip2/1.0.8", "rocksdb/11.1.1@minifi/develop", "libarchive/3.8.7", "grpc/1.78.1", "google-cloud-cpp/2.28.0")
 requires_with_options = () #(("aws-sdk-cpp/1.11.692", {"s3-crt": True, "kinesis": True}))
 
 shared_sources = ("CMakeLists.txt", "libminifi/*", "extensions/*", "minifi_main/*", "behave_framework/*", "bin/*", "bootstrap/*", "cmake/*", "conf/*", "controller/*", "core-framework/*",
@@ -52,6 +52,8 @@ class MiNiFiCppMain(ConanFile):
         tc.variables["MINIFI_SPDLOG_SOURCE"] = "CONAN"
         tc.variables["MINIFI_CATCH2_SOURCE"] = "CONAN"
         tc.variables["MINIFI_LIBARCHIVE_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_GRPC_SOURCE"] = "CONAN"
+        tc.variables["MINIFI_GOOGLECLOUDCPP_SOURCE"] = "CONAN"
         tc.variables["MINIFI_AWSSDKCPP_SOURCE"] = "BUILD"
 
         tc.variables["ENABLE_AWS"] = "OFF"
