@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [ { id: gcc-13, base_image: gcc:13-bookworm },
-                    { id: gcc-15, base_image: gcc:15-trixie } ]
+                    { id: gcc-16, base_image: gcc:16-trixie } ]
     runs-on: ubuntu-24.04
 
     steps:
