@@ -26,7 +26,7 @@
 #include "core/PropertyDefinitionBuilder.h"
 #include "rdkafka_utils.h"
 #include "utils/Enum.h"
-#include "minifi-c.h"
+#include "minifi-api.h"
 
 namespace org::apache::nifi::minifi::processors {
 
@@ -41,7 +41,7 @@ class KafkaProcessorBase : public api::core::ProcessorImpl {
   EXTENSIONAPI static constexpr auto SSLContextService =
       core::PropertyDefinitionBuilder<>::createProperty("SSL Context Service")
           .withDescription("SSL Context Service Name")
-          .withAllowedType<MINIFI_SSL_CONTEXT_SERVICE_PROPERTY_TYPE>()
+          .withAllowedType<MINIFI_SSL_CONTEXT_SERVICE_INTERFACE_PROPERTY_TYPE>()
           .build();
   EXTENSIONAPI static constexpr auto SecurityProtocol =
       core::PropertyDefinitionBuilder<magic_enum::enum_count<kafka::SecurityProtocolOption>()>::createProperty(

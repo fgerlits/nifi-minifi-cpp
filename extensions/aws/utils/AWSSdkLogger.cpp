@@ -17,10 +17,11 @@
  */
 #include "AWSSdkLogger.h"
 
-#include <cstdio>
 #include <cstdarg>
+#include <cstdio>
 
 #include "aws/core/utils/logging/LogLevel.h"
+#include "minifi-cpp/core/logging/AdvancedLogger.h"
 #include "minifi-cpp/utils/gsl.h"
 
 namespace org::apache::nifi::minifi::aws::utils {
@@ -58,7 +59,8 @@ core::logging::LOG_LEVEL mapFromAwsLevels(Aws::Utils::Logging::LogLevel level) {
 }  // namespace
 
 Aws::Utils::Logging::LogLevel AWSSdkLogger::GetLogLevel() const {
-  return mapToAwsLevels(logger_->level());
+  const auto level = core::logging::AdvancedLogger::getLevel(logger_.get()) | minifi::utils::orTerminate("logger_ should be an AdvancedLogger");
+  return mapToAwsLevels(level);
 }
 
 void AWSSdkLogger::Log(Aws::Utils::Logging::LogLevel log_level, const char* tag, const char* format_str, ...) {  // NOLINT(cert-dcl50-cpp)

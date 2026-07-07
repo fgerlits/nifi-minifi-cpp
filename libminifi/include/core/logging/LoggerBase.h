@@ -17,26 +17,18 @@
  */
 #pragma once
 
-#include <string>
-#include <mutex>
 #include <memory>
+#include <mutex>
 #include <optional>
-#include <sstream>
-#include <utility>
-#include <iostream>
-#include <vector>
-#include <algorithm>
+#include <string>
 
+#include "fmt/std.h"
+#include "minifi-cpp/core/logging/AdvancedLogger.h"
+#include "minifi-cpp/core/logging/Logger.h"
 #include "spdlog/common.h"
 #include "spdlog/logger.h"
-#include "minifi-cpp/utils/gsl.h"
 #include "utils/ConfigurationUtils.h"
 #include "utils/Enum.h"
-#include "utils/GeneralUtils.h"
-#include "fmt/chrono.h"
-#include "fmt/std.h"
-#include "fmt/ostream.h"
-#include "minifi-cpp/core/logging/Logger.h"
 
 namespace org::apache::nifi::minifi::core::logging {
 
@@ -111,7 +103,7 @@ inline LOG_LEVEL mapStringToLogLevel(const std::string& level_str) {
   throw std::invalid_argument(fmt::format("Invalid LOG_LEVEL {}", level_str));
 }
 
-class LoggerBase : public Logger {
+class LoggerBase : public AdvancedLogger {
  public:
   LoggerBase(LoggerBase const&) = delete;
   LoggerBase& operator=(LoggerBase const&) = delete;
@@ -119,11 +111,11 @@ class LoggerBase : public Logger {
   void set_max_log_size(int size) override {
     max_log_size_ = size;
   }
+  LOG_LEVEL level() const override;
 
   virtual std::optional<std::string> get_id() = 0;
   bool should_log(LOG_LEVEL level) override;
   void log_string(LOG_LEVEL level, std::string str) override;
-  LOG_LEVEL level() const override;
   void setLogCallback(const std::function<void(LOG_LEVEL level, const std::string&)>& callback);
 
  private:

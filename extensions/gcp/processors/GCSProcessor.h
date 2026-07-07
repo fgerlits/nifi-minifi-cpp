@@ -53,7 +53,7 @@ class GCSProcessor : public api::core::ProcessorImpl {
       .build();
   EXTENSIONAPI static constexpr auto ProxyConfigurationService = core::PropertyDefinitionBuilder<>::createProperty("Proxy Configuration Service")
       .withDescription("Specifies the Proxy Configuration Controller Service to proxy network requests.")
-      .withAllowedType<MINIFI_PROXY_CONFIGURATION_SERVICE_PROPERTY_TYPE>()
+      .withAllowedType<MINIFI_PROXY_CONFIGURATION_SERVICE_INTERFACE_PROPERTY_TYPE>()
       .build();
   EXTENSIONAPI static constexpr auto Properties = std::to_array<core::PropertyReference>({
       GCPCredentials,
@@ -63,7 +63,7 @@ class GCSProcessor : public api::core::ProcessorImpl {
   });
 
  protected:
-  MinifiStatus onScheduleImpl(api::core::ProcessContext& context) override;
+  minifi_status onScheduleImpl(api::core::ProcessContext& context) override;
 
   virtual google::cloud::storage::Client getClient() const;
   static std::shared_ptr<google::cloud::Credentials> getCredentials(const api::core::ProcessContext& context);

@@ -84,10 +84,8 @@ class Logger {
     log(LOG_LEVEL::trace, std::move(fmt), std::forward<Args>(args)...);
   }
 
-  virtual void set_max_log_size(int size) = 0;
   virtual void log_string(LOG_LEVEL level, std::string str) = 0;
   virtual bool should_log(LOG_LEVEL level) = 0;
-  [[nodiscard]] virtual LOG_LEVEL level() const = 0;
 
   virtual ~Logger() = default;
 

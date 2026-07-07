@@ -32,15 +32,16 @@
 #include "core/Resource.h"
 #include "core/logging/LoggerFactory.h"
 #include "minifi-cpp/agent/agent_version.h"
+#include "minifi-cpp/core/ProcessorDescriptor.h"
+#include "minifi-cpp/core/logging/AdvancedLogger.h"
 #include "range/v3/algorithm.hpp"
 #include "range/v3/view/filter.hpp"
 #include "utils/Environment.h"
+#include "utils/ExtensionInitUtils.h"
 #include "utils/Locations.h"
 #include "utils/StringUtils.h"
 #include "utils/file/FilePattern.h"
 #include "utils/file/FileUtils.h"
-#include "minifi-cpp/core/ProcessorDescriptor.h"
-#include "utils/ExtensionInitUtils.h"
 
 namespace org::apache::nifi::minifi::extensions::python {
 
@@ -53,7 +54,7 @@ class DummyProcessorDescriptor : public core::ProcessorDescriptor {
   void setSupportedProperties(std::span<const core::Property> /*properties*/) override {}
 };
 
-class DummyLogger : public core::logging::Logger {
+class DummyLogger : public core::logging::AdvancedLogger {
  public:
   void set_max_log_size(int /*size*/) override {}
   void log_string(core::logging::LOG_LEVEL /*level*/, std::string /*str*/) override {}

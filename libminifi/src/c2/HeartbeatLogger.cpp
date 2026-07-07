@@ -16,13 +16,15 @@
  */
 
 #include "c2/HeartbeatLogger.h"
+
 #include "core/Resource.h"
+#include "minifi-cpp/core/logging/AdvancedLogger.h"
 
 namespace org::apache::nifi::minifi::c2 {
 
 HeartbeatLogger::HeartbeatLogger(std::string_view name, const utils::Identifier& id)
   : HeartbeatReporter(name, id) {
-  logger_->set_max_log_size(-1);  // log however huge the heartbeat is
+  gsl_Assert(core::logging::AdvancedLogger::setMaxLogSize(logger_.get(), -1));
 }
 
 int16_t HeartbeatLogger::heartbeat(const C2Payload &heartbeat) {
