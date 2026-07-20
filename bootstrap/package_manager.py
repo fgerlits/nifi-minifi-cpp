@@ -241,7 +241,7 @@ setlocal EnableDelayedExpansion
   set PATH=!PATH:C:\\Strawberry\\c\\bin;=!;C:\\Program Files\\NASM;
 endlocal & set PATH=%PATH%
 set build_platform=x64
-call {_get_activate_venv_path()}
+call "{_get_activate_venv_path()}"
 
 """
 
@@ -302,7 +302,7 @@ class ChocolateyPackageManager(PackageManager):
 
     def run_cmd(self, cmd: str) -> bool:
         env_bat_path = pathlib.Path(__file__).parent.resolve() / "build_environment.bat"
-        res = subprocess.run(f"{env_bat_path} & {cmd}", check=True, text=True)
+        res = subprocess.run(f'"{env_bat_path}" & {cmd}', check=True, text=True)
 
         return res.returncode == 0
 
