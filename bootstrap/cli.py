@@ -79,7 +79,7 @@ def run_conan_install(minifi_options: MinifiOptions, package_manager: PackageMan
     if not package_manager.run_cmd(conan_remote_add_cmd):
         print("Adding the nifi-conan remote failed")
         return False
-    build_cmd = f'conan install "{minifi_options.source_dir}" --output-folder={minifi_options.build_dir} --build=missing {conan_options} ' \
+    build_cmd = f'conan install "{minifi_options.source_dir}" --output-folder="{minifi_options.build_dir}" --build=missing {conan_options} ' \
                 f'--settings=build_type={minifi_options.build_type.value}{generator_setting}{compiler_settings}'
     res = package_manager.run_cmd(build_cmd)
     print("Conan install was successful" if res else "Conan install was unsuccessful")
