@@ -301,6 +301,7 @@ class ChocolateyPackageManager(PackageManager):
         return ""
 
     def run_cmd(self, cmd: str) -> bool:
+        print(f"### running: {cmd}")
         env_bat_path = pathlib.Path(__file__).parent.resolve() / "build_environment.bat"
         res = subprocess.run(f'"{env_bat_path}" & {cmd}', check=True, text=True)
 
