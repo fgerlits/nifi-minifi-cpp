@@ -211,7 +211,7 @@ def build_dir_menu(minifi_options: MinifiOptions, _package_manager: PackageManag
     answers = inquirer.prompt(questions)
     if answers is None:
         return True
-    minifi_options.build_dir = answers["build_dir"]
+    minifi_options.build_dir = Path(answers["build_dir"]).resolve()
     minifi_options.save_option_state()
     return False
 
