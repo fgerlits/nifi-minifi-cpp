@@ -40,7 +40,7 @@ endfunction()
 
 
 CREATE_DOCKER_TARGET_FROM_ROCKY_PACKAGE(rockylinux:8 rocky8 "dnf install -y wget python3.12-devel python3.12-pip gcc gcc-c++ findutils")
-CREATE_DOCKER_TARGET_FROM_ROCKY_PACKAGE(rockylinux:9 rocky9 "dnf install -y wget python3-devel python3-pip gcc gcc-c++ findutils")
+CREATE_DOCKER_TARGET_FROM_ROCKY_PACKAGE(rockylinux:9 rocky9 "dnf install -y wget python3.12-devel python3.12-pip gcc gcc-c++ findutils")
 CREATE_DOCKER_TARGET_FROM_ROCKY_PACKAGE(rockylinux/rockylinux:10 rocky10 "dnf install -y wget python3-devel python3-pip gcc gcc-c++ findutils")
 CREATE_DOCKER_TARGET_FROM_ROCKY_PACKAGE(ubuntu:jammy jammy "apt update \\&\\& apt install -y wget python3-dev python3-venv python3-pip")
 CREATE_DOCKER_TARGET_FROM_ROCKY_PACKAGE(ubuntu:noble noble "apt update \\&\\& apt install -y wget python3-dev python3-venv python3-pip")
@@ -48,7 +48,7 @@ CREATE_DOCKER_TARGET_FROM_ROCKY_PACKAGE(debian:bookworm bookworm "apt update \\&
 CREATE_DOCKER_TARGET_FROM_ROCKY_PACKAGE(debian:bullseye bullseye "apt update \\&\\& apt install -y wget python3-dev python3-venv python3-pip")
 CREATE_DOCKER_TARGET_FROM_ROCKY_PACKAGE(debian:trixie trixie "apt update \\&\\& apt install -y wget python3-dev python3-venv python3-pip")
 CREATE_DOCKER_TARGET_FROM_RPM_PACKAGE(rockylinux:8 rocky8 "dnf install -y wget python3.12-devel python3.12-pip gcc gcc-c++")
-CREATE_DOCKER_TARGET_FROM_RPM_PACKAGE(rockylinux:9 rocky9 "dnf install -y wget python3-devel python3-pip gcc gcc-c++")
+CREATE_DOCKER_TARGET_FROM_RPM_PACKAGE(rockylinux:9 rocky9 "dnf install -y wget python3.12-devel python3.12-pip gcc gcc-c++")
 CREATE_DOCKER_TARGET_FROM_RPM_PACKAGE(rockylinux/rockylinux:10 rocky10 "dnf install -y wget python3-devel python3-pip gcc gcc-c++")
 
 ADD_PACKAGE_VERIFY(rocky8)

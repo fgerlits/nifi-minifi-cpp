@@ -34,6 +34,8 @@ COPY ${ARCHIVE_LOCATION} /tmp/minifi.rpm
 RUN /bin/bash -c "${INSTALL_PACKAGE_CMD}" \
     && rpm -i /tmp/minifi.rpm
 
+RUN echo nifi.python.env.setup.binary=python3.12 >> /etc/nifi-minifi-cpp/minifi.properties
+
 USER ${USER}
 
 # Start MiNiFi CPP in the foreground

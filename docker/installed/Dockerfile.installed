@@ -39,6 +39,8 @@ ADD ${ARCHIVE_LOCATION} ${MINIFI_BASE_DIR}
 RUN chown -R ${USER}:${USER} /opt/minifi  \
     && /bin/bash -c "${INSTALL_PACKAGE_CMD}"
 
+RUN echo nifi.python.env.setup.binary=python3.12 >> ${MINIFI_HOME}/conf/minifi.properties
+
 USER ${USER}
 WORKDIR ${MINIFI_HOME}
 
