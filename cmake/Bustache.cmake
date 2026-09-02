@@ -34,6 +34,7 @@ set(PC ${Bash_EXECUTABLE}  -c "set -x &&\
 FetchContent_Declare(Bustache
         GIT_REPOSITORY  https://github.com/jamboree/bustache.git
         GIT_TAG         af10816ce3d2ff8577fd27caa2c1005c01d8069b
+        GIT_SHALLOW     TRUE
         PATCH_COMMAND   "${PC}"
         SYSTEM
 )

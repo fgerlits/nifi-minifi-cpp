@@ -23,6 +23,7 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(yaml
         GIT_REPOSITORY  https://github.com/yaml/libyaml.git
         GIT_TAG         2c891fc7a770e8ba2fec34fc6b545c672beb37e6  # 0.2.5
+        GIT_SHALLOW     TRUE
         SYSTEM
 )
 
