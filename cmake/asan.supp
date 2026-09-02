@@ -15,18 +15,16 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# AddressSanitizer runtime suppressions for MiNiFi C++ ASan builds
-# (MINIFI_ADVANCED_ASAN_BUILD=ON). Referenced from cmake/BuildTests.cmake via
-# ASAN_OPTIONS=suppressions=... for every unit test.
+# AddressSanitizer runtime suppressions for MiNiFi C++ ASan builds (MINIFI_ADVANCED_ASAN_BUILD=ON).
+# Referenced from cmake/BuildTests.cmake via ASAN_OPTIONS=suppressions=... for every unit test.
 
-# Environment::runningAsService_ (core-framework/common/src/utils/Environment.cpp)
-# and other core-framework globals are statically linked into both libcore-minifi.so
-# and every dlopen'd extension .so. ASan reports these identical definitions duplicated
-# across DSOs as odr-violations; at runtime they are unified by RTLD_GLOBAL, so they are
-# not real conflicting-definition bugs.
+# Defined identically in two different .so's, not a problem.
+odr_violation:minifi_api_version
 odr_violation:runningAsService_
 
-# minifi_api_version (extensions/*/ExtensionInitializer.cpp): each extension exports its own
-# CEXTENSIONAPI api-version constant for the loader's compatibility check. With RTLD_GLOBAL these
-# same-named per-extension globals collide; the loader reads each via its own handle, so benign.
-odr_violation:minifi_api_version
+# Defined identically in two different .so's, coming from third-party dependencies, not a problem.
+odr_violation:BZ2_crc32Table
+odr_violation:deflate_copyright
+odr_violation:inflate_copyright
+odr_violation:m_amount
+odr_violation:RFC1123_no_wday
