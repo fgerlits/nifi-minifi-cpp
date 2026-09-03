@@ -510,6 +510,71 @@ jobs:
         with:
           name: rocky-binaries
           path: /tmp/bin
+  address-sanitizer:
+    name: "ubuntu-26.04-asan"
+    runs-on: ubuntu-26.04
+    timeout-minutes: 120
+    env:
+      UBUNTU_GCC_MINIFI_OPTIONS: >-
+        -DCMAKE_BUILD_TYPE=Debug
+        -DCI_BUILD=OFF
+        -DCUSTOM_MALLOC=OFF
+        -DDOCKER_BUILD_ONLY=OFF
+        -DDOCKER_PUSH=OFF
+        -DDOCKER_SKIP_TESTS=ON
+        -DENABLE_ALL=ON
+        -DENABLE_TEST_PROCESSORS=ON
+        -DFORCE_COLORED_OUTPUT=ON
+        -DMINIFI_FAIL_ON_WARNINGS=ON
+        -DPORTABLE=ON
+        -DSKIP_TESTS=OFF
+        -DMINIFI_USE_REAL_ODBC_TEST_DRIVER=OFF
+        -DUSE_SHARED_LIBS=ON
+        -DMINIFI_ADVANCED_ASAN_BUILD=ON
+    steps:
+      - id: checkout
+        uses: actions/checkout@v6
+      - name: cache restore
+        uses: actions/cache/restore@v5
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ubuntu-26.04-asan-ccache-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ubuntu-26.04-asan-ccache-${{github.ref}}-
+            ubuntu-26.04-asan-ccache-refs/heads/main-
+      - id: install_deps
+        run: |
+          sudo apt update
+          sudo apt install -y ccache libfl-dev python3 python3-venv
+          echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
+          echo -e "127.0.0.1\t$HOSTNAME" | sudo tee -a /etc/hosts > /dev/null
+      - name: build
+        run: |
+          python3 -m venv venv && source venv/bin/activate \
+            && pip install -r requirements.txt \
+            && python main.py --noninteractive --minifi-options="${UBUNTU_GCC_MINIFI_OPTIONS}" --cmake-options="-DSTRICT_GSL_CHECKS=AUDIT"
+        working-directory: bootstrap
+      - name: cache save
+        uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ubuntu-26.04-asan-ccache-${{github.ref}}-${{github.sha}}
+      - name: test
+        id: test
+        run: |
+          # Set core file size limit to unlimited
+          ulimit -c unlimited
+          ctest -j$(nproc) --output-on-failure
+        working-directory: build
+      - name: upload ASan/LSan output
+        if: ${{ failure() && steps.test.conclusion == 'failure' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: asan-logs
+          path: |
+            build/asan_logs/*
+          if-no-files-found: ignore
   docker_build:
     name: "Docker build for integration tests (x86_64)"
     if: >-
