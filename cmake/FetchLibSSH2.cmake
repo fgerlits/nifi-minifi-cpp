@@ -22,20 +22,25 @@ find_package(ZLIB REQUIRED)
 
 include(FetchContent)
 
+set(PATCH_FILE_1 "${CMAKE_SOURCE_DIR}/thirdparty/libssh2/libssh2-CMAKE_MODULE_PATH.patch")
+set(PATCH_FILE_2 "${CMAKE_SOURCE_DIR}/thirdparty/libssh2/fix-windows-ioctl.patch")
+set(PATCH_FILE_3 "${CMAKE_SOURCE_DIR}/thirdparty/libssh2/fix-ecdh-leak.patch")
 if (WIN32)
-    set(PATCH_FILE "${CMAKE_SOURCE_DIR}/thirdparty/libssh2/fix-windows-ioctl.patch")
     set(PC ${Bash_EXECUTABLE}  -c "set -x &&\
-        (\\\"${Patch_EXECUTABLE}\\\" -p1 -R -s -f --dry-run -i \\\"${PATCH_FILE}\\\" || \\\"${Patch_EXECUTABLE}\\\" -p1 -N -i \\\"${PATCH_FILE}\\\")")
+        (\\\"${Patch_EXECUTABLE}\\\" -p1 -R -s -f --dry-run -i \\\"${PATCH_FILE_1}\\\" || \\\"${Patch_EXECUTABLE}\\\" -p1 -N -i \\\"${PATCH_FILE_1}\\\") &&\
+        (\\\"${Patch_EXECUTABLE}\\\" -p1 -R -s -f --dry-run -i \\\"${PATCH_FILE_2}\\\" || \\\"${Patch_EXECUTABLE}\\\" -p1 -N -i \\\"${PATCH_FILE_2}\\\") &&\
+        (\\\"${Patch_EXECUTABLE}\\\" -p1 -R -s -f --dry-run -i \\\"${PATCH_FILE_3}\\\" || \\\"${Patch_EXECUTABLE}\\\" -p1 -N -i \\\"${PATCH_FILE_3}\\\")")
 else()
-    set(PC "")
+    set(PC ${Bash_EXECUTABLE}  -c "set -x &&\
+        (\\\"${Patch_EXECUTABLE}\\\" -p1 -R -s -f --dry-run -i \\\"${PATCH_FILE_1}\\\" || \\\"${Patch_EXECUTABLE}\\\" -p1 -N -i \\\"${PATCH_FILE_1}\\\") &&\
+        (\\\"${Patch_EXECUTABLE}\\\" -p1 -R -s -f --dry-run -i \\\"${PATCH_FILE_3}\\\" || \\\"${Patch_EXECUTABLE}\\\" -p1 -N -i \\\"${PATCH_FILE_3}\\\")")
 endif()
 
 FetchContent_Declare(
         libssh2
-        GIT_REPOSITORY https://github.com/libssh2/libssh2
-        GIT_TAG        4884fc6102b32b76f0b1606a76477abe0e68ee51
-        GIT_SHALLOW    TRUE
-        PATCH_COMMAND "${PC}"
+        URL "https://github.com/libssh2/libssh2/archive/refs/tags/libssh2-1.11.1.tar.gz"
+        URL_HASH "SHA256=82b35c61c78b475647bdc981a183c5b5ab0d979e1caee94186e8f9150f2b0d0d"
+        PATCH_COMMAND ${PC}
         SYSTEM
         OVERRIDE_FIND_PACKAGE
 )
@@ -53,3 +58,4 @@ target_link_libraries(libssh2_static PUBLIC OpenSSL::Crypto OpenSSL::SSL ZLIB::Z
 if (NOT TARGET Libssh2::libssh2)
     add_library(Libssh2::libssh2 ALIAS libssh2_static)
 endif()
+

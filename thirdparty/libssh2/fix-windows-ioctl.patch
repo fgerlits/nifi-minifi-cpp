@@ -1,25 +1,29 @@
 diff --git a/src/session.c b/src/session.c
-index d4c1691d..c365290c 100644
+index 2d77b05e..929de40d 100644
 --- a/src/session.c
 +++ b/src/session.c
-@@ -266,7 +266,10 @@ static int session_banner_send(LIBSSH2_SESSION *session)
- static int session_nonblock(libssh2_socket_t sockfd,   /* operate on this */
-                             int nonblock /* TRUE or FALSE */ )
+@@ -292,7 +292,12 @@ static int
+ session_nonblock(libssh2_socket_t sockfd,   /* operate on this */
+                  int nonblock /* TRUE or FALSE */ )
  {
--#ifdef HAVE_O_NONBLOCK  /* most recent unix versions */
+-#ifdef HAVE_O_NONBLOCK
 +#if defined(_WIN32)
-+    unsigned long flags = nonblock;
++    unsigned long flags;
++
++    flags = nonblock;
 +    return ioctlsocket(sockfd, FIONBIO, &flags);
-+#elif defined(HAVE_O_NONBLOCK)  /* most recent unix versions */
-     int flags = fcntl(sockfd, F_GETFL, 0);
-     if(nonblock)
-         return fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
-@@ -280,9 +283,6 @@ static int session_nonblock(libssh2_socket_t sockfd,   /* operate on this */
- #elif defined(HAVE_SO_NONBLOCK)  /* BeOS */
++#elif defined(HAVE_O_NONBLOCK)
+     /* most recent unix versions */
+     int flags;
+ 
+@@ -314,11 +319,6 @@ session_nonblock(libssh2_socket_t sockfd,   /* operate on this */
+     /* BeOS */
      long b = nonblock ? 1 : 0;
      return setsockopt(sockfd, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
 -#elif defined(_WIN32)
--    unsigned long flags = nonblock;
+-    unsigned long flags;
+-
+-    flags = nonblock;
 -    return ioctlsocket(sockfd, FIONBIO, &flags);
  #else
      (void)sockfd;
