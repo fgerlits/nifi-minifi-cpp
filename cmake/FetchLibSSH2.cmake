@@ -33,7 +33,7 @@ endif()
 FetchContent_Declare(
         libssh2
         GIT_REPOSITORY https://github.com/libssh2/libssh2
-        GIT_TAG        4884fc6102b32b76f0b1606a76477abe0e68ee51  # head of the master branch as of 2026-09-03
+        GIT_TAG        4884fc6102b32b76f0b1606a76477abe0e68ee51
         GIT_SHALLOW    TRUE
         PATCH_COMMAND "${PC}"
         SYSTEM
