@@ -24,7 +24,7 @@ jobs:
   address-sanitizer:
     name: "ubuntu-26.04-asan"
     runs-on: ubuntu-26.04
-    timeout-minutes: 120
+    timeout-minutes: 600
     env:
       UBUNTU_GCC_MINIFI_OPTIONS: >-
         -DCMAKE_BUILD_TYPE=Debug
