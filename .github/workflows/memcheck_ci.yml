@@ -76,7 +76,7 @@ jobs:
             build/Testing/Temporary/LastDynamicAnalysis_*.log
           if-no-files-found: ignore
   address-sanitizer:
-    name: "AdressSanitizer+LeakSanitizer on ubuntu 26.04"
+    name: "AddressSanitizer+LeakSanitizer on ubuntu 26.04"
     runs-on: ubuntu-26.04
     timeout-minutes: 300
     steps:
