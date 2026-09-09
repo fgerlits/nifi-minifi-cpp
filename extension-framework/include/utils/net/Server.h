@@ -78,6 +78,7 @@ class Server {
   // Spawn a coroutine on io_context_ with a cancellation slot so stop() can end it and let the context drain
   // gracefully. Must be called from the io_context thread (i.e. from run() before io_context_.run(), or from within
   // a coroutine running on it); cancellation_signals_ is only ever touched on that thread, so it needs no locking.
+  // Exceptions are swallowed silently, as this is intended as a wrapper for asio::co_spawn(..., asio::detached).
   template<typename T>
   void asyncSpawn(asio::awaitable<T> coroutine) {
     const auto cancellation_signal_it = cancellation_signals_.emplace(cancellation_signals_.end());
