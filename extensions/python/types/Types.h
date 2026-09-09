@@ -246,8 +246,8 @@ class List : public ReferenceHolder<reference_type> {
 
   template<object::convertible T>
   void append(T value) {
-    auto object = object::from(std::move(value));
-    PyList_Append(this->ref_.get(), object.get());
+    auto value_object = object::from(std::move(value));
+    PyList_Append(this->ref_.get(), value_object.get());
   }
 
   size_t length() {
@@ -297,8 +297,8 @@ class Dict : public ReferenceHolder<reference_type> {
 
   template<object::convertible T>
   void put(const char* key, T value) {
-    auto object = object::from(std::move(value));
-    PyDict_SetItemString(this->ref_.get(), key, object.get());
+    auto value_object = object::from(std::move(value));
+    PyDict_SetItemString(this->ref_.get(), key, value_object.get());
   }
 
   template<object::convertible T>
