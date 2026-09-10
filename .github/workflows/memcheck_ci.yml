@@ -39,14 +39,20 @@ jobs:
           echo -e "127.0.0.1\t$HOSTNAME" | sudo tee -a /etc/hosts > /dev/null
       - name: environment diagnostics
         run: |
+          set +e  # never let a diagnostic command abort the job
           uname -a
           gcc --version | head -1
-          dpkg -l 'libasan*' 'gcc-15*' | grep '^ii' || true
+          dpkg -l 'libasan*' 'gcc-1*' | grep '^ii'
           grep -m1 'model name' /proc/cpuinfo; grep -o -m1 la57 /proc/cpuinfo || echo "no la57"
           grep 'address sizes' /proc/cpuinfo | head -1
-          cat /proc/sys/vm/mmap_rnd_bits /proc/sys/vm/overcommit_memory /proc/sys/vm/max_map_count
-          free -h; nproc
-          cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || true
+          echo "mmap_rnd_bits=$(sudo cat /proc/sys/vm/mmap_rnd_bits) overcommit=$(cat /proc/sys/vm/overcommit_memory) max_map_count=$(cat /proc/sys/vm/max_map_count)"
+          free -h; echo "nproc=$(nproc)"
+          cg=$(awk -F: '/^0::/{print $3}' /proc/self/cgroup)  # cgroup v2 path for this process
+          echo "cgroup=$cg"
+          for f in memory.max memory.high memory.current; do
+            echo "  $f=$(cat "/sys/fs/cgroup${cg}/$f" 2>/dev/null)"
+          done
+          true
       - name: build
         run: |
           python3 -m venv venv && source venv/bin/activate \
