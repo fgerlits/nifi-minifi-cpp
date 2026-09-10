@@ -96,6 +96,16 @@ jobs:
           sudo apt install -y ccache libfl-dev python3 python3-venv
           echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
           echo -e "127.0.0.1\t$HOSTNAME" | sudo tee -a /etc/hosts > /dev/null
+      - name: environment diagnostics
+        run: |
+          uname -a
+          gcc --version | head -1
+          dpkg -l 'libasan*' 'gcc-15*' | grep '^ii' || true
+          grep -m1 'model name' /proc/cpuinfo; grep -o -m1 la57 /proc/cpuinfo || echo "no la57"
+          grep 'address sizes' /proc/cpuinfo | head -1
+          cat /proc/sys/vm/mmap_rnd_bits /proc/sys/vm/overcommit_memory /proc/sys/vm/max_map_count
+          free -h; nproc
+          cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || true
       - name: build
         run: |
           python3 -m venv venv && source venv/bin/activate \
@@ -114,6 +124,11 @@ jobs:
           # Set core file size limit to unlimited
           ulimit -c unlimited
           ctest -j$(nproc) --output-on-failure
+        working-directory: build
+      - name: repro one failing test (isolated)
+        if: always()
+        run: |
+          ASAN_OPTIONS=verbosity=2:detect_odr_violation=1 ctest -R '^InvokeHTTPTests$' -j1 --output-on-failure || true
         working-directory: build
       - name: upload ASan/LSan output
         if: ${{ failure() && steps.test.conclusion == 'failure' }}
