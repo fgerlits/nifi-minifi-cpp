@@ -92,7 +92,7 @@ jobs:
 
           echo "===================== [2] gdb: run until SEGV, dump real mmap + backtraces ====================="
           # gdb intercepts SIGSEGV before ASan's handler, so we see the faulting state and full map.
-          export ASAN_OPTIONS=detect_odr_violation=1  # inherited by the gdb inferior
+          export ASAN_OPTIONS=verbosity=2:print_legend=1:detect_odr_violation=1  # inherited by the gdb inferior
           for i in $(seq 1 25); do
             timeout 180 gdb -q -batch -nx \
               -ex 'run' \
