@@ -82,13 +82,17 @@ jobs:
           # These binaries take no args and are self-contained (Catch2WithMain + TEST_RESOURCES).
           TEST=./bin/C2DescribeCoreComponentStateTest
 
+          # detect_odr_violation=1 (report only on size mismatch) is what CMake's ENVIRONMENT normally
+          # supplies via ctest; without it ASan aborts at startup on the many duplicate globals from
+          # USE_SHARED_LIBS=ON, before the real civetweb/SSL crash can occur.
           echo "===================== [1] ASan address-space layout (verbosity=2) ====================="
-          ASAN_OPTIONS=verbosity=2:print_legend=1 timeout 150 "$TEST" > asan_init.log 2>&1
+          ASAN_OPTIONS=verbosity=2:print_legend=1:detect_odr_violation=1 timeout 150 "$TEST" > asan_init.log 2>&1
           grep -iE "SHADOW_OFFSET|HighMem|LowMem|MidMem|Shadow|redzone|kHigh|Reserve|Mmap" asan_init.log | head -60
           echo "--- init log tail ---"; tail -25 asan_init.log
 
           echo "===================== [2] gdb: run until SEGV, dump real mmap + backtraces ====================="
           # gdb intercepts SIGSEGV before ASan's handler, so we see the faulting state and full map.
+          export ASAN_OPTIONS=detect_odr_violation=1  # inherited by the gdb inferior
           for i in $(seq 1 25); do
             timeout 180 gdb -q -batch -nx \
               -ex 'run' \
