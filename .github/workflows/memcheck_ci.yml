@@ -72,15 +72,48 @@ jobs:
           ulimit -c unlimited
           ctest -j$(nproc) --output-on-failure
         working-directory: build
-      - name: repro one failing test (isolated)
+      - name: capture ASan shadow layout and fault map
         if: always()
         run: |
-          ASAN_OPTIONS=verbosity=2:detect_odr_violation=1 ctest -R '^InvokeHTTPTests$' -j1 --output-on-failure || true
+          set +e  # diagnostics must never fail the job
+          sudo apt-get update -qq && sudo apt-get install -y -qq gdb
+          # Run a known-crashing C2 integration test DIRECTLY (not via ctest), so our ASAN_OPTIONS
+          # win: the CMake ENVIRONMENT property only overrides ASAN_OPTIONS when run through ctest.
+          # These binaries take no args and are self-contained (Catch2WithMain + TEST_RESOURCES).
+          TEST=./bin/C2DescribeCoreComponentStateTest
+
+          echo "===================== [1] ASan address-space layout (verbosity=2) ====================="
+          ASAN_OPTIONS=verbosity=2:print_legend=1 timeout 150 "$TEST" > asan_init.log 2>&1
+          grep -iE "SHADOW_OFFSET|HighMem|LowMem|MidMem|Shadow|redzone|kHigh|Reserve|Mmap" asan_init.log | head -60
+          echo "--- init log tail ---"; tail -25 asan_init.log
+
+          echo "===================== [2] gdb: run until SEGV, dump real mmap + backtraces ====================="
+          # gdb intercepts SIGSEGV before ASan's handler, so we see the faulting state and full map.
+          for i in $(seq 1 25); do
+            timeout 180 gdb -q -batch -nx \
+              -ex 'run' \
+              -ex 'printf "\n===== FAULT DETAILS =====\n"' \
+              -ex 'print/x $_siginfo._sifields._sigfault.si_addr' \
+              -ex 'info registers rip' \
+              -ex 'bt' \
+              -ex 'thread apply all bt' \
+              -ex 'info proc mappings' \
+              --args "$TEST" > "gdb_$i.log" 2>&1
+            if grep -q "SIGSEGV" "gdb_$i.log"; then
+              echo ">>> Reproduced SEGV on iteration $i"
+              cat "gdb_$i.log"
+              break
+            fi
+            echo "iteration $i: no SEGV (exited normally)"
+          done
         working-directory: build
       - name: upload ASan/LSan output
-        if: ${{ failure() && steps.test.conclusion == 'failure' }}
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: asan-logs
-          path: build/asan_logs/*
+          path: |
+            build/asan_logs/*
+            build/asan_init.log
+            build/gdb_*.log
           if-no-files-found: ignore
