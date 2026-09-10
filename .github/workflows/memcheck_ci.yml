@@ -47,6 +47,8 @@ jobs:
           grep 'address sizes' /proc/cpuinfo | head -1
           echo "mmap_rnd_bits=$(sudo cat /proc/sys/vm/mmap_rnd_bits) overcommit=$(cat /proc/sys/vm/overcommit_memory) max_map_count=$(cat /proc/sys/vm/max_map_count)"
           free -h; echo "nproc=$(nproc)"
+          echo "=== ulimit -a ==="; ulimit -a
+          echo "=== /proc/self/limits ==="; cat /proc/self/limits
           cg=$(awk -F: '/^0::/{print $3}' /proc/self/cgroup)  # cgroup v2 path for this process
           echo "cgroup=$cg"
           for f in memory.max memory.high memory.current; do
@@ -76,6 +78,7 @@ jobs:
         if: always()
         run: |
           set +e  # diagnostics must never fail the job
+          echo "=== ulimit -a (this step's shell; gdb inferior inherits it) ==="; ulimit -a
           sudo apt-get update -qq && sudo apt-get install -y -qq gdb
           # Run a known-crashing C2 integration test DIRECTLY (not via ctest), so our ASAN_OPTIONS
           # win: the CMake ENVIRONMENT property only overrides ASAN_OPTIONS when run through ctest.
@@ -98,7 +101,8 @@ jobs:
               -ex 'run' \
               -ex 'printf "\n===== FAULT DETAILS =====\n"' \
               -ex 'print/x $_siginfo._sifields._sigfault.si_addr' \
-              -ex 'info registers rip' \
+              -ex 'info registers rip rsp rbp' \
+              -ex 'x/2i $pc' \
               -ex 'bt' \
               -ex 'thread apply all bt' \
               -ex 'info proc mappings' \
