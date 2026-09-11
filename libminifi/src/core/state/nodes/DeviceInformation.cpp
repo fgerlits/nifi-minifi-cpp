@@ -85,7 +85,6 @@ std::string Device::getDeviceId() {
   ifaddrs *ifa = nullptr;
   int family = 0;
   int s = 0;
-  int n = 0;
   std::array<char, NI_MAXHOST> host{};
 
   if (getifaddrs(&ifaddr) == -1) {
@@ -94,7 +93,7 @@ std::string Device::getDeviceId() {
 
   /* Walk through linked list, maintaining head pointer so we
     can free list later */
-  for (ifa = ifaddr, n = 0; ifa != nullptr; ifa = ifa->ifa_next, n++) {
+  for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
     if (ifa->ifa_addr == nullptr)
       continue;
 
