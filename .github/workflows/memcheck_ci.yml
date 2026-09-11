@@ -34,14 +34,14 @@ jobs:
       - id: install_deps
         run: |
           sudo apt update
-          sudo apt install -y ccache libfl-dev python3 python3-venv
+          sudo apt install -y ccache libfl-dev python3 python3-venv g++-16
           echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
           echo -e "127.0.0.1\t$HOSTNAME" | sudo tee -a /etc/hosts > /dev/null
       - name: environment diagnostics
         run: |
           set +e  # never let a diagnostic command abort the job
           uname -a
-          gcc --version | head -1
+          /usr/bin/gcc-16 --version | head -1
           dpkg -l 'libasan*' 'gcc-1*' | grep '^ii'
           grep -m1 'model name' /proc/cpuinfo; grep -o -m1 la57 /proc/cpuinfo || echo "no la57"
           grep 'address sizes' /proc/cpuinfo | head -1
@@ -59,7 +59,7 @@ jobs:
         run: |
           python3 -m venv venv && source venv/bin/activate \
             && pip install -r requirements.txt \
-            && python main.py --noninteractive --minifi-options="${CMAKE_FLAGS} -DMINIFI_ADVANCED_ASAN_BUILD=ON" --cmake-options="-DSTRICT_GSL_CHECKS=AUDIT"
+            && python main.py --noninteractive --minifi-options="${CMAKE_FLAGS} -DMINIFI_ADVANCED_ASAN_BUILD=ON" --cmake-options="-DSTRICT_GSL_CHECKS=AUDIT -DCMAKE_C_COMPILER=/usr/bin/gcc-16 -DCMAKE_CXX_COMPILER=/usr/bin/g++-16"
         working-directory: bootstrap
       - name: cache save
         uses: actions/cache/save@v5
