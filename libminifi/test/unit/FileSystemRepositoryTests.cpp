@@ -64,8 +64,11 @@ TEST_CASE("Test Physical memory usage", "[testphysicalmemoryusage]") {
   }
 
   using org::apache::nifi::minifi::test::utils::verifyEventHappenedInPollTime;
+  std::cout << "### start_memory = " << start_memory << '\n';
   CHECK(verifyEventHappenedInPollTime(5s, [&] {
       const auto end_memory = minifi::utils::OsUtils::getCurrentProcessPhysicalMemoryUsage();
+      std::cout << "### end_memory = " << end_memory << '\n';
+      std::cout << "### end_memory < start_memory + int64_t{5_MB} is " << std::boolalpha << (end_memory < start_memory + int64_t{5_MB}) << std::noboolalpha << '\n';
       REQUIRE(end_memory > 0);
       return end_memory < start_memory + int64_t{5_MB};
     }, 100ms));
