@@ -82,7 +82,7 @@ TEST_CASE("Test Physical memory usage", "[testphysicalmemoryusage]") {
   CHECK(verifyEventHappenedInPollTime(5s, [&] {
       const auto end_memory = minifi::utils::OsUtils::getCurrentProcessPhysicalMemoryUsage();
       std::cout << "### end_memory = " << end_memory << '\n';
-      std::cout << "### end_memory < start_memory + int64_t{5_MB} is " << std::boolalpha << (end_memory < start_memory + int64_t{5_MB}) << std::noboolalpha << '\n';
+      std::cout << "### end_memory < start_memory + expected_max_memory_increase is " << std::boolalpha << (end_memory < start_memory + expected_max_memory_increase) << std::noboolalpha << '\n';
       REQUIRE(end_memory > 0);
       return end_memory < start_memory + expected_max_memory_increase;
     }, 100ms));
