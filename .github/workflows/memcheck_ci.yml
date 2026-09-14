@@ -147,3 +147,79 @@ jobs:
           name: asan-logs
           path: build/asan_logs/*
           if-no-files-found: ignore
+  address-sanitizer-clang:
+    name: "AddressSanitizer+LeakSanitizer on ubuntu 26.04 with Clang 22"
+    runs-on: ubuntu-26.04
+    timeout-minutes: 300
+    steps:
+      - id: checkout
+        uses: actions/checkout@v6
+      - name: cache restore
+        uses: actions/cache/restore@v5
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ubuntu-26.04-asan-clang-ccache-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ubuntu-26.04-asan-clang-ccache-${{github.ref}}-
+            ubuntu-26.04-asan-clang-ccache-refs/heads/main-
+      - id: install_deps
+        run: |
+          sudo apt update
+          sudo apt install -y ccache libfl-dev libc++-22-dev libc++abi-22-dev python3 python3-venv
+          echo "PATH=/usr/lib/ccache:$PATH" >> $GITHUB_ENV
+          echo -e "127.0.0.1\t$HOSTNAME" | sudo tee -a /etc/hosts > /dev/null
+      - name: environment diagnostics
+        run: |
+          set +e  # never let a diagnostic command abort the job
+          uname -a
+          clang-22 --version | head -1
+          dpkg -l 'clang-22' 'libclang*' 'libc++*' | grep '^ii'
+          grep -m1 'model name' /proc/cpuinfo; grep -o -m1 la57 /proc/cpuinfo || echo "no la57"
+          grep 'address sizes' /proc/cpuinfo | head -1
+          echo "mmap_rnd_bits=$(sudo cat /proc/sys/vm/mmap_rnd_bits) overcommit=$(cat /proc/sys/vm/overcommit_memory) max_map_count=$(cat /proc/sys/vm/max_map_count)"
+          free -h; echo "nproc=$(nproc)"
+          echo "=== ulimit -a ==="; ulimit -a
+          echo "=== /proc/self/limits ==="; cat /proc/self/limits
+          cg=$(awk -F: '/^0::/{print $3}' /proc/self/cgroup)  # cgroup v2 path for this process
+          echo "cgroup=$cg"
+          for f in memory.max memory.high memory.current; do
+            echo "  $f=$(cat "/sys/fs/cgroup${cg}/$f" 2>/dev/null)"
+          done
+          true
+      - name: build
+        run: |
+          export CC=clang-22
+          export CXX=clang++-22
+          export CXXFLAGS="-stdlib=libc++"
+          export LDFLAGS="-stdlib=libc++"
+          python3 -m venv venv && source venv/bin/activate \
+            && pip install -r requirements.txt \
+            && python main.py --noninteractive --skip-compiler-install --minifi-options="${CMAKE_FLAGS} -DMINIFI_ADVANCED_ASAN_BUILD=ON" --cmake-options="-DSTRICT_GSL_CHECKS=AUDIT"
+        working-directory: bootstrap
+      - name: cache save
+        uses: actions/cache/save@v5
+        if: always()
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ubuntu-26.04-asan-clang-ccache-${{github.ref}}-${{github.sha}}
+      - name: test
+        id: test
+        run: |
+          # Set core file size limit to unlimited
+          ulimit -c unlimited
+          ctest -j$(nproc) --output-on-failure
+        working-directory: build
+      - name: test FileSystemRepositoryTests
+        id: test_FileSystemRepositoryTests
+        run: |
+          # Set core file size limit to unlimited
+          ulimit -c unlimited
+          ctest -R FileSystemRepositoryTests --output-on-failure --repeat until-fail:500
+        working-directory: build
+      - name: upload ASan/LSan output
+        if: ${{ failure() && steps.test.conclusion == 'failure' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: asan-logs-clang
+          path: build/asan_logs/*
+          if-no-files-found: ignore
