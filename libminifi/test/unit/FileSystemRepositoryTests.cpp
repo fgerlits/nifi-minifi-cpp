@@ -63,14 +63,28 @@ TEST_CASE("Test Physical memory usage", "[testphysicalmemoryusage]") {
     stream->write(as_bytes(fragment));
   }
 
-  using org::apache::nifi::minifi::test::utils::verifyEventHappenedInPollTime;
+#if defined(__SANITIZE_ADDRESS__)  // detect AddressSanitizer on GCC
+#  define MINIFI_ASAN_ENABLED 1
+#elif defined(__has_feature)
+#  if __has_feature(address_sanitizer)  // detect AddressSanitizer on Clang
+#    define MINIFI_ASAN_ENABLED 1
+#  endif
+#endif
+
+#ifndef MINIFI_ASAN_ENABLED
+  static constexpr int64_t expected_max_memory_increase = 5_MB;
+#else
+  static constexpr int64_t expected_max_memory_increase = 15_MB;
+#endif
   std::cout << "### start_memory = " << start_memory << '\n';
+  std::cout << "### expected_max_memory_increase = " << expected_max_memory_increase << '\n';
+  using org::apache::nifi::minifi::test::utils::verifyEventHappenedInPollTime;
   CHECK(verifyEventHappenedInPollTime(5s, [&] {
       const auto end_memory = minifi::utils::OsUtils::getCurrentProcessPhysicalMemoryUsage();
       std::cout << "### end_memory = " << end_memory << '\n';
       std::cout << "### end_memory < start_memory + int64_t{5_MB} is " << std::boolalpha << (end_memory < start_memory + int64_t{5_MB}) << std::noboolalpha << '\n';
       REQUIRE(end_memory > 0);
-      return end_memory < start_memory + int64_t{5_MB};
+      return end_memory < start_memory + expected_max_memory_increase;
     }, 100ms));
 }
 
