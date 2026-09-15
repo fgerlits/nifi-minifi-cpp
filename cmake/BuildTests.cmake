@@ -29,6 +29,8 @@ if (MINIFI_ADVANCED_ASAN_BUILD)
         if (MINIFI_TEST_NAME)
             set_property(TEST "${MINIFI_TEST_NAME}" APPEND PROPERTY
                 ENVIRONMENT "ASAN_OPTIONS=detect_odr_violation=1:log_path=${CMAKE_BINARY_DIR}/asan_logs/${MINIFI_TEST_NAME}")
+            set_property(TEST "${MINIFI_TEST_NAME}" APPEND PROPERTY
+                ENVIRONMENT "LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/cmake/leak_sanitizer.supp")
         endif()
     endfunction()
 endif()

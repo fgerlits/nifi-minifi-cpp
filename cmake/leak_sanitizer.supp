@@ -1,0 +1,33 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# LeakSanitizer suppressions for MiNiFi C++ test runs.
+# Wired into CTest via LSAN_OPTIONS in the add_test() override in cmake/BuildTests.cmake
+# (only for MINIFI_ADVANCED_ASAN_BUILD builds).
+#
+# Syntax: `leak:<substring>` suppresses a leak if the substring matches any frame's
+# (demangled) function name, source file, or module in the leak's stack trace.
+
+# Extensions are loaded via dlopen() at startup and cannot be fully unloaded at exit
+# (STB_GNU_UNIQUE symbols and third-party singletons such as RocksDB's Env::Default()
+# keep the .so mapped -- see the comment in Extension::~Extension()). The LeakSanitizer
+# in Clang 20 therefore reports the load-time global allocations of every loaded extension
+# as leaks. In a running agent these are persistent process-lifetime globals, not true
+# leaks, so we suppress the whole extension-loading path. Both frames below are present
+# in every such leak; listing both is robust to one being inlined into the other.
+leak:org::apache::nifi::minifi::core::extension::Extension::load
+leak:org::apache::nifi::minifi::core::extension::ExtensionManager::ExtensionManager
