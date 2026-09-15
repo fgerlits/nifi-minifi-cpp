@@ -51,11 +51,13 @@ Extension::Extension(std::string library_name, std::filesystem::path library_pat
 
 bool Extension::load(bool global) {
   dlerror();
-  if (global) {
-    handle_ = dlopen(library_path_.string().c_str(), RTLD_NOW | RTLD_GLOBAL);  // NOLINT(cppcoreguidelines-owning-memory)
-  } else {
-    handle_ = dlopen(library_path_.string().c_str(), RTLD_NOW | RTLD_LOCAL);  // NOLINT(cppcoreguidelines-owning-memory)
-  }
+  int flags = RTLD_NOW | (global ? RTLD_GLOBAL : RTLD_LOCAL);
+#if defined(__has_feature)
+#  if __has_feature(address_sanitizer)
+  flags |= RTLD_NODELETE;  // improve ASan output on Clang by keeping .so's in memory
+#  endif
+#endif
+  handle_ = dlopen(library_path_.string().c_str(), flags);  // NOLINT(cppcoreguidelines-owning-memory)
   if (!handle_) {
     logger_->log_error("Failed to load extension '{}' at '{}': {}", library_name_, library_path_, dlerror());
     return false;
