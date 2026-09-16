@@ -54,7 +54,7 @@ jobs:
         run: |
           # Set core file size limit to unlimited
           ulimit -c unlimited
-          ctest -j$(nproc) -L memchecked -T memcheck
+          ctest -j$(nproc) -T memcheck
         working-directory: build
       - name: check valgrind output
         id: check
