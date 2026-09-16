@@ -100,7 +100,7 @@ TEST_CASE("Alert system forwards logs") {
 
   auto verifyLogsArrived = [&] (const std::vector<std::string>& expected) {
     std::vector<std::string> logs;
-    REQUIRE(handler.alerts_.dequeueWaitFor(logs, 1s));
+    REQUIRE(handler.alerts_.dequeueWaitFor(logs, utils::timeout(1s)));
     REQUIRE(logs.size() == expected.size());
     for (size_t idx = 0; idx < expected.size(); ++idx) {
       bool contains = std::search(logs[idx].begin(), logs[idx].end(), expected[idx].begin(), expected[idx].end()) != logs[idx].end();
