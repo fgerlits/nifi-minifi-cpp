@@ -136,7 +136,7 @@ namespace MinifiConcurrentQueueTestProducersConsumers {
       constexpr std::size_t max_read_attempts = 300;
       for (std::size_t attempt_num = 0; results.size() < 3 && attempt_num < max_read_attempts; ++attempt_num) {
         std::string s;
-        if (queue.dequeueWaitFor(s, std::chrono::milliseconds(1))) {
+        if (queue.dequeueWaitFor(s, minifi::test::utils::timeout(1ms))) {
           results.push_back(s);
         }
       }

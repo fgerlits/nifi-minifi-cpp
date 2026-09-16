@@ -19,6 +19,10 @@
 
 #include <type_traits>
 
+#if __has_include(<valgrind/valgrind.h>)
+#include <valgrind/valgrind.h>
+#endif
+
 #ifdef WIN32
 #include <windows.h>
 #include <aclapi.h>
@@ -62,6 +66,15 @@ void setAclOnFileOrDirectory(std::string file_name, DWORD perms, ACCESS_MODE per
 #endif
 
 namespace org::apache::nifi::minifi::test::utils {
+
+bool runningUnderValgrind() {
+#ifdef RUNNING_ON_VALGRIND
+  static const bool result = (RUNNING_ON_VALGRIND != 0);
+  return result;
+#else
+  return false;
+#endif
+}
 
 std::filesystem::path putFileToDir(const std::filesystem::path& dir_path, const std::filesystem::path& file_name, const std::string& content) {
   auto file_path = dir_path/file_name;
@@ -162,7 +175,7 @@ bool countLogOccurrencesUntil(const std::string& pattern,
                               const std::chrono::milliseconds max_duration,
                               const std::chrono::milliseconds wait_time) {
   auto start_time = std::chrono::steady_clock::now();
-  while (std::chrono::steady_clock::now() < start_time + max_duration) {
+  while (std::chrono::steady_clock::now() < start_time + timeout(max_duration)) {
     if (LogTestController::getInstance().countOccurrences(pattern) == occurrences)
       return true;
     std::this_thread::sleep_for(wait_time);
