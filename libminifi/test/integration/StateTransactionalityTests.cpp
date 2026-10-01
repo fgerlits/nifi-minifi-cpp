@@ -83,7 +83,7 @@ class StatefulIntegrationTest : public IntegrationBase {
   }
 
   void runAssertions() override {
-    REQUIRE(utils::verifyEventHappenedInPollTime(std::chrono::milliseconds(wait_time_), [&] {
+    REQUIRE(utils::verifyEventHappenedInPollTime(wait_time_, [&] {
       return stateful_processor_.get().hasFinishedHooks() && log_checker_();
     }));
   }
