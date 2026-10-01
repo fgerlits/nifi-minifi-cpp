@@ -95,7 +95,7 @@ class ManualClock : public minifi::utils::timeutils::SteadyClock {
   std::chrono::milliseconds time_{0};
 };
 
-constexpr int VALGRIND_TIMEOUT_MULTIPLIER = 50;
+inline constexpr int VALGRIND_TIMEOUT_MULTIPLIER = 50;
 
 bool runningUnderValgrind();
 
