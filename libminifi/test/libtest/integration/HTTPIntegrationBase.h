@@ -40,7 +40,7 @@ int ssl_enable(void* /*ssl_context*/, void* /*user_data*/);
 class HTTPIntegrationBase : public IntegrationBase {
  public:
   explicit HTTPIntegrationBase(const std::optional<std::filesystem::path>& test_file_location = {}, const std::optional<std::filesystem::path>& home_path = {},
-    std::chrono::milliseconds waitTime = std::chrono::milliseconds(DEFAULT_WAITTIME_MSECS))
+    std::chrono::milliseconds waitTime = DefaultWaitTime)
       : IntegrationBase(test_file_location, home_path, waitTime),
         server(nullptr) {
   }
@@ -113,7 +113,7 @@ class VerifyC2Describe : public VerifyC2Base {
 class VerifyC2Update : public HTTPIntegrationBase {
  public:
   explicit VerifyC2Update(const std::filesystem::path& test_file_location, const std::optional<std::filesystem::path>& home_path = {},
-    std::chrono::milliseconds waitTime = std::chrono::milliseconds(DEFAULT_WAITTIME_MSECS))
+    std::chrono::milliseconds waitTime = DefaultWaitTime)
       : HTTPIntegrationBase(test_file_location, home_path, waitTime) {
   }
 
