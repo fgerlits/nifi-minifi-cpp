@@ -64,7 +64,7 @@ class SiteToSiteTestHarness : public HTTPIntegrationBase {
 
   void runAssertions() override {
     // There is nothing to verify here, but we are expected to wait for all paralell events to execute
-    std::this_thread::sleep_for(std::chrono::milliseconds(wait_time_));
+    std::this_thread::sleep_for(wait_time_);
   }
 
  protected:

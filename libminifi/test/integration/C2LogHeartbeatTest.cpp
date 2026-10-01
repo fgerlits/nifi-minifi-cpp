@@ -49,9 +49,7 @@ class VerifyLogC2Heartbeat : public VerifyC2Base {
   }
 
   void runAssertions() override {
-    REQUIRE(minifi::test::utils::verifyLogLinePresenceInPollTime(
-        std::chrono::milliseconds(wait_time_),
-        "\"operation\": \"heartbeat\""));
+    REQUIRE(minifi::test::utils::verifyLogLinePresenceInPollTime(wait_time_, "\"operation\": \"heartbeat\""));
 
     const auto log = LogTestController::getInstance().getLogs();
     auto types_in_heartbeat = log | ranges::views::split('\n')

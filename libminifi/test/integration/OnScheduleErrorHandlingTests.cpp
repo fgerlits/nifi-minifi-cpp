@@ -47,7 +47,7 @@ class KamikazeErrorHandlingTests : public IntegrationBase {
                                                  minifi::processors::KamikazeProcessor::OnTriggerExceptionStr,
                                                  "[warning] ProcessSession rollback for kamikaze executed"};
 
-    const bool test_success = verifyEventHappenedInPollTime(std::chrono::milliseconds(wait_time_), [&] {
+    const bool test_success = verifyEventHappenedInPollTime(wait_time_, [&] {
       const std::string logs = LogTestController::getInstance().getLogs();
       const auto result = minifi::utils::string::countOccurrences(logs, minifi::processors::KamikazeProcessor::OnScheduleExceptionStr);
       size_t last_pos = result.first;

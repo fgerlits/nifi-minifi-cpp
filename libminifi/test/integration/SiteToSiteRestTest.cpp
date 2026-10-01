@@ -90,11 +90,11 @@ class SiteToSiteTestHarness : public HTTPIntegrationBase {
   void runAssertions() override {
     using minifi::test::utils::verifyLogLinePresenceInPollTime;
     if (isSecure) {
-      REQUIRE(verifyLogLinePresenceInPollTime(std::chrono::milliseconds(wait_time_), "process group remote site2site port 10001, is secure true"));
+      REQUIRE(verifyLogLinePresenceInPollTime(wait_time_, "process group remote site2site port 10001, is secure true"));
     } else {
-      REQUIRE(verifyLogLinePresenceInPollTime(std::chrono::milliseconds(wait_time_), "process group remote site2site port 10001, is secure false"));
+      REQUIRE(verifyLogLinePresenceInPollTime(wait_time_, "process group remote site2site port 10001, is secure false"));
     }
-    REQUIRE(verifyLogLinePresenceInPollTime(std::chrono::milliseconds(wait_time_), "ProcessGroup::refreshRemoteSiteToSiteInfo -- curl_easy_perform() failed "));
+    REQUIRE(verifyLogLinePresenceInPollTime(wait_time_, "ProcessGroup::refreshRemoteSiteToSiteInfo -- curl_easy_perform() failed "));
   }
 
  protected:
