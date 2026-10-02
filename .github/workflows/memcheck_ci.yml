@@ -54,10 +54,11 @@ jobs:
         run: |
           # Set core file size limit to unlimited
           ulimit -c unlimited
-          ctest -j$(nproc) -T memcheck
+          ctest -j$(nproc) -T memcheck --output-on-failure
         working-directory: build
       - name: check valgrind output
         id: check
+        if: always()
         run: |
           nonempty_valgrind_outputs=$(find Testing/Temporary -maxdepth 1 -name 'MemoryChecker.*.log' -size +0 -print)
           if [ -n "$nonempty_valgrind_outputs" ]; then
