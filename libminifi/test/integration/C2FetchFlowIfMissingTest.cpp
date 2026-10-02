@@ -26,6 +26,10 @@ using namespace std::literals::chrono_literals;
 namespace org::apache::nifi::minifi::test {
 
 TEST_CASE("C2FetchFlowIfMissingTest", "[c2test]") {
+  if (minifi::test::utils::runningUnderValgrind()) {
+    SKIP("Fetching the flow config often times out under Valgrind.");
+  }
+
   TestController controller;
   auto minifi_home = controller.createTempDirectory();
   const auto test_file_path = std::filesystem::path(TEST_RESOURCES) / "TestEmpty.yml";
