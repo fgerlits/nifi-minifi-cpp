@@ -213,3 +213,17 @@
    fun:fill_window
    ...
 }
+
+# "Conditional jump or move depends on uninitialised value(s)" inside the libstdc++
+# std::from_chars<int> that is inlined into Cron's fromChars<>/parse<year>
+# (utils/Cron.cpp). The input std::string is fully initialised and fromChars value-
+# initialises its output; this is a known valgrind imprecision on optimized integer
+# parsing, not a real defect. The globbed frames match whether valgrind compares
+# mangled or demangled names ("parse"/"year"/"Cron" are substrings of both).
+{
+   cron_parse_year_fromchars_uninitialised
+   Memcheck:Cond
+   fun:*parse*year*
+   fun:*Cron*
+   ...
+}
