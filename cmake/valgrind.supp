@@ -92,6 +92,24 @@
    ...
 }
 
+# glibc lazily allocates a module's Thread-Local-Storage block (a DTV entry) the first time a
+# thread touches a thread_local in a dynamically-loaded library (e.g. the Lua script extension):
+# __tls_get_addr -> tls_get_addr_tail -> allocate_and_init -> allocate_dtv_entry. The block is
+# owned by the dynamic linker's DTV and freed by the OS at exit; valgrind only holds an interior
+# pointer, so it is flagged "possibly lost". Sibling path to possibly_lost_tls_dtv_growth (which
+# matches DTV *resize* instead). Never a real leak.
+{
+   possibly_lost_tls_dtv_entry_allocation
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   ...
+   fun:allocate_dtv_entry
+   ...
+   fun:__tls_get_addr
+   ...
+}
+
 # glibc grows the Thread-Local-Storage descriptor vector (DTV) the first time a
 # thread touches a dynamically-loaded TLS variable. The DTV block is kept for
 # the thread's lifetime and freed by the OS at exit; the growth happens only
