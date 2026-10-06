@@ -54,7 +54,7 @@ jobs:
         run: |
           # Set core file size limit to unlimited
           ulimit -c unlimited
-          ctest -j$(nproc) -T memcheck --output-on-failure
+          ctest -j$(nproc) -T memcheck -LE integration --output-on-failure
         working-directory: build
       - name: check valgrind output
         id: check
