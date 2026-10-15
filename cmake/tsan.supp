@@ -1,0 +1,36 @@
+# ThreadSanitizer suppressions for MiNiFi C++ test runs.
+#
+# Wired in via TSAN_OPTIONS=suppressions=... in cmake/BuildTests.cmake.
+# Format reference: https://github.com/google/sanitizers/wiki/ThreadSanitizerSuppressions
+#
+# These entries suppress data races inside third-party, vendored code and the
+# test framework -- code MiNiFi does not own and does not intend to fix here.
+# Keeping that noise out of the output ensures real races in MiNiFi's own code
+# are not buried. A `race:` rule matches when EITHER of the two racing stacks
+# contains a frame matching the pattern.
+
+# --- civetweb (vendored HTTP library, _deps/civetweb-src) ---
+# Shutdown-time races between mg_stop()/CivetServer::close() on the main thread
+# and civetweb worker/master threads still draining connections.
+race:*civetweb-src*
+
+# --- open62541 (vendored OPC UA library, _deps/open62541-*) ---
+# Races in the server timer (batchTimerEntry/UA_Timer_add) and ua_server during
+# OPC UA test server start/stop, plus open62541's own internal server-lock
+# ordering (UA_LOCK/lockServer acquired in different orders on startup vs. the
+# timer thread). Both stacks are entirely inside open62541.
+race:*open62541*
+deadlock:*open62541*
+
+# --- Catch2 test framework (src/catch2) ---
+# Fast-path assertion counters (assertionPassedFastPath/handleExpr) race when
+# assertions are evaluated from multiple threads within a test.
+race:*catch_run_context*
+
+# --- BackTrace stack-dump signal handler (core-framework/src/utils/BackTrace.cpp) ---
+# The SIGUSR2 handler that captures per-thread stack traces for the jstack/BackTrace
+# diagnostic feature deliberately does non-async-signal-safe work (it allocates and
+# takes a lock inside pull_trace()/handler()). This covers both "signal-unsafe call
+# inside of a signal handler" and "signal handler spoils errno". Accepted as a
+# diagnostic-only risk rather than reworked here.
+signal:*BackTrace.cpp*
