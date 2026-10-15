@@ -25,6 +25,7 @@
 
 #include "minifi-cpp/utils/gsl.h"
 #include "utils/OsUtils.h"
+#include "utils/Sanitizers.h"
 #include "unit/TestBase.h"
 #include "unit/TestUtils.h"
 #include "unit/Catch.h"
@@ -32,6 +33,9 @@
 TEST_CASE("Test Physical memory usage", "[testphysicalmemoryusage]") {
   if (minifi::test::utils::runningUnderValgrind()) {
     SKIP("Memory usage is much higher when running under Valgrind");
+  }
+  if constexpr (utils::ThreadSanitizerEnabled) {
+    SKIP("Memory usage is much higher when running under ThreadSanitizer");
   }
 
   constexpr bool cout_enabled = true;

@@ -434,7 +434,7 @@ Connections:
   queue prioritizer class: ''
 Remote Process Groups:
 - id: b0c09ff0-0158-1000-0000-000000000000
-  name: ''
+  name: Remote Process Group
   url: http://localhost:8080/nifi
   comment: ''
   timeout: 20 sec
@@ -487,6 +487,7 @@ NiFi Properties Overrides: {}
 
   TypedProcessorWrapper<minifi::RemoteProcessGroupPort> port = rootFlowConfig->findProcessorByName("AmazingInputPort");
   REQUIRE(port);
+  CHECK(port->getProcessGroupPath() == "Simple TailFile To RPG / Remote Process Group");
   CHECK(port->getUUIDStr() == "ac0e798c-0158-1000-0588-cda9b944e011");
   CHECK(port.get().getUseCompression() == true);
   CHECK(port.get().getBatchSize().value() == 10);
@@ -2367,7 +2368,7 @@ Connections:
   destination id: b0c04f28-0158-1000-0000-000000000000
 Remote Process Groups:
 - id: b0c09ff0-0158-1000-0000-000000000000
-  name: ''
+  name: Remote Process Group
   url: http://localhost:8080/nifi
   comment: ''
   timeout: 20 sec
@@ -2389,6 +2390,7 @@ NiFi Properties Overrides: {}
 
   TypedProcessorWrapper<minifi::RemoteProcessGroupPort> port = rootFlowConfig->findProcessorByName("AmazingOutputPort");
   REQUIRE(port);
+  CHECK(port->getProcessGroupPath() == "Simple RPG To PutFile / Remote Process Group");
   CHECK(port->getUUIDStr() == "ac0e798c-0158-1000-0588-cda9b944e011");
   CHECK(port.get().getUseCompression() == true);
   CHECK(port.get().getBatchSize().value() == 10);

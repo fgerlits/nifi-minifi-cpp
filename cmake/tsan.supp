@@ -1,0 +1,16 @@
+# ThreadSanitizer suppressions for MiNiFi C++ test runs.
+#
+# Wired in via TSAN_OPTIONS=suppressions=... in cmake/BuildTests.cmake.
+# Format reference: https://github.com/google/sanitizers/wiki/ThreadSanitizerSuppressions
+
+# --- civetweb (vendored HTTP library) ---
+# Shutdown races inside civetweb itself: mg_stop() tears the context down on the main thread
+# while the master and worker threads are still accepting and draining connections.
+race:^mg_stop$
+race:^close_all_listening_sockets$
+race:^mg_free$
+race:^consume_socket$
+race:^master_thread_run$
+race:^mg_get_server_ports$
+race:^push_inner$
+race:^pull_all$

@@ -18,11 +18,13 @@
 
 #include <open62541/server.h>
 #include <open62541/server_config_default.h>
+#include <atomic>
 #include <thread>
 #include <mutex>
 #include <algorithm>
 #include "unit/TestUtils.h"
 #include "unit/Catch.h"
+#include "utils/StringUtils.h"
 
 extern "C" int mp_vsnprintf(char* s, size_t count, const char* format, va_list arg);
 
@@ -80,9 +82,7 @@ class OpcUaTestServer {
   void start() {
     std::lock_guard<std::mutex> lock(mutex_);
     running_ = true;
-    server_thread_ = std::thread([this]() {
-      UA_Server_run(server_, &running_);
-    });
+    server_thread_ = std::thread([this]() { runUAServer(); });
     ensureConnection();
   }
 
@@ -136,6 +136,17 @@ class OpcUaTestServer {
   }
 
  private:
+  void runUAServer() {
+    startup_status_ = UA_Server_run_startup(server_);
+    if (startup_status_ != UA_STATUSCODE_GOOD) { return; }
+    while (running_) {
+      UA_Server_run_iterate(server_, true);
+    }
+    if (const UA_StatusCode shutdown_status = UA_Server_run_shutdown(server_); shutdown_status != UA_STATUSCODE_GOOD) {
+      addLog(minifi::utils::string::join_pack("[ERROR] UA_Server_run_shutdown failed: ", UA_StatusCode_name(shutdown_status), "\n"));
+    }
+  }
+
   UA_NodeId addObject(const char *name, UA_NodeId parent) {
     UA_NodeId object_id;
     UA_ObjectAttributes attr = UA_ObjectAttributes_default;
@@ -210,18 +221,20 @@ class OpcUaTestServer {
   }
 
   void ensureConnection() {
+    REQUIRE(utils::verifyEventHappenedInPollTime(5s, [&]() { return startup_status_.load() == UA_STATUSCODE_GOOD; }, 10ms));
     REQUIRE(utils::verifyEventHappenedInPollTime(
       5s,
       [&]() {
         auto logs = getLogs();
-        return std::find_if(logs.begin(), logs.end(), [](const std::string& message) { return message.find("New DiscoveryUrl added") != std::string::npos;}) != logs.end();
+        return std::ranges::any_of(logs, [](const std::string& message) { return message.contains("New DiscoveryUrl added"); });
       },
       100ms));
   }
 
   UA_Server* server_;
   UA_UInt16 ns_index_;
-  UA_Boolean running_ = false;
+  std::atomic<bool> running_ = false;
+  std::atomic<UA_StatusCode> startup_status_ = UA_STATUSCODE_UNCERTAIN;
   std::mutex mutex_;
   std::thread server_thread_;
   mutable std::mutex server_logs_mutex_;
