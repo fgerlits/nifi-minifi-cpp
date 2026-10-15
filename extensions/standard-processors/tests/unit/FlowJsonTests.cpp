@@ -164,6 +164,7 @@ TEST_CASE("NiFi flow json format is correctly parsed") {
   // verify RPG input port
   TypedProcessorWrapper<minifi::RemoteProcessGroupPort> port = flow->findProcessorByName("AmazingInputPort");
   REQUIRE(port);
+  CHECK(port->getProcessGroupPath() == "MiNiFi Flow / NiFi Flow");
   CHECK(port->getUUIDStr() == "00000000-0000-0000-0000-000000000003");
   CHECK(port->getMaxConcurrentTasks() == 7);
   CHECK(port.get().getInstances().size() == 1);
@@ -1050,6 +1051,7 @@ TEST_CASE("NiFi flow json can use alternative targetUris field") {
   // verify RPG input port
   TypedProcessorWrapper<minifi::RemoteProcessGroupPort> port = flow->findProcessorByName("AmazingInputPort");
   REQUIRE(port);
+  CHECK(port->getProcessGroupPath() == "MiNiFi Flow / NiFi Flow");
   CHECK(port->getUUIDStr() == "00000000-0000-0000-0000-000000000003");
   CHECK(port->getMaxConcurrentTasks() == 7);
   CHECK(port.get().getUseCompression() == true);
@@ -1864,6 +1866,7 @@ TEST_CASE("Output port can also be used in RPG") {
 
   TypedProcessorWrapper<minifi::RemoteProcessGroupPort> port = flow->findProcessorByName("AmazingOutputPort");
   REQUIRE(port);
+  CHECK(port->getProcessGroupPath() == "MiNiFi Flow / NiFi Flow");
   CHECK(port->getUUIDStr() == "00000000-0000-0000-0000-000000000003");
   CHECK(port.get().getUseCompression() == true);
   CHECK(port.get().getBatchSize().value() == 10);

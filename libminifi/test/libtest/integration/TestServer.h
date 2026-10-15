@@ -24,7 +24,19 @@
 #include "CivetLibrary.h"
 #include "CivetServer.h"
 #include "utils/HTTPUtils.h"
+#include "utils/Sanitizers.h"
 #include "ServerAwareHandler.h"
+
+namespace test_server_detail {
+inline std::vector<std::string> create_options(std::vector<std::string> options) {
+  if constexpr (org::apache::nifi::minifi::utils::ThreadSanitizerEnabled) {
+    // civetweb is already suppressed in tsan.supp, but the suppression happens after stack trace symbolization, which
+    // can take 10 seconds or more, and these long pauses can cause test failures; to avoid this, run single-threaded
+    options.insert(options.end(), {"num_threads", "1"});
+  }
+  return options;
+}
+}  // namespace test_server_detail
 
 /**
  * A wrapper around CivetServer which notifies Handlers before shutdown,
@@ -41,15 +53,15 @@ class TestServer {
 
 
     // ECDH+AESGCM+AES256:!aNULL:!MD5:!DSS
-    const std::vector<std::string> cpp_options{ "document_root", ".", "listening_ports", port, "error_log_file",
-                              "error.log", "ssl_certificate", cert, "ssl_ca_file", ca_cert, "ssl_protocol_version", "4", "ssl_cipher_list",
-                              "ALL", "request_timeout_ms", "10000", "enable_auth_domain_check", "no", "ssl_verify_peer", "yes"};
+    auto cpp_options = test_server_detail::create_options({"document_root", ".", "listening_ports", port, "error_log_file",
+        "error.log", "ssl_certificate", cert, "ssl_ca_file", ca_cert, "ssl_protocol_version", "4", "ssl_cipher_list",
+        "ALL", "request_timeout_ms", "10000", "enable_auth_domain_check", "no", "ssl_verify_peer", "yes"});
     server_ = std::make_unique<CivetServer>(cpp_options, callbacks);
     addHandler(rooturi, handler);
   }
 
   TestServer(const std::string& port, const std::string& rooturi, CivetHandler* handler) {
-    const std::vector<std::string> cpp_options{"document_root", ".", "listening_ports", port};
+    auto cpp_options = test_server_detail::create_options({"document_root", ".", "listening_ports", port});
     server_ = std::make_unique<CivetServer>(cpp_options);
     addHandler(rooturi, handler);
   }

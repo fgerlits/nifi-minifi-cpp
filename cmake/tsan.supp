@@ -1,0 +1,30 @@
+# ThreadSanitizer suppressions for MiNiFi C++ test runs.
+#
+# Wired in via TSAN_OPTIONS=suppressions=... in cmake/BuildTests.cmake.
+# Format reference: https://github.com/google/sanitizers/wiki/ThreadSanitizerSuppressions
+
+# --- civetweb (vendored HTTP library) ---
+# Shutdown-time races between mg_stop()/CivetServer::close() on the main thread
+# and civetweb worker/master threads still draining connections, fully inside the
+# civetweb library.
+race:*civetweb-src*
+
+# --- open62541 (vendored OPC UA library) ---
+# Races in the server timer (batchTimerEntry/UA_Timer_add) and ua_server during
+# OPC UA test server start/stop, plus open62541's own internal server-lock
+# ordering (UA_LOCK/lockServer acquired in different orders on startup vs. the
+# timer thread). Both stacks are entirely inside open62541.
+race:*open62541*
+deadlock:*open62541*
+
+# --- OpenSSL (static libcrypto) lock-free hash table ---
+# Lock-free reader (match_key) vs. locked writer (alloc_new_value) in OpenSSL's
+# RCU-style crypto/hashtable/hashtable.c, hit when concurrent TLS handshakes run
+# on separate threads. TSan doesn't model the table's atomic publish/retire of
+# nodes, so it flags the lock-free read against the write; benign.
+race:hashtable.c
+
+# --- libc++ std::promise<void> shared state ---
+# libc++ is uninstrumented, so TSan cannot see the internal bookkeeping of
+# promise<void>, and reports some uses of it as a data race.
+race:promise<void>::~promise

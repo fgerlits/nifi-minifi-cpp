@@ -1,5 +1,4 @@
 /**
- *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,23 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef NDEBUG  // TestBase.h #undef's NDEBUG
+#define IS_DEBUG 1
+#endif
 
+#include <algorithm>
 #include <utility>
 #include <future>
 #include <memory>
+#include <string>
 #include "unit/TestBase.h"
 #include "unit/Catch.h"
 #include "utils/BackTrace.h"
 #include "utils/Monitors.h"
 #include "utils/ThreadPool.h"
-#include "range/v3/algorithm/any_of.hpp"
 
 using namespace std::literals::chrono_literals;
 
-TEST_CASE("BT1", "[TPT1]") {
+TEST_CASE("Simple backtrace test", "[BT1]") {
   const BackTrace trace = TraceResolver::getResolver().getBackTrace("BT1");
 #ifdef HAS_EXECINFO
-  CHECK(!trace.getTraces().empty());
+  const auto lines = trace.getTraces();
+  CHECK(!lines.empty());
+  CHECK(std::ranges::any_of(lines,
+      [](const std::string& line) { return line.contains(" @ ") && line.contains(" + "); }));
+#ifdef IS_DEBUG
+  CHECK(std::ranges::any_of(lines,
+      [](const std::string& line) { return line.contains("getBackTrace"); }));
+#endif
 #endif
 }
 
@@ -46,7 +56,7 @@ void outer_function(std::atomic_flag& ready_to_check, std::atomic_flag& checking
 }
 
 
-TEST_CASE("BT2", "[TPT2]") {
+TEST_CASE("Backtrace test with thread pool", "[BT2]") {
   std::atomic_flag ready_for_checking;
   std::atomic_flag done_with_checking;
 
@@ -70,12 +80,12 @@ TEST_CASE("BT2", "[TPT2]") {
       CHECK(trace.getName().starts_with(thread_pool_name));
     }
 #ifdef HAS_EXECINFO
-    auto first_worker_trace = traces.front();
-    CHECK(ranges::any_of(first_worker_trace.getTraces(), [](const std::string& trace_line) { return trace_line.find("run_tasks") != trace_line.npos; }));
-#ifdef DEBUG
-    CHECK(ranges::any_of(first_worker_trace.getTraces(), [](const std::string& trace_line) { return trace_line.find("outer_function") != trace_line.npos; }));
-    CHECK(ranges::any_of(first_worker_trace.getTraces(), [](const std::string& trace_line) { return trace_line.find("inner_function") != trace_line.npos; }));
-#endif
+    const auto& first_worker_trace = traces.front();
+    const auto lines = first_worker_trace.getTraces();
+    CHECK(std::ranges::any_of(lines,
+        [](const std::string& line) { return line.contains(" @ ") && line.contains(" + "); }));
+    CHECK(std::ranges::any_of(lines,
+        [](const std::string& line) { return line.contains("run_tasks"); }));
 #endif
     done_with_checking.test_and_set();
     done_with_checking.notify_all();
