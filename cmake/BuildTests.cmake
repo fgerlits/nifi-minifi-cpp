@@ -36,13 +36,15 @@ endif()
 if (MINIFI_ADVANCED_TSAN_BUILD)
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/tsan_logs")
 
-    # Route each test's ThreadSanitizer output to <build>/tsan_logs/<test-name>.<pid>
+    # Route each test's ThreadSanitizer output to <build>/tsan_logs/<test-name>.<pid> and apply the
+    # suppressions in cmake/tsan.supp (races in vendored civetweb/open62541 and the Catch2 framework).
+    # print_suppressions=0 keeps a fully-suppressed (otherwise clean) run from writing a log at all.
     function(add_test)
         _add_test(${ARGV})
         cmake_parse_arguments(MINIFI_TEST "" "NAME" "COMMAND" ${ARGV})
         if (MINIFI_TEST_NAME)
             set_property(TEST "${MINIFI_TEST_NAME}" APPEND PROPERTY
-                    ENVIRONMENT "TSAN_OPTIONS=log_path=${CMAKE_BINARY_DIR}/tsan_logs/${MINIFI_TEST_NAME}")
+                    ENVIRONMENT "TSAN_OPTIONS=log_path=${CMAKE_BINARY_DIR}/tsan_logs/${MINIFI_TEST_NAME}:suppressions=${CMAKE_SOURCE_DIR}/cmake/tsan.supp:print_suppressions=0")
         endif()
     endfunction()
 endif()
