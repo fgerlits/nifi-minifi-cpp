@@ -26,3 +26,11 @@ deadlock:*open62541*
 # Fast-path assertion counters (assertionPassedFastPath/handleExpr) race when
 # assertions are evaluated from multiple threads within a test.
 race:*catch_run_context*
+
+# --- BackTrace stack-dump signal handler (core-framework/src/utils/BackTrace.cpp) ---
+# The SIGUSR2 handler that captures per-thread stack traces for the jstack/BackTrace
+# diagnostic feature deliberately does non-async-signal-safe work (it allocates and
+# takes a lock inside pull_trace()/handler()). This covers both "signal-unsafe call
+# inside of a signal handler" and "signal handler spoils errno". Accepted as a
+# diagnostic-only risk rather than reworked here.
+signal:*BackTrace.cpp*
