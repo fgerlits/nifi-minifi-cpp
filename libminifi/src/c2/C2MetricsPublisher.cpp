@@ -18,7 +18,8 @@
 
 #include <filesystem>
 #include <memory>
-#include <map>
+#include <mutex>
+#include <unordered_set>
 #include "c2/C2MetricsPublisher.h"
 #include "minifi-cpp/core/state/nodes/MetricsBase.h"
 #include "core/state/nodes/QueueMetrics.h"
@@ -142,28 +143,25 @@ state::response::SharedResponseNode C2MetricsPublisher::loadC2ResponseConfigurat
 
 std::optional<state::response::NodeReporter::ReportedNode> C2MetricsPublisher::getMetricsNode(const std::string& metrics_class) const {
   gsl_Expects(response_node_loader_);
-  std::lock_guard<std::mutex> guard{metrics_mutex_};
-  const auto createReportedNode = [](const std::vector<state::response::SharedResponseNode>& nodes) {
-    gsl_Expects(!nodes.empty());
-    state::response::NodeReporter::ReportedNode reported_node;
-    reported_node.is_array = nodes[0]->isArray();
-    reported_node.name = nodes[0]->getName();
-    reported_node.serialized_nodes = state::response::ResponseNode::serializeAndMergeResponseNodes(nodes);
-    return reported_node;
-  };
 
+  std::vector<state::response::SharedResponseNode> nodes;
   if (!metrics_class.empty()) {
-    auto metrics_nodes = response_node_loader_->loadResponseNodes(metrics_class, nullptr);
-    if (!metrics_nodes.empty()) {
-      return createReportedNode(metrics_nodes);
-    }
+    nodes = response_node_loader_->loadResponseNodes(metrics_class, nullptr);
   } else {
-    const auto metrics_it = root_response_nodes_.find("metrics");
-    if (metrics_it != root_response_nodes_.end()) {
-      return createReportedNode(metrics_it->second);
+    std::scoped_lock guard{metrics_mutex_};
+    if (const auto metrics_it = root_response_nodes_.find("metrics"); metrics_it != root_response_nodes_.end()) {
+      nodes = metrics_it->second;
     }
   }
-  return std::nullopt;
+  if (nodes.empty()) {
+    return std::nullopt;
+  }
+
+  state::response::NodeReporter::ReportedNode reported_node;
+  reported_node.is_array = nodes[0]->isArray();
+  reported_node.name = nodes[0]->getName();
+  reported_node.serialized_nodes = state::response::ResponseNode::serializeAndMergeResponseNodes(nodes);
+  return reported_node;
 }
 
 std::vector<state::response::NodeReporter::ReportedNode> C2MetricsPublisher::getHeartbeatNodes(bool include_manifest) const {
@@ -174,21 +172,27 @@ std::vector<state::response::NodeReporter::ReportedNode> C2MetricsPublisher::get
 
   bool include = include_manifest || full_heartbeat;
 
-  std::vector<state::response::NodeReporter::ReportedNode> reported_nodes;
-  std::lock_guard<std::mutex> guard{metrics_mutex_};
-  reported_nodes.reserve(root_response_nodes_.size());
-  for (const auto& [name, node_values] : root_response_nodes_) {
-    for (const auto& node : node_values) {
-      auto identifier = dynamic_cast<state::response::AgentIdentifier*>(node.get());
-      if (identifier) {
-        identifier->includeAgentManifest(include);
-      }
-      state::response::NodeReporter::ReportedNode reported_node;
-      reported_node.name = node->getName();
-      reported_node.is_array = node->isArray();
-      reported_node.serialized_nodes = node->serialize();
-      reported_nodes.push_back(reported_node);
+  // Copy the nodes to avoid the metrics_mutex_ -> FlowController::mutex_ lock ordering,
+  // because during flow config load/update, the mutexes are locked in the reverse order.
+  std::vector<state::response::SharedResponseNode> root_response_nodes;
+  {
+    std::scoped_lock guard{metrics_mutex_};
+    for (const auto& [name, node_values] : root_response_nodes_) {
+      root_response_nodes.insert(root_response_nodes.end(), node_values.begin(), node_values.end());
     }
+  }
+
+  std::vector<state::response::NodeReporter::ReportedNode> reported_nodes;
+  reported_nodes.reserve(root_response_nodes.size());
+  for (const auto& node : root_response_nodes) {
+    if (auto* identifier = dynamic_cast<state::response::AgentIdentifier*>(node.get())) {
+      identifier->includeAgentManifest(include);
+    }
+    state::response::NodeReporter::ReportedNode reported_node;
+    reported_node.name = node->getName();
+    reported_node.is_array = node->isArray();
+    reported_node.serialized_nodes = node->serialize();
+    reported_nodes.push_back(std::move(reported_node));
   }
   return reported_nodes;
 }
@@ -199,7 +203,7 @@ void C2MetricsPublisher::loadMetricNodes(core::ProcessGroup*) {
     return;
   }
   std::string class_csv;
-  std::lock_guard<std::mutex> guard{metrics_mutex_};
+  std::scoped_lock guard{metrics_mutex_};
   if (configuration_->get(minifi::Configuration::nifi_c2_root_classes, class_csv)) {
     auto classes = utils::string::splitAndTrimRemovingEmpty(class_csv, ",");
     std::unordered_set<std::string> unique_classes{classes.begin(), classes.end()};
@@ -220,7 +224,7 @@ void C2MetricsPublisher::loadMetricNodes(core::ProcessGroup*) {
 }
 
 void C2MetricsPublisher::clearMetricNodes() {
-  std::lock_guard<std::mutex> guard{metrics_mutex_};
+  std::scoped_lock guard{metrics_mutex_};
   root_response_nodes_.clear();
 }
 
