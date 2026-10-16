@@ -509,9 +509,12 @@ ParameterContext* ProcessGroup::getParameterContext() const {
 }
 
 std::string ProcessGroup::buildGroupPath() const {
-  std::lock_guard<std::recursive_mutex> lock(mutex_);
   std::string path = name_;
-  auto parent = parent_process_group_;
+  ProcessGroup* parent = nullptr;
+  {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    parent = parent_process_group_;
+  }
   while (parent != nullptr) {
     path.insert(0, parent->getName() + " / ");
     parent = parent->getParent();
