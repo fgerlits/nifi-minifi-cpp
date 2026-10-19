@@ -15,6 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#if defined(__SANITIZE_THREAD__)  // GCC
+#  define MINIFI_TSAN_ENABLED 1
+#elif defined(__has_feature)
+#  if __has_feature(thread_sanitizer)  // Clang
+#    define MINIFI_TSAN_ENABLED 1
+#  endif
+#endif
+
 #include <algorithm>
 #include <filesystem>
 #include <string>
@@ -29,6 +37,13 @@
 #include "catch2/matchers/catch_matchers.hpp"
 
 namespace org::apache::nifi::minifi::processors::test {
+
+#ifdef MINIFI_TSAN_ENABLED
+// librdkafka uses C11 threads (thrd_create), which TSan does not intercept yet, and this causes a SEGV;
+// re-enable these tests after https://github.com/llvm/llvm-project/pull/231194 is merged
+TEST_CASE("Dummy test case added because CTest doesn't allow test files without any test cases") {
+}
+#else
 
 TEST_CASE("Batch Size cannot be larger than Queue Max Message", "[PublishKafka]") {
   auto publish_kafka = PublishKafka(mock::getMockMetadata());
@@ -94,5 +109,7 @@ TEST_CASE("System CA certificate locations are probed when no CA certificate is 
 
   CHECK(hasDebugLog(*logger, "Kafka ssl.ca.location [probe]"));
 }
+
+#endif  // MINIFI_TSAN_ENABLED
 
 }  // namespace org::apache::nifi::minifi::processors::test
