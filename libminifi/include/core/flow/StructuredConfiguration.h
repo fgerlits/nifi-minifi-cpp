@@ -131,7 +131,7 @@ class StructuredConfiguration : public FlowConfiguration {
    * @param parent        the root node of flow configuration to which
    *                      to add the process groups that are parsed
    */
-  void parseRemoteProcessGroup(const Node& rpg_node_seq, core::ProcessGroup* parent);
+  void parseRemoteProcessGroup(const Node& rpg_node_seq, core::ProcessGroup* parent_group);
 
   /**
    * Parses the Provenance Reporting section of a configuration.
