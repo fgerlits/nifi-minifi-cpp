@@ -26,6 +26,7 @@
 #include "HTTPCallback.h"
 #include "io/BaseStream.h"
 #include "HTTPClient.h"
+#include "minifi-cpp/utils/gsl.h"
 
 namespace org::apache::nifi::minifi::http {
 
@@ -93,10 +94,11 @@ class HttpStream : public io::BaseStreamImpl {
     return submit_status;
   }
 
-  static bool submit_read_client(const std::shared_ptr<HTTPClient>& client, utils::ByteOutputCallback* callback) {
+  static bool submit_read_client(const std::shared_ptr<HTTPClient>& client) {
     if (client == nullptr)
       return false;
     bool submit_status = client->submit();
+    auto callback = gsl::not_null(dynamic_cast<utils::ByteOutputCallback*>(client->getReadCallback()));
     callback->close();
     return submit_status;
   }
