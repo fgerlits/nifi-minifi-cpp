@@ -20,6 +20,14 @@
 // as we measure the absolute memory usage that would fail this test
 #define EXTENSION_LIST ""  // NOLINT(cppcoreguidelines-macro-usage)
 
+#if defined(__SANITIZE_THREAD__)  // GCC
+#  define MINIFI_TSAN_ENABLED 1
+#elif defined(__has_feature)
+#  if __has_feature(thread_sanitizer)  // Clang
+#    define MINIFI_TSAN_ENABLED 1
+#  endif
+#endif
+
 #include <iostream>
 #include <numeric>
 
@@ -33,6 +41,9 @@ TEST_CASE("Test Physical memory usage", "[testphysicalmemoryusage]") {
   if (minifi::test::utils::runningUnderValgrind()) {
     SKIP("Memory usage is much higher when running under Valgrind");
   }
+#ifdef MINIFI_TSAN_ENABLED
+  SKIP("Memory usage is much higher when running under ThreadSanitizer");
+#endif
 
   constexpr bool cout_enabled = true;
 
