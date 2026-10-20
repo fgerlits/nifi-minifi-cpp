@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "utils/BackTrace.h"
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 
-#include "utils/OptionalUtils.h"
+#include "utils/BackTrace.h"
 
 #ifndef HAS_EXECINFO
 BackTrace TraceResolver::getBackTrace(std::string_view thread_name, std::thread::native_handle_type /*thread_handle*/) {
@@ -24,22 +26,21 @@ BackTrace TraceResolver::getBackTrace(std::string_view thread_name, std::thread:
 #else
 
 #include <cxxabi.h>
-#include <execinfo.h>
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
 #include <dlfcn.h>
+#include <execinfo.h>
+#include <pthread.h>
+#include <semaphore.h>
 #ifdef __linux__
 #include <link.h>
 #endif
-#include <csignal>
-#include <pthread.h>
-#include <semaphore.h>
+
 #include <array>
+#include <csignal>
 #include <cerrno>
-#include <iostream>
-#include <utility>
+#include <cstring>
 #include <memory>
+#include <optional>
+#include <utility>
 
 #include "utils/Deleters.h"
 
