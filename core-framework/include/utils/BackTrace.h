@@ -30,8 +30,8 @@ class BackTrace {
  public:
   BackTrace() = default;
 
-  explicit BackTrace(std::string name)
-      : name_(std::move(name)) {
+  explicit BackTrace(std::string_view name)
+      : name_(name) {
   }
 
   [[nodiscard]] std::vector<std::string> getTraces() const {
@@ -55,12 +55,12 @@ class BackTrace {
 
 class TraceResolver {
  public:
-  BackTrace getBackTrace(std::string thread_name, std::thread::native_handle_type thread);
-  BackTrace getBackTrace(std::string thread_name) {
+  BackTrace getBackTrace(std::string_view thread_name, std::thread::native_handle_type thread);
+  BackTrace getBackTrace(std::string_view thread_name) {
 #ifdef WIN32
-    return BackTrace(std::move(thread_name));
+    return BackTrace(thread_name);
 #else
-    return getBackTrace(std::move(thread_name), pthread_self());
+    return getBackTrace(thread_name, pthread_self());
 #endif
   }
 

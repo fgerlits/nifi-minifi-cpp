@@ -18,9 +18,8 @@
 #include "utils/OptionalUtils.h"
 
 #ifndef HAS_EXECINFO
-BackTrace TraceResolver::getBackTrace(std::string thread_name, std::thread::native_handle_type /*thread_handle*/) {
-  back_trace_ = BackTrace(std::move(thread_name));
-  return std::move(back_trace_);
+BackTrace TraceResolver::getBackTrace(std::string_view thread_name, std::thread::native_handle_type /*thread_handle*/) {
+  return BackTrace(thread_name);
 }
 #else
 
@@ -161,10 +160,10 @@ namespace {
   }
 }  // namespace
 
-BackTrace TraceResolver::getBackTrace(std::string thread_name, std::thread::native_handle_type thread_handle) {
+BackTrace TraceResolver::getBackTrace(std::string_view thread_name, std::thread::native_handle_type thread_handle) {
   std::scoped_lock guard(mutex_);
   CaptureState& cap = captureState();
-  back_trace_ = BackTrace(std::move(thread_name));
+  back_trace_ = BackTrace(thread_name);
 
   if (0 == thread_handle || pthread_equal(pthread_self(), thread_handle)) {
     captureRawTrace();
