@@ -3,18 +3,13 @@
 # Wired in via TSAN_OPTIONS=suppressions=... in cmake/BuildTests.cmake.
 # Format reference: https://github.com/google/sanitizers/wiki/ThreadSanitizerSuppressions
 #
-# These entries suppress data races inside third-party, vendored code and the
-# test framework -- code MiNiFi does not own and does not intend to fix here.
-# Keeping that noise out of the output ensures real races in MiNiFi's own code
-# are not buried. A `race:` rule matches when EITHER of the two racing stacks
-# contains a frame matching the pattern.
-
-# --- civetweb (vendored HTTP library, _deps/civetweb-src) ---
+# --- civetweb (vendored HTTP library) ---
 # Shutdown-time races between mg_stop()/CivetServer::close() on the main thread
-# and civetweb worker/master threads still draining connections.
+# and civetweb worker/master threads still draining connections, fully inside the
+# civetweb library.
 race:*civetweb-src*
 
-# --- open62541 (vendored OPC UA library, _deps/open62541-*) ---
+# --- open62541 (vendored OPC UA library) ---
 # Races in the server timer (batchTimerEntry/UA_Timer_add) and ua_server during
 # OPC UA test server start/stop, plus open62541's own internal server-lock
 # ordering (UA_LOCK/lockServer acquired in different orders on startup vs. the
