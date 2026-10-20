@@ -27,7 +27,7 @@
 #include "minifi-cpp/core/PropertyDefinition.h"
 #include "core/PropertyDefinitionBuilder.h"
 #include "minifi-cpp/core/RelationshipDefinition.h"
-#include "Catch.h"
+#include "minifi-cpp/utils/gsl.h"
 
 namespace minifi = org::apache::nifi::minifi;
 
@@ -108,19 +108,18 @@ class MockProcessor : public minifi::core::ProcessorImpl {
     if (!IsNullOrEmpty(linked_service)) {
       std::shared_ptr<minifi::core::controller::ControllerServiceHandle> service = context.getControllerService(linked_service, getUUID());
       std::lock_guard<std::mutex> lock(control_mutex);
-      REQUIRE(nullptr != service);
-      REQUIRE("pushitrealgood" == std::dynamic_pointer_cast<MockControllerService>(service)->doSomething());
-      // verify we have access to the controller service
-      // and verify that we can execute it.
+      // verify we have access to the controller service and we can execute it
+      gsl_Expects(nullptr != service);
+      gsl_Expects("pushitrealgood" == std::dynamic_pointer_cast<MockControllerService>(service)->doSomething());
     }
 
     bool in_sub_process_group = context.getProperty("InSubProcessGroup") | minifi::utils::andThen(minifi::parsing::parseBool) | minifi::utils::orThrow("");
     auto sub_service = context.getControllerService("SubMockController", getUUID());
     if (in_sub_process_group) {
-      REQUIRE(nullptr != sub_service);
+      gsl_Expects(nullptr != sub_service);
       subprocess_controller_service_found_correctly = true;
     } else {
-      REQUIRE(nullptr == sub_service);
+      gsl_Expects(nullptr == sub_service);
       subprocess_controller_service_not_found_correctly = true;
     }
     session.transfer(flow_file, Success);
