@@ -17,11 +17,12 @@
 #pragma once
 
 #include <mutex>
-#include <sstream>
 #include <string>
 #include <thread>
 #include <utility>
 #include <vector>
+
+#include "fmt/format.h"
 
 class TraceResolver;
 
@@ -68,13 +69,12 @@ class TraceResolver {
     return resolver;
   }
 
-  void addTraceLine(const char* file_name, const char* symbol_name, uintptr_t symbol_offset) {
-    std::stringstream line;
-    line << file_name;
-    if (symbol_name != nullptr) {
-      line << " @ " << symbol_name << " + " << symbol_offset;
-    }
-    back_trace_.addLine(line.str());
+  void addTraceLine(std::string_view file_name) {
+    back_trace_.addLine(std::string{file_name});
+  }
+
+  void addTraceLine(std::string_view file_name, std::string_view symbol_name, uintptr_t symbol_offset) {
+    back_trace_.addLine(fmt::format("{} @ {} + {}", file_name, symbol_name, symbol_offset));
   }
 
  private:

@@ -104,7 +104,7 @@ namespace {
 #endif  // __linux__
       if (res == 0 || dl_info.dli_fname == nullptr || dl_info.dli_fname[0] == '\0') {
         // We could not determine symbolic information for this address
-        TraceResolver::getResolver().addTraceLine(file_name, nullptr, symbol_offset);
+        TraceResolver::getResolver().addTraceLine(file_name);
         continue;
       }
 
@@ -141,7 +141,7 @@ namespace {
       }
       symbol_offset = reinterpret_cast<uintptr_t>(cap.stack_buffer[i]) - base_address;
 
-      TraceResolver::getResolver().addTraceLine(file_name, symbol_name.c_str(), symbol_offset);
+      TraceResolver::getResolver().addTraceLine(file_name, symbol_name, symbol_offset);
     }
   }
 
