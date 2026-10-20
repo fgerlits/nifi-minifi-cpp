@@ -26,6 +26,14 @@
 #include "utils/HTTPUtils.h"
 #include "ServerAwareHandler.h"
 
+#if defined(__SANITIZE_THREAD__)  // GCC
+#  define MINIFI_TSAN_ENABLED 1
+#elif defined(__has_feature)
+#  if __has_feature(thread_sanitizer)  // Clang
+#    define MINIFI_TSAN_ENABLED 1
+#  endif
+#endif
+
 /**
  * A wrapper around CivetServer which notifies Handlers before shutdown,
  * so they wouldn't get stuck (if a handler returns after shutdown is
@@ -41,15 +49,23 @@ class TestServer {
 
 
     // ECDH+AESGCM+AES256:!aNULL:!MD5:!DSS
-    const std::vector<std::string> cpp_options{ "document_root", ".", "listening_ports", port, "error_log_file",
-                              "error.log", "ssl_certificate", cert, "ssl_ca_file", ca_cert, "ssl_protocol_version", "4", "ssl_cipher_list",
-                              "ALL", "request_timeout_ms", "10000", "enable_auth_domain_check", "no", "ssl_verify_peer", "yes"};
+    std::vector<std::string> cpp_options{ "document_root", ".", "listening_ports", port, "error_log_file",
+        "error.log", "ssl_certificate", cert, "ssl_ca_file", ca_cert, "ssl_protocol_version", "4", "ssl_cipher_list",
+        "ALL", "request_timeout_ms", "10000", "enable_auth_domain_check", "no", "ssl_verify_peer", "yes"};
+#ifdef MINIFI_TSAN_ENABLED
+    std::vector<std::string> single_threaded{"num_threads", "1"};
+    cpp_options.append_range(single_threaded);  // avoid multiple-second pauses due to TSan stack symbolization
+#endif
     server_ = std::make_unique<CivetServer>(cpp_options, callbacks);
     addHandler(rooturi, handler);
   }
 
   TestServer(const std::string& port, const std::string& rooturi, CivetHandler* handler) {
-    const std::vector<std::string> cpp_options{"document_root", ".", "listening_ports", port};
+    std::vector<std::string> cpp_options{"document_root", ".", "listening_ports", port};
+#ifdef MINIFI_TSAN_ENABLED
+    std::vector<std::string> single_threaded{"num_threads", "1"};
+    cpp_options.append_range(single_threaded);  // avoid multiple-second pauses due to TSan stack symbolization
+#endif
     server_ = std::make_unique<CivetServer>(cpp_options);
     addHandler(rooturi, handler);
   }
