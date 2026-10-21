@@ -75,6 +75,11 @@ namespace {
       backtrace(stack_buffer.data(), static_cast<int>(stack_buffer.size()));
     }
     ~CaptureState() { sem_destroy(&sem); }
+
+    CaptureState(const CaptureState&) = delete;
+    CaptureState& operator=(const CaptureState&) = delete;
+    CaptureState(CaptureState&&) = delete;
+    CaptureState& operator=(CaptureState&&) = delete;
   };
 
   CaptureState& captureState() {
