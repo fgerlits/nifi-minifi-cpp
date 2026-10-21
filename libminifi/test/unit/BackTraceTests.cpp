@@ -1,5 +1,4 @@
 /**
- *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -36,8 +35,10 @@ TEST_CASE("Simple backtrace test", "[BT1]") {
   CHECK(!lines.empty());
   CHECK(std::ranges::any_of(lines,
       [](const std::string& line) { return line.contains(" @ ") && line.contains(" + "); }));
+#ifndef NDEBUG
   CHECK(std::ranges::any_of(lines,
       [](const std::string& line) { return line.contains("getBackTrace"); }));
+#endif
 #endif
 }
 
