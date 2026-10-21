@@ -14,6 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef NDEBUG  // TestBase.h #undef's NDEBUG
+#define IS_DEBUG 1
+#endif
 
 #include <algorithm>
 #include <utility>
@@ -35,7 +38,7 @@ TEST_CASE("Simple backtrace test", "[BT1]") {
   CHECK(!lines.empty());
   CHECK(std::ranges::any_of(lines,
       [](const std::string& line) { return line.contains(" @ ") && line.contains(" + "); }));
-#ifndef NDEBUG
+#ifdef IS_DEBUG
   CHECK(std::ranges::any_of(lines,
       [](const std::string& line) { return line.contains("getBackTrace"); }));
 #endif
