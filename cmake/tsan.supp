@@ -2,7 +2,7 @@
 #
 # Wired in via TSAN_OPTIONS=suppressions=... in cmake/BuildTests.cmake.
 # Format reference: https://github.com/google/sanitizers/wiki/ThreadSanitizerSuppressions
-#
+
 # --- civetweb (vendored HTTP library) ---
 # Shutdown-time races between mg_stop()/CivetServer::close() on the main thread
 # and civetweb worker/master threads still draining connections, fully inside the
@@ -16,6 +16,13 @@ race:*civetweb-src*
 # timer thread). Both stacks are entirely inside open62541.
 race:*open62541*
 deadlock:*open62541*
+
+# --- OpenSSL (static libcrypto) lock-free hash table ---
+# Lock-free reader (match_key) vs. locked writer (alloc_new_value) in OpenSSL's
+# RCU-style crypto/hashtable/hashtable.c, hit when concurrent TLS handshakes run
+# on separate threads. TSan doesn't model the table's atomic publish/retire of
+# nodes, so it flags the lock-free read against the write; benign.
+race:hashtable.c
 
 # --- Catch2 test framework (src/catch2) ---
 # Fast-path assertion counters (assertionPassedFastPath/handleExpr) race when
