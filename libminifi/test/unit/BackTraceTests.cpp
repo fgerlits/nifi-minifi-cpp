@@ -19,6 +19,9 @@
 #include <utility>
 #include <future>
 #include <memory>
+
+#include <iostream>
+
 #include "unit/TestBase.h"
 #include "unit/Catch.h"
 #include "utils/BackTrace.h"
@@ -32,6 +35,10 @@ TEST_CASE("BT1", "[TPT1]") {
   const BackTrace trace = TraceResolver::getResolver().getBackTrace("BT1");
 #ifdef HAS_EXECINFO
   CHECK(!trace.getTraces().empty());
+for (const auto& line : trace.getTraces()) {
+  std::cout << "test 1: " << line << '\n';
+}
+std::cout << "\n#################################################\n\n";
 #endif
 }
 
@@ -68,6 +75,10 @@ TEST_CASE("BT2", "[TPT2]") {
     REQUIRE(!traces.empty());
     for (const auto &trace : traces) {
       CHECK(trace.getName().starts_with(thread_pool_name));
+      for (const auto& line : trace.getTraces()) {
+        std::cout << "test 2: " << line << '\n';
+      }
+      std::cout << "\n#################################################\n\n";
     }
 #ifdef HAS_EXECINFO
     auto first_worker_trace = traces.front();
