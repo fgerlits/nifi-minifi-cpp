@@ -23,6 +23,9 @@
 #include <future>
 #include <memory>
 #include <string>
+
+#include <iostream>
+
 #include "unit/TestBase.h"
 #include "unit/Catch.h"
 #include "utils/BackTrace.h"
@@ -35,6 +38,10 @@ TEST_CASE("Simple backtrace test", "[BT1]") {
   const BackTrace trace = TraceResolver::getResolver().getBackTrace("BT1");
 #ifdef HAS_EXECINFO
   const auto lines = trace.getTraces();
+for (const auto& line : lines) {
+  std::cout << "test 1: " << line << '\n';
+}
+std::cout << "\n#################################################\n\n";
   CHECK(!lines.empty());
   CHECK(std::ranges::any_of(lines,
       [](const std::string& line) { return line.contains(" @ ") && line.contains(" + "); }));
@@ -78,6 +85,10 @@ TEST_CASE("Backtrace test with thread pool", "[BT2]") {
     REQUIRE(!traces.empty());
     for (const auto &trace : traces) {
       CHECK(trace.getName().starts_with(thread_pool_name));
+      for (const auto& line : trace.getTraces()) {
+        std::cout << "test 2: " << line << '\n';
+      }
+      std::cout << "\n#################################################\n\n";
     }
 #ifdef HAS_EXECINFO
     const auto& first_worker_trace = traces.front();
