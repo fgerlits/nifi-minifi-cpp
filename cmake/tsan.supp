@@ -24,7 +24,7 @@ deadlock:*open62541*
 # nodes, so it flags the lock-free read against the write; benign.
 race:hashtable.c
 
-# --- Catch2 test framework (src/catch2) ---
-# Fast-path assertion counters (assertionPassedFastPath/handleExpr) race when
-# assertions are evaluated from multiple threads within a test.
-race:*catch_run_context*
+# --- libc++ std::promise<void> shared state ---
+# libc++ is uninstrumented, so TSan cannot see the internal bookkeeping of
+# promise<void>, and reports some uses of it as a data race.
+race:promise<void>::~promise
