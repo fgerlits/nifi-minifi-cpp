@@ -215,8 +215,7 @@ class ListenHTTPTestsFixture {
     std::vector<std::thread> client_threads;
     client_threads.reserve(response_expectations.size());
 
-    for (auto& client_result : client_results)
-    {
+    for (auto& client_result : client_results) {
       size_t prev_req_count = ListenHTTPTestAccessor::call_pendingRequestCount(proc.get());
       client_threads.emplace_back([&, this] {
         auto client = client_to_use ? std::move(client_to_use) : initialize_client();
