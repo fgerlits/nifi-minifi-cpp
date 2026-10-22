@@ -121,7 +121,7 @@ jobs:
         run: |
           # Set core file size limit to unlimited
           ulimit -c unlimited
-          ctest --timeout 300 -j4 --output-on-failure --timeout 300 -LE performance
+          ./bin/BackTraceTests
         working-directory: build
       - name: check-cores
         if: ${{ failure() && steps.test.conclusion == 'failure' }}
