@@ -59,10 +59,10 @@ void MetricsPublisherStore::loadMetricNodes(core::ProcessGroup* root) {
 }
 
 void MetricsPublisherStore::clearMetricNodes() {
+  response_node_loader_->clearConfigRoot();
   for (const auto& [name, publisher]: metrics_publishers_) {
     publisher->clearMetricNodes();
   }
-  response_node_loader_->clearConfigRoot();
 }
 
 std::weak_ptr<state::MetricsPublisher> MetricsPublisherStore::getMetricsPublisher(const std::string& name) const {

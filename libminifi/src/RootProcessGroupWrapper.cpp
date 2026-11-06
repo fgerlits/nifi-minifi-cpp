@@ -25,24 +25,43 @@ void RootProcessGroupWrapper::updatePropertyValue(const std::string& processor_n
 }
 
 std::string RootProcessGroupWrapper::getName() const {
-  if (root_ != nullptr) {
-    return root_->getName();
-  }
-  return "";
+  return getIdentity().name;
 }
 
 utils::Identifier RootProcessGroupWrapper::getComponentUUID() const {
-  if (!root_) {
-    return {};
-  }
-  return root_->getUUID();
+  return getIdentity().uuid;
 }
 
 std::string RootProcessGroupWrapper::getVersion() const {
-  if (root_ != nullptr) {
-    return std::to_string(root_->getVersion());
+  return getIdentity().version;
+}
+
+RootProcessGroupWrapper::RootIdentity RootProcessGroupWrapper::getIdentity() const {
+  std::shared_lock lock(component_cache_mutex_);
+  return cached_identity_;
+}
+
+std::vector<state::ComponentState> RootProcessGroupWrapper::getProcessorStates() const {
+  std::shared_lock lock(component_cache_mutex_);
+  std::vector<state::ComponentState> states;
+  states.reserve(cached_processors_.size());
+  for (const auto* processor : cached_processors_) {
+    states.push_back({.name = processor->getName(), .uuid = processor->getUUID(), .running = processor->isRunning()});
   }
-  return "0";
+  return states;
+}
+
+void RootProcessGroupWrapper::setComponentCacheRoot(core::ProcessGroup* root) {
+  std::vector<core::Processor*> processors;
+  RootIdentity identity;
+  if (root) {
+    root->getAllProcessors(processors);
+    identity = {.name = root->getName(), .uuid = root->getUUID(), .version = std::to_string(root->getVersion())};
+  }
+
+  std::unique_lock lock(component_cache_mutex_);
+  cached_processors_ = std::move(processors);
+  cached_identity_ = std::move(identity);
 }
 
 void RootProcessGroupWrapper::setNewRoot(std::unique_ptr<core::ProcessGroup> new_root) {
@@ -55,9 +74,11 @@ void RootProcessGroupWrapper::setNewRoot(std::unique_ptr<core::ProcessGroup> new
   if (controller_socket_protocol_) {
     controller_socket_protocol_->setRoot(nullptr);
   }
+  setComponentCacheRoot(nullptr);
   backup_root_ = std::move(root_);
   root_ = std::move(new_root);
   processor_to_controller_.clear();
+  setComponentCacheRoot(root_.get());
   if (metrics_publisher_store_) { metrics_publisher_store_->loadMetricNodes(root_.get()); }
   if (controller_socket_protocol_) {
     controller_socket_protocol_->setRoot(root_.get());
@@ -66,9 +87,17 @@ void RootProcessGroupWrapper::setNewRoot(std::unique_ptr<core::ProcessGroup> new
 
 void RootProcessGroupWrapper::restoreBackup() {
   if (metrics_publisher_store_) { metrics_publisher_store_->clearMetricNodes(); }
+  if (controller_socket_protocol_) {
+    controller_socket_protocol_->setRoot(nullptr);
+  }
+  setComponentCacheRoot(nullptr);
   root_ = std::move(backup_root_);
   processor_to_controller_.clear();
+  setComponentCacheRoot(root_.get());
   if (metrics_publisher_store_) { metrics_publisher_store_->loadMetricNodes(root_.get()); }
+  if (controller_socket_protocol_) {
+    controller_socket_protocol_->setRoot(root_.get());
+  }
 }
 
 void RootProcessGroupWrapper::clearBackup() {
@@ -138,27 +167,6 @@ void RootProcessGroupWrapper::clearConnection(const std::string &connection) {
     logger_->log_info("Clearing connection {}", connection);
     conn->second->drain(true);
   }
-}
-
-std::optional<std::vector<state::StateController*>> RootProcessGroupWrapper::getAllProcessorControllers(
-    const std::function<gsl::not_null<std::unique_ptr<state::ProcessorController>>(core::Processor&)>& controllerFactory) {
-  if (!root_) {
-    return std::nullopt;
-  }
-  std::vector<state::StateController*> controllerVec;
-  std::vector<core::Processor*> processorVec;
-  root_->getAllProcessors(processorVec);
-
-  for (const auto& processor : processorVec) {
-    // reference to the existing or newly created controller
-    auto& controller = processor_to_controller_[processor->getUUID()];
-    if (!controller) {
-      controller = controllerFactory(*processor);
-    }
-    controllerVec.push_back(controller.get());
-  }
-
-  return controllerVec;
 }
 
 state::StateController* RootProcessGroupWrapper::getProcessorController(const std::string& id_or_name,

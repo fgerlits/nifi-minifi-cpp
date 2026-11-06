@@ -24,6 +24,7 @@
 #include <optional>
 #include <utility>
 #include <vector>
+#include <shared_mutex>
 
 #include "core/ProcessGroup.h"
 #include "utils/Id.h"
@@ -32,6 +33,7 @@
 #include "minifi-cpp/utils/gsl.h"
 #include "minifi-cpp/core/logging/Logger.h"
 #include "c2/ControllerSocketProtocol.h"
+#include "core/state/UpdateController.h"
 
 namespace org::apache::nifi::minifi {
 
@@ -46,12 +48,24 @@ class RootProcessGroupWrapper {
     if (metrics_publisher_store_) {
       metrics_publisher_store_->clearMetricNodes();
     }
+    setComponentCacheRoot(nullptr);
   }
+
+  // Identity of the current root process group, copied out of it whenever the root changes, so that it can be
+  // read from a metrics thread without touching root_ (and therefore without FlowController::mutex_).
+  struct RootIdentity {
+    std::string name;
+    utils::Identifier uuid;
+    std::string version{"0"};
+  };
 
   void updatePropertyValue(const std::string& processor_name, const std::string& property_name, const std::string& property_value);
   std::string getName() const;
   utils::Identifier getComponentUUID() const;
   std::string getVersion() const;
+  RootIdentity getIdentity() const;
+
+  std::vector<state::ComponentState> getProcessorStates() const;
   const core::ProcessGroup* getRoot() const { return root_.get(); }
   void setNewRoot(std::unique_ptr<core::ProcessGroup> new_root);
   void restoreBackup();
@@ -74,15 +88,13 @@ class RootProcessGroupWrapper {
   state::StateController* getProcessorController(const std::string& id_or_name,
       const std::function<gsl::not_null<std::unique_ptr<state::ProcessorController>>(core::Processor&)>& controllerFactory);
 
-  std::optional<std::vector<state::StateController*>> getAllProcessorControllers(
-          const std::function<gsl::not_null<std::unique_ptr<state::ProcessorController>>(core::Processor&)>& controllerFactory);
-
   void setControllerSocketProtocol(c2::ControllerSocketProtocol* controller_socket_protocol) {
     controller_socket_protocol_ = controller_socket_protocol;
   }
 
  private:
   std::optional<std::chrono::milliseconds> loadShutdownTimeoutFromConfiguration();
+  void setComponentCacheRoot(core::ProcessGroup* root);
 
   std::shared_ptr<Configure> configuration_;
   std::unique_ptr<core::ProcessGroup> root_;
@@ -91,6 +103,11 @@ class RootProcessGroupWrapper {
   std::unordered_map<utils::Identifier, std::unique_ptr<state::ProcessorController>> processor_to_controller_;
   std::chrono::milliseconds shutdown_check_interval_{1000};
   c2::ControllerSocketProtocol* controller_socket_protocol_{};
+
+  mutable std::shared_mutex component_cache_mutex_;  // protects cached_processors_ and cached_identity_
+  std::vector<core::Processor*> cached_processors_;
+  RootIdentity cached_identity_;
+
   std::shared_ptr<core::logging::Logger> logger_ = core::logging::LoggerFactory<RootProcessGroupWrapper>::getLogger();
 };
 
